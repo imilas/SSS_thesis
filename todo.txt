@@ -1,0 +1,22 @@
+* Write results of genetic search
+    -[x] Change synth params
+    -[x] Write evolution loop
+    -[x] Write mutation functions
+    -[ ] Measure time for stacks sizes 1-2-4
+
+* Do bandit search
+    -[x] Do week 1 of RL course
+    -[ ] figure out what's next
+
+* Test variation of models' score 
+    -[x] Gather data
+    -[ ] Find method of test
+    -[ ] Write results
+
+* Shrink data base? How many drums groups to use?
+
+* Fix the latex warnings
+
+* Make free drum database
+    -[x] Make it
+    -[ ] Host it

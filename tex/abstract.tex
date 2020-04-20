@@ -1,0 +1,13 @@
+% Allow relative paths in included subfiles that are compiled separately
+% See https://tex.stackexchange.com/questions/153312/
+\providecommand{\main}{..}
+\documentclass[\main/thesis.tex]{subfiles}
+
+\begin{document}
+
+% environment for abstract.
+\begin{abstract}
+Digital sound artists often require a variety of percussive samples for their music. We observed a lack of copyright-free one-shot percussive sample-packs for purposes of research and music creation. Yet for more than two decades research involving digital synthesis, genetic search, and neural networks has been used to invent and approximate novel sounds. Our goal is to generate one-shot percussive samples by leveraging modern AI technologies alongside scalable signal generation methods. Could we generate novel drum sounds through machine learning, heuristic search and modular synthesizers? We centered our approach around the combination of two central components: \begin {enumerate*} [label=(\roman*)] \item a "virtual ear" capable of learning key features of various sound groups and evaluating the proximity of unheard sounds to desired sets and \item a dynamic virtual synthesizer with a rich set of tractable parameters\end{enumerate*}. We present a generative pipeline that utilizes robust digital signal processing methods and is guided by supervised learning and genetic search towards generation of novel, high-quality, one-shot percussive sounds. We present our findings and measurements of the various approaches taken towards the implementation of the virtual ear, virtual synthesizer, and generative pipeline; hoping to expose the advantages and shortcomings of the employed methodologies and their practicality in future works via a clear demonstration of their capabilities relative to our stated goal. We also discuss and share our curated dataset of sounds along with our codebase \footnote{\url{redacted}} which can be used for its further expansion.
+\end{abstract}
+
+\end{document}

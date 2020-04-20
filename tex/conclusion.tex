@@ -1,0 +1,38 @@
+% Allow relative paths in included subfiles that are compiled separately
+% See https://tex.stackexchange.com/questions/153312/
+\providecommand{\main}{..}
+\documentclass[\main/thesis.tex]{subfiles}
+
+\onlyinsubfile{\zexternaldocument*{\main/tex/introduction}}
+
+\begin{document}
+
+\chapter{Conclusion}
+
+\section{Summary}
+\balance
+
+In summary we were capable of generating many new and novel drum samples that were agreed upon by human-raters and machines. Lessons learned included:
+
+\begin{itemize}
+    \item Our methodology was successful in generating novel examples of some percussion categories.
+    \item Generating virtual synthesizers allows for the fast generation and evaluation of audio created from a complex synth. Our implementation enables classification of the virtual synthesizer and sounds into percussive categories, enabling not only the creation of new libraries of percussion sounds, but new libraries of percussion synthesizers.
+    \item Despite our careful feature extraction and training, our generative pipe-line is not bullet-proof. Based on our human survey many of the samples generated in our pipeline are non-percussive.
+    \item Implementation of an virtual ear that can distinguish sounds from closed sets (kick drums, snare drums etc) from an infinitely large set (non-percussive sounds) is difficult. 
+\end{itemize}
+
+Based on our observations, the biggest hurdle towards generation of novel percussive sounds is an ear that can distinguish non-percussive sounds from percussive sounds. 
+
+\section{Future Work}
+
+In future work, we will continue our attempt at effective, domain agnostic separation of noise from drums.  Our focus will be on extraction of generalizable features which can help us with classification problems regardless of the audio domain i.e source of audio.
+    
+We will seek solutions from the state of the art methods in regards to open set recognition. We plan to utilize genetic search and other heuristic methods for guided generation of sound rather than random search applied to a heuristic. We will also introduce new features into our virtual synthesizer to add diversity to generated samples. 
+
+\begin{note}[Caution:]
+For cross-references to work, when files are compiled separately,
+the referenced file must be compiled at least once before the
+referring file is compiled.
+\end{note}
+
+\end{document}
