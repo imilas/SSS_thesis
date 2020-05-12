@@ -6,14 +6,31 @@
 \begin{document}
 
 \chapter{Introduction}
-The rise of Digital Audio Workstations (DAW) \cite{leider2004digital} and Virtual Studio Technology (VST) based plug-ins \cite{tanev2013virtual} have rapidly transformed the sonic and material landscape of music production in the recent years. Coupled with this rise in popularity is a vast array of commercial products and services dedicated to satiating the need of amateur and professional music producers for unique sounds; most commonly via audio samples: one-shot drum samples, long sustained notes (commonly referred to as pads or textures), and loops (percussive or melodic) are common deliverables. Two notable examples of these commercial services are \textit{loopmasters}\footnote{loopmasters.com} and \textit{splice.com}\footnote{splice.com}. Furthermore, VST plug-ins can emulate complex audio synthesizers and effects which some producers may find daunting or time consuming to work with from scratch. In many cases VST plug-in vendors or unaffiliated enthusiasts sell additional presets for these plugins, targeted towards producers who do not have the time or interest in creating their own. The flexibility of the VST technology allows producers to further modify these presets until their desired sound is reached.
+\section{What is our goal?}
+A common approach to creation of drum tracks for digital music is to combine short recordings of real-life drums and other percussive elements in order to create a new drum-kit. This approach frees artists from the need to obtain and store real life instruments while enabling endless combinatorial possibilities. However, by relying on recordings of \textit{real life} drum sounds, we are still limited by what drums exist in the real world and whether or not we have access to clean, one-shot\footnote{A single hit on the drum that captures its capabilities} recordings of these drum. 
 
-We want to leverage AI technologies, such as heuristic search and random search, to produce new drum samples, by finding synthesizers and their appropriate configurations that can produce various kinds of drum samples. Effectively we will combine machine listening and code generation of synthesizers to find drum samples.
+To find new sources of novel drum sounds, we can conceptualize utilizing digital sound synthesis in various ways. An ideal scenario would be a graphical, 3D simulation of virtual drums, where we could modulate the thickness, dimensions and material of the frame, the drum skin, the type of impact, etc. before rendering the sound of the simulation. Unfortunately, such 3D systems are not yet practical \cite{langlois2016toward}. State of the art generative networks utilized in works such as \cite{ramires2019timbfeat,aouameur2019neural} are another promising avenue; However, as discussed further in \ref{related} we prefer to work towards more efficient methods that utilize simple, tried and true methods of digital sound synthesis in tandem with machine learning techniques to rapidly generate new sounds. Another desirable (by us) by-product of this approach is that the sounds generated may sound extremely in-organic, yet perfectly usable by more experimental artists.
 
-Our work is motivated by the idea of finding new, convenient methods for the expansion of a music producer's library of sounds. Primarily with generation of novel, one-shot audio samples but also with automated search and creation of presets for virtual synthesizers. Using the generation of short, percussive audio samples as a starting point, this project is a proof of concept for a promising avenue towards our motivational goal.
+\section{How Can A Computer Make Sounds?}
+Your computer can make a wide variety of sounds in wide variety of ways. You can use it to record real life audio and play it back. You can hit its various parts with a drumstick. You can also program it to make noise at a software level. 
 
+Sounds are transmitted via waveforms. Your computer can emulate the physical characteristics of basic waveforms by evaluating the output of periodic functions such as sines and cosines. Evaluation of basic periodic functions is the simplest form of software audio generation \cite[chapter~5]{mitchell2009basicsynth}. For example, think of the universally recognizable "dialing" sounds that communication networks use during typical phone calls. You can program your computer to make similar noises by feeding a range of equally spaced values between 0 and $2\pi$ to a sinusoidal function at a rate that's audible to human ears\footnote{Human audible range is approximately 30Hz to 15000KHz}. This generative system is called an \textit{oscillator} and its ouput is a waveform which can be sent to a digital-to-analog conversion system to create an audible signal. The combination and modification of these pure tones are the building blocks of digital signal processing (DSP).
 
-\section{Methodology}
+% make circle/wave graph from chapter 5 of mitchell
+
+ Most organic sounds are much more complex than the output of a single oscillator and their digital approximation requires a combination of multiple (perhaps thousands) of pure tones. However, with careful programming, DSP techniques can be used to efficiently replicate almost any sound, which is why they have powered commercial digital synthesizers for over half a century \cite{jenkins2019analog} and continue to remain a popular method of audio synthesis amongst artists. 
+ 
+ %talk about vsts here
+
+\section{How Can a Computer Categorize Sounds?}
+Suppose a human is given a set of recordings of solo musical instruments being played by various skill levels and asked to categorize them however they please. There is a long list of features that the human could use to go about this task: the length of audio recordings, the skill of the player, the timbre of the instrument (which is related to the type of instrument: wind, string, percussion etc.) the rhythm and so on. 
+
+Computers can be programmed to extract the majority of these feature types for us. Particularly with shorter audio clips (such as the drum sounds we're interested) human subjectivity plays a smaller role in describing sounds and the categorization task becomes easier. 
+
+In our work, we find simple features such as frequency content (high pitch vs low pitch), length, and envelope (how fast the sounds reaches its maximum loudness and fades away) to be excellent features in categorization of drum sounds. Later on we will discuss our algorithms for extraction of these and other features in \ref{impl}
+
+\section{What Is Our Methodology?}
+
 Our attempt is centered around a generative pipeline of audio. We want random sounds to be created by a tractable source, we also want to evaluate these sounds so we can guide the random sounds generator towards desired sounds. Instead of learning weights and parameters in an audio-generating neural network, we wish to generate, search, and tune synthesizers to produce percussion sounds. Following this idea, we found the proper implementation of 2 major components to be crucial:
 
 \begin{itemize}
@@ -44,5 +61,10 @@ Some notes about our dataset:
 
 \item We limit the size of the n-stack-synths category to 50\% of the total size of our drum dataset. This is done in order to measure whether the features extracted can address the "Open Set Recognition" problem, which will be discussed further in Section \ref{sec:ear}.
 \end{itemize}
+
+\section{Restating the the Goal}
+We want to leverage AI technologies, such as heuristic search and random search, to produce new drum samples, by finding synthesizers and their appropriate configurations that can produce various kinds of drum samples. Effectively we will combine machine listening and code generation of synthesizers to find drum samples.
+
+Our work is motivated by the idea of finding new, convenient methods for the expansion of a music producer's library of sounds. Primarily with generation of novel, one-shot audio samples but also with automated search and creation of presets for virtual synthesizers. Using the generation of short, percussive audio samples as a starting point, this project is a proof of concept for a promising avenue towards our motivational goal.
 
 \end{document}
