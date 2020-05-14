@@ -6,7 +6,8 @@
     - Probably we have to evaluate the curated collection
     - You should talk about instruments you can make with this.
     - Can you cluster the results so we can get a soundfont of an instrument?
-
+* To learn:
+    - look up physical synthesis
 * Genetic search on envelope only, then graph onto interactive plot
 
 * Add prior work:
