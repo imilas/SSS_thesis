@@ -8,8 +8,8 @@
 \chapter{Introduction}
 
 %% TODO
-% AH: citations are not nouns. Please use X et al.~\cite{...}
-
+ % AH: Tell us you want to generate synthesizers and the benefits of code over 1000s of NN parameters.
+ 
 \section{What is Our Goal?}
 Novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are not easy or cheap to find. New drum sounds can be obtained via live recordings of drums, layering existing drum sounds or creative (often lengthy) hacking of sound engineering techniques. Our goal here is to create a new, virtual source of novel drum sounds, which could then be used in electronic music compositions.
 
@@ -34,7 +34,7 @@ For example, think of the universally recognizable "dialing" sounds (DTMF) that 
 
 This generative system is called an \textit{oscillator} and its output is a waveform which can be sent to your computer's digital-to-analog conversion system to create an audible signal. The combination and modification of these pure tones are the building blocks of digital signal processing (DSP).
 
-% make circle/wave graph from chapter 5 of mitchell
+% inspired by chapter 5 graph of mitchell (maybe cite?)
 \begin{figure*}[h]
 \centering
 \includegraphics[width=0.45\linewidth,angle =-90 ]{images/periodic_function.png}
@@ -46,14 +46,7 @@ This generative system is called an \textit{oscillator} and its output is a wave
  
 In the next chapters we will discuss our work towards a system for automatic \textit{generation of sounds}, capable of rapid generation of short (under 1 second) audio clips. Our approach entailed the implementation of a virtual sound synthesizer that can take a set of instructions, or \textit{programs}, as input and generate the corresponding audio. A by-product of this approach is that the sounds generated may sound extremely in-organic, yet perfectly usable by more experimental artists, adding a desirable "novel" factor. 
 
- % AH: Tell us you want to generate synthesizers and the benefits of code over 1000s of NN parameters.
- 
- % AH: what's the point? Why are we here? You want to synthesize drums?
- 
- % AH: Why are talking about categorizing sounds now?
- 
- % AH: Maybe motivate OK we can generate synthesizes but can we determine if they are any good?
- 
+
 
 \subsection{How Can a Computer Evaluate Sounds?}
 Automatic evaluation of sounds is an essential component of our work: A thorough manual evaluation of outputs is not possible when hundreds can be created in a second. How can a computer help us evaluate sounds?
@@ -81,9 +74,10 @@ Section \ref{impl} contains further discussion of the components as well as the 
 While the main focus of this project is the generation of novel percussive sounds, our methodology indicates promising results with regards to creation of new presets for any virtual synth without the need for a-priori knowledge of the functions or its parameters (i.e the effect of parameter modulation on the sonic output). We also demonstrate the viability of a virtual synthesizers based on Digital Signal Processing (DSP) methods for fast, unsupervised creation of novel audio, discussed in more detail in section \ref{related}. 
 
 
-\section{Restating the the Goal}
+\section{Restating the Goal}
 We want to leverage AI technologies, such as heuristic search and random search, to produce new drum samples, by finding synthesizers and their appropriate configurations that can produce various kinds of drum samples. Effectively we will combine machine listening and code generation of synthesizers to find drum samples.
 
 Our work is motivated by the idea of finding new, convenient methods for the expansion of a music producer's library of sounds. Primarily with generation of novel, one-shot audio samples but also with automated search and creation of presets for virtual synthesizers. Using the generation of short, percussive audio samples as a starting point, this project is a proof of concept for a promising avenue towards our motivational goal.
+
 
 \end{document}
