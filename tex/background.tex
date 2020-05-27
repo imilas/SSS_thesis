@@ -22,9 +22,11 @@
 \begin{document}
 
 \chapter{Background and Related Work}
-\section{Sound from Numbers}
+\section{Digital Audio: Sound from Numbers}
 
-In 1963, Mathews \cite{mathews1963digital} wrote on the utility of computers as digital instruments: By presenting a snapshot of digital audio technology of his time and making predictions on what will be possible in the near future. Much of the underlying approaches described have remained relatively unchanged, yet subject to up-scaling alongside Moore's law \cite{mack2011fifty,smith1991viewpoints}. For instance, Mathews described a general method for computers to capture and internally represent audio: By discretely sampling continuous pressure waves of sound. 
+In 1963, Mathews \cite{mathews1963digital} wrote on the potential and utility of computers as digital instruments; By presenting a snapshot of digital audio technology of his time and making predictions on what will be possible in the near future. Many of the techniques described by Mathews have remained popular and relatively unchanged, yet subjected to up-scaling alongside Moore's law \cite{mack2011fifty,smith1991viewpoints}. For instance, Mathews described a general method for computers to capture and internally represent audio: By discretely sampling continuous pressure waves of sound. 
+
+As briefly discussed in the introduction \ref{sec:computer make sound}, sound can take on the physical characteristics of a waveform. Imagine the curve shown in figure \ref{fig_sampling_rate} is representative of a sound we would like to digitally capture. As the sound travels through a microphone's sensors, the microphone can capture small packets of information about it. Each packet would represent the amplitude of the wave at a time-step. The more packets of information we get, the better our digital recreation of the original sound. In this context, \textit{sampling rate}, is an important feature of a digital sound, referring to the ratio of samples per second of audio, often measured in Hz. Today, sampling rates of 44.1 kHz and 48 kHz are often referred to as standard quality \cite{reiss2016meta}. 
 
 
 
