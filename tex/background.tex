@@ -23,13 +23,11 @@
 
 \chapter{Background and Related Work}
 \section{Digital Audio: Sound from Numbers}
-
+Explain what this section is about
+\subsection{Quality of Digital Audio}
 In 1963, Mathews \cite{mathews1963digital} wrote on the potential and utility of computers as digital instruments; By presenting a snapshot of digital audio technology of his time and making predictions on what will be possible in the near future. Many of the techniques described by Mathews have remained popular and relatively unchanged, yet subjected to up-scaling alongside Moore's law \cite{mack2011fifty,smith1991viewpoints}. For instance, Mathews described a general method for computers to capture and internally represent audio: By discretely sampling continuous pressure waves of sound. 
 
-As briefly discussed in the introduction \ref{sec:computer make sound}, sound can take on the physical characteristics of a waveform. Imagine the curve shown in figure \ref{fig_sampling_rate} is representative of a sound we would like to digitally capture. As the sound travels through a microphone's sensors, the microphone can capture small packets of information about it. Each packet would represent the amplitude of the wave at a time-step. The more packets of information we get, the better our digital recreation of the original sound. In this context, \textit{sampling rate}, is an important feature of a digital sound, referring to the ratio of samples per second of audio, often measured in Hz. Today, sampling rates of 44.1 kHz and 48 kHz are often referred to as standard quality \cite{reiss2016meta}. 
-
-
-
+As briefly discussed in the introduction \ref{sec:computer make sound}, sound can take on the physical characteristics of a waveform. Imagine the curve shown in figure \ref{fig_sampling_rate} is representative of a sound we would like to digitally capture. As the sound travels through a microphone's sensors, the microphone can capture small packets of information about it. Each packet would represent the amplitude of the wave at a time-step. The more packets of information we get, the better our digital recreation of the original sound. In this context, \textit{sampling rate}, is an important feature of a digital sound, referring to the ratio of samples per second of audio, often measured in Hz. \textit{bitdepth} is the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while "high quality" audio indicates an increase in bit rate or bit depth \cite{reiss2016meta}. In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of test subjects were able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training \cite{reiss2016meta}.
 
 
 \begin{figure}[h]
@@ -39,11 +37,12 @@ As briefly discussed in the introduction \ref{sec:computer make sound}, sound ca
 \caption{Reconstruction of a periodic, continuous wave at three different sampling levels. Higher sampling rates result in higher reconstruction accuracy. }
 \end{figure}
 
+\\\\
+\subsection{Frequency, Pitch and Spectrograms}
 
 
 
-
-
+\section{?}
 The rise of Digital Audio Workstations (DAW) \cite{leider2004digital} and Virtual Studio Technology (VST) based plug-ins \cite{tanev2013virtual} have rapidly transformed the sonic and material landscape of music production in the recent years. Coupled with this rise in popularity is a vast array of commercial products and services dedicated to satiating the need of amateur and professional music producers for unique sounds; most commonly via audio samples: one-shot drum samples, long sustained notes (commonly referred to as pads or textures), and loops (percussive or melodic) are common deliverables. Two notable examples of these commercial services are \textit{loopmasters}\footnote{loopmasters.com} and \textit{splice.com}\footnote{splice.com}. Furthermore, VST plug-ins can emulate complex audio synthesizers and effects which some producers may find daunting or time consuming to work with from scratch. In many cases VST plug-in vendors or unaffiliated enthusiasts sell additional presets for these plugins, targeted towards producers who do not have the time or interest in creating their own. The flexibility of the VST technology allows producers to further modify these presets until their desired sound is reached.
 
 \section{Related Work and Contradistinctions}
