@@ -23,15 +23,12 @@
 
 \chapter{Background and Related Work}
 \section{Digital Audio: Sound from Numbers}
-% greg describes These terms: frequency, fundamental frequency, harmonics, pitch, onset time,
-% offset time, low-pass filter, high-pass filter, band-pass filter, spectrogram,
-% signal downsampling and decimation.
+Sound is the result of a series of physical events. Most of what we hear is the product of physical disturbances, causing vibrations in our mutually shared, immersive mediums (air, hopefully). Sound waves carry these vibrations through air as an expanding, spherical wave front; Exponentially losing intensity as they travel away from the source \cite{cook1999chap4}.
 
-Explain what this section is about
 \subsection{Quality of Digital Audio}
 In 1963, Mathews \cite{mathews1963digital} wrote on the potential and utility of computers as digital instruments; By presenting a snapshot of digital audio technology of his time and making predictions on what will be possible in the near future. Many of the techniques described by Mathews have remained popular and relatively unchanged, yet subjected to up-scaling alongside Moore's law \cite{mack2011fifty,smith1991viewpoints}. For instance, Mathews described a general method for computers to capture and internally represent audio: By discretely sampling continuous pressure waves of sound. 
 
-As briefly discussed in the introduction \ref{sec:computer make sound}, sound can take on the physical characteristics of a waveform. Imagine the curve shown in figure \ref{fig_sampling_rate} is representative of a sound we would like to digitally capture. As the sound travels through a microphone's sensors, the microphone can capture small packets of information about it. Each packet would represent the amplitude of the wave at a time-step. The more packets of information we get, the better our digital recreation of the original sound. In this context, \textit{sampling rate}, is an important feature of a digital sound, referring to the ratio of samples per second of audio, often measured in Hz. \textit{bitdepth} is the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while "high quality" audio indicates an increase in bit rate or bit depth \cite{reiss2016meta}. In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of test subjects were able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training \cite{reiss2016meta}.
+As briefly discussed in the introduction \ref{sec:computer make sound}, sound can take on the physical characteristics of a waveform. Imagine the curve shown in figure \ref{fig_sampling_rate} is representative of a sound we would like to digitally capture. As the sound travels through a microphone's sensors, the microphone can capture small packets of information about it. Each packet would represent the amplitude of the wave at a time-step. The more packets of information we get, the better our digital recreation of the original sound. In this context, \textit{sampling rate}, is an important feature of a digital sound, referring to the ratio of samples per second of audio. It is often measured in Hertz (Hz). Sampling rate is not the only important factor when recording audio as it's important to record the samples with speed \textit{and} precision. Precision, or the range of possible values for each sample is determined by bit depth: the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while "high quality" audio indicates an increase in bit rate or bit depth \cite{reiss2016meta}. In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of people are able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training \cite{reiss2016meta}.
 
 
 \begin{figure}[h]
@@ -42,9 +39,17 @@ As briefly discussed in the introduction \ref{sec:computer make sound}, sound ca
 \end{figure}
 
 \\\\
-% what's the difference between signal and waveform, I've been using them semi-interchangebly. 
+\subsection{Loudness and Envelopes}
+
+
+% note: make sure you're using terms signal and waveform properly
 \subsection{Frequency, Pitch and Spectrograms}
-Frequency is used to describe number of repetitions within a time-frame, or how frequently a cycle is repeated. The frequency of an audio signal is often measured in hertz. 
+\textit{Frequency} is used to describe number of repetitions within a time-frame, or how frequently a cycle is repeated. The frequency of an audio signal is often measured in unit of hertz (cycles per second). Most sounds, particularly those from none virtual sources, are a combination of multiple different pressure waves with different frequencies and amplitudes. \textit{Pitch}, is a perceptual property of sound that is tied to the frequencies present in each sound. How we perceive and describe the pitch of a sound (e.g high-pitched vs low-pitched") is heavily dependent on the characteristics (frequency, amplitude, duration, etc) of the waveforms it contains. Some sounds such as piano chords or pure tones have easily discernable pitches. Others, such as "pink noise" or the sound of rain do not. Yet another factor to consider is the hearing ability of the subject, which varies between people based on factors such as age, environment, musical training, etc \cite{reiss2016meta,alain2007age,newman2012grm7}. 
+
+Spectrograms are graphs used to showcase and analyze the duration and amplitude of frequencies present in a sound. Since we often do not have access to the time-variant systems behind sounds of interest, it is common to use function decomposition methods to break sounds down to a combination of simpler functions. A commonly used method for the breakdown of complex, time-variant functions is the fourier transformation and its variations. One such method is the discrete fourier transformation (DFT) and its inverse, often used to convert digital sound from its time domain representation (sequence of samples) to its frequency domain representation (sets of frequency ranges and their amplitude) and vice versa.
+
+[figure of this breakdown]
+
 
 
 \section{Digital Audio Generation}
