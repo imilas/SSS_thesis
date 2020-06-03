@@ -20,7 +20,7 @@ Novel, one-shot\footnote{A single hit on the drum that captures its capabilities
 To virtually create novel drum sounds, we need a generative source; One that produces audio based on some instructions. We also need a method of evaluation to help us determine which sounds resemble drums and are worth keeping. We also would like to know what instructions caused our audio source to make the sounds we liked. In short, our approach requires effective \textit{generation} and \textit{evaluation} of sounds. 
 
 \section{What Tools Are at Our Disposal?}
-
+\label{sec_tools_disposal}
 We can conceptualize utilizing digital sound synthesis in various ways. An ideal scenario would be a graphical, 3D simulation of virtual drums; Where we could modulate the thickness, dimensions and material of the frame, the drum skin, the type of impact, etc. before rendering the sound of the simulation. Unfortunately, such 3D systems are not yet practical \cite{langlois2016toward}. State of the art generative networks utilized in works by Ramires et al. \cite{ramires2020neural} and Aouameur et al.\cite{aouameur2019neural} 
 are another promising avenue; However, for reasons such as efficiency, tractability and novelty (discussed further in related works \ref{related}), we strive towards more tractable methods that utilize simple, tried and true signal generation tools in tandem with machine learning techniques to rapidly generate new sounds and evaluate their desirability.
 

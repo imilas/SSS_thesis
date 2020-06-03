@@ -17,41 +17,57 @@
     - How it can be replicated
 \fi
 
-
+% todos:
+% probably use amplitude and magnitude and power
+% haven't described timbre 
+% make reconstruction wave include multiple waveforms and how they go missing if sampling rate too slow
+% haven't described nyquist frequency
     
 \begin{document}
 
 \chapter{Background and Related Work}
 
-This chapter aims to provide a background for the subsequent chapters via a quick overview of three important topics: A brief cover of the digital audio and concepts that have been fundamental to our work, a quick overview of digital synthesis techniques, and finally, related works and their relative similarities and distinctions.
+% AH: Digital Signals are a series of values (not digits) and 
+%     perfectly valid way of saying a series of numbers.
+%    
 
+This chapter aims to provide a background for the subsequent chapters via a quick overview of three important topics: 
+\begin{enumerate*}[label=(\roman*)]
+  \item Digital sound, its features and concepts that have been fundamental to our work,
+  \item  A quick overview of digital synthesis techniques, and
+  \item Related works and their relative similarities and distinctions.
+\end{enumerate*}
 \section{Digital Audio: Sound from Numbers}
-Sound is the result of a series of physical events. Most of what we hear is the product of physical disturbances, causing vibrations in our mutually shared, immersive mediums (air, hopefully). Sound waves carry these vibrations through air as part of an expanding, spherical wave front; Exponentially losing intensity as they travel away from the source \cite{cook1999chap4}. \\
+Sound is the result of a series of physical events. Most of what we hear is the product of physical disturbances, causing vibrations in our mutually shared, immersive mediums (air, hopefully). Sound waves carry these vibrations through air as part of an expanding, spherical wave front; Exponentially losing intensity as they travel away from the source \cite{cook1999chap4}. 
+\\\\
 
+[graph describing wave amplitude, phase and frequency here]
+\\\\
 A sound wave can be viewed as the result of a function which governs amplitude through time, where time and amplitude exist in continuous dimensions. Waves can be approximated via a series of samples, associating time steps to a discrete range of amplitude values. 
 Given a wave generation method, computers can make sound by sending a series of discrete digits to a digital-to-analogue chip, which in turn can
-create vibrations within a speaker.  \textit{Digital synthesis} of audio is the process of creating these discrete digits. 
-
+create vibrations within a speaker.  \textit{Digital synthesis} of audio is the process of creating these discrete values. 
+\\
 
 \subsection{Sampling Rates and Quality of Digital Audio}
 In 1963, Mathews wrote on the potential and utility of computers as digital instruments; By presenting a snapshot of digital audio technology of his time and making predictions on what would be possible in the future  \cite{mathews1963digital}. This work by Mathews makes the robust foundations of digital signal processing apparent as many of the techniques described have remained popular and relatively unchanged, yet subjected to up-scaling alongside Moore's law \cite{mack2011fifty,smith1991viewpoints}. For instance, Mathews described a general method for computers to capture and internally represent audio: By discretely sampling continuous pressure waves of sound and recreating the sound from numbers. 
 
 As discussed previously, \ref{sec:computer make sound}, sound can take on the physical characteristics of a waveform. Imagine the curve shown in figure \ref{fig_sampling_rate} is representative of a sound wave we would like to digitally capture. As the sound travels through a microphone, its sensors can capture small packets of information about it. Each packet would represent the amplitude of the wave at a time-step. The more packets of information we get, the better our digital recreation of the original sound.
 
-In this context, \textit{sampling rate}, is an important feature of digital sound, referring to the number of samples per second of audio (measured in Hertz, or Hz). Sampling rate is not the only important factor when recording audio as it is important to record the samples with not just speed, but also precision. Assuming perfect sensors, precision is the range of possible values we can assign to each sample. It is determined by bit depth: the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while "high quality" audio indicates an increase in bit rate or bit depth \cite{reiss2016meta}. Although subject to diminishing returns, high quality audio may be preferable to most musicians and audio-engineers; In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of people are able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training \cite{reiss2016meta}. 
+In this context, \textit{sampling rate}, is an important feature of digital sound, referring to the number of samples per second of audio (measured in Hertz, or Hz). Sampling rate is not the only important factor when recording audio as it is important to record the samples with not just speed, but also precision. Assuming perfect sensors, precision is the range of possible values we can assign to each sample. It is determined by bit depth: the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while "high quality" audio indicates an increase in bit rate or bit depth \cite{reiss2016meta}. Although subject to diminishing returns, high quality audio may be preferable to most musicians and audio-engineers; In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of people are able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training~\cite{reiss2016meta}. 
 
+% AH: please use word~\cite{author} not word \cite{author}
 
 \begin{figure}[h]
 \label{fig_sampling_rate}
 \centering
 \includegraphics[width=1\linewidth,angle =-90 ]{images/periodic_function_decimation.png}
-\caption{Reconstruction of a periodic, continuous wave at three different sampling levels. Higher sampling rates result in higher reconstruction accuracy. }
+\caption{Reconstruction of a periodic, continuous wave at three different sampling levels. Higher sampling rates result in higher reconstruction accuracy. } % AH: this is linear interpolation many sound cards will convert the last signal back into the original wave just fine
 \end{figure}
 
 \\\\
 \subsection{Loudness, Amplitudes and Envelopes}
 Loudness is a subjective description of a sound's intensity or energy levels. It varies based on the complexity of sounds, the frequencies present, and hearing ability of the listener \cite{fletcher1933loudness,cook1999chap6}. It can only be measured relatively, by establishing a benchmark sound and surveying populations on the relative intensities \cite{cook1999chap6}. Since loudness and intensity of sound correlate with the amplitude of digital waveforms (the values assigned to the samples), an imperfect but convenient alternative method for inferring the the loudness of digital sounds is to compare relative amplitudes. 
-% cite 
+
 \\
 The peak level of a digital sound corresponds to the sample with the highest value. This method has its benefits, but leaves out an important factor: the duration of intensity. A more commonly used method of level detection is the Root Mean Square (RMS) method, which averages the values of a short sequence of samples for its calculation of levels.
 \\
@@ -72,8 +88,34 @@ Spectrograms are graphs used to showcase and analyze the duration and amplitude 
 
 % https://en.wikipedia.org/wiki/Frequency_domain#/media/File:Fourier_transform_time_and_frequency_domains_(small).gif
 
-\section{Digital Audio Generation}
-\subsection{Filters, Oscilators...}
+\section{Digital Audio Synthesis}
+
+The phenomena of sound at intensities we commonly encounter can be described as a product of a \textit{linear system} of functions \cite{cook1999chap4}. A linear system is a system where the transformation of a overlapping inputs is equal to the sum of the separately transformed inputs \cite{lyons2004understandingChap1}. In a linear system $\mathcal{S}$ with valid inputs and outputs $x(i)$ and $y(i)$, if:
+
+\begin{equation}
+ \mathcal{S}(x(i_1)) \xrightarrow{generates} y(i_1)
+\end{equation}
+\begin{center}
+    and
+\end{center}
+\begin{equation}
+\mathcal{S}(x(i_2)) \xrightarrow{generates}y(i_2)
+\end{equation}
+
+The output of the system given both inputs is the sum of the individual outputs, or:
+\begin{equation}
+ \mathcal{S}(x(i_1)+x(i_2)) \xrightarrow{generates} y(i_1)+y(i_2) 
+\end{equation}
+\\
+This concept has important implications digital audio creation and analysis. Simple tones can be combined to create complex sounds, and complex sounds can be broken down for easier analysis. It also allows systems based on experiments with simple sine waves to remain relevant in complex sound domains \cite{cook1999chap4}. \\\\
+[graph of addition of two sine waves making a complex sine wave ]
+\\
+
+In their taxonomy of digital synthesis techniques, Smith defines four families of algorithms. Algorithms that process and modulate existing sounds (e.g granular synthesis, wavelets), Spectral models that aim to create a particular spectrum of sound (e.g additive, subtractive), physicals models which emulate the physics of real instruments (as discussed in section \ref{sec_tools_disposal}) and abstract models (e.g wave shaping, phase distortion) which for signal generation \cite{smith1991viewpoints}. 
+
+
+
+\subsection{Filters, Oscillators...}
 \subsection{?}
 The rise of Digital Audio Workstations (DAW) \cite{leider2004digital} and Virtual Studio Technology (VST) based plug-ins \cite{tanev2013virtual} have rapidly transformed the sonic and material landscape of music production in the recent years. Coupled with this rise in popularity is a vast array of commercial products and services dedicated to satiating the need of amateur and professional music producers for unique sounds; most commonly via audio samples: one-shot drum samples, long sustained notes (commonly referred to as pads or textures), and loops (percussive or melodic) are common deliverables. Two notable examples of these commercial services are \textit{loopmasters}\footnote{loopmasters.com} and \textit{splice.com}\footnote{splice.com}. Furthermore, VST plug-ins can emulate complex audio synthesizers and effects which some producers may find daunting or time consuming to work with from scratch. In many cases VST plug-in vendors or unaffiliated enthusiasts sell additional presets for these plugins, targeted towards producers who do not have the time or interest in creating their own. The flexibility of the VST technology allows producers to further modify these presets until their desired sound is reached.
 
