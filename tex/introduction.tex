@@ -61,7 +61,7 @@ In our work, we find simple features such as frequency content (high pitch vs lo
 
 %% TODO: Throw a diagram in here?
 \section{What Is Our Methodology?}
-
+\label{sec_methodology}
 Given the tools at our disposal, our attempt is centered around a generative pipeline of audio. The outputs of this pipeline are evaluated and the evaluation score is used to further improve the pipeline and separate undesired outputs from desired ones. We want random sounds to be created by a tractable source, we also want to evaluate these sounds so we can guide the random sound generator towards desired sounds. Instead of learning weights and parameters in an audio-generation neural network, we wish to generate, search, and tune synthesizers to produce percussion sounds. Following this idea, we found the proper implementation of 2 major components to be crucial:
 
 \begin{itemize}

@@ -31,12 +31,13 @@
 %     perfectly valid way of saying a series of numbers.
 %    
 
-This chapter aims to provide a background for the subsequent chapters via a quick overview of three important topics: 
-\begin{enumerate*}[label=(\roman*)]
-  \item Digital sound, its features and concepts that have been fundamental to our work,
-  \item  A quick overview of digital synthesis techniques, and
-  \item Related works and their relative similarities and distinctions.
-\end{enumerate*}
+This chapter aims to provide a background for the subsequent chapters via a quick overview of four important topics:\\ 
+\begin{enumerate}[label=(\roman*)]
+\item Digital sound, its features and concepts that have been fundamental to our work.
+\item A quick overview of common digital synthesis techniques.
+\item Discussion on the applications of artificial neural networks (ANNs) for feature extraction and sound production. Although similar results can be yielded from either approach, we distinguish ANN based techniques from tradition digital signal processing (DSP).
+\item Related works and their relative similarities and distinctions.
+\end{enumerate}
 \section{Digital Audio: Sound from Numbers}
 Sound is the result of a series of physical events. Most of what we hear is the product of physical disturbances, causing vibrations in our mutually shared, immersive mediums (air, hopefully). Sound waves carry these vibrations through air as part of an expanding, spherical wave front; Exponentially losing intensity as they travel away from the source \cite{cook1999chap4}. 
 \\\\
@@ -69,9 +70,8 @@ In this context, \textit{sampling rate}, is an important feature of digital soun
 \subsection{Loudness, Amplitudes and Envelopes}
 Loudness is a subjective description of a sound's intensity or energy levels. It varies based on the complexity of sounds, the frequencies present, and hearing ability of the listener \cite{fletcher1933loudness,cook1999chap6}. It can only be measured relatively, by establishing a benchmark sound and surveying populations on the relative intensities \cite{cook1999chap6}. Since loudness and intensity of sound correlate with the amplitude of digital waveforms (the values assigned to the samples), an imperfect but convenient alternative method for inferring the the loudness of digital sounds is to compare relative amplitudes. 
 
-\\
 The peak level of a digital sound corresponds to the sample with the highest value. This method has its benefits, but leaves out an important factor: the duration of intensity. A more commonly used method of level detection is the Root Mean Square (RMS) method, which averages the values of a short sequence of samples for its calculation of levels.
-\\
+
 Sounds typically vary in intensity as they unfold. This change in intensity is often described by the "envelope" of the sound, particularly in shorter samples. For digital sounds, Mitchell describes the envelope as either (since samples typically take the range of -1 to 1) of the borders that are created by graphing a signal and connecting the local absolute peak values \cite{mitchell2009basicsynthChap6}. The envelope is generally described via 4 features: Attack, Decay, Sustain and Release (ADSR). Attack describes how quickly the peak loudness is reached. Decay for how quickly the sound drops to sustain level. Sustain is the duration of sustaining intensity (e.g how long a finger is kept on a piano key). Release describes the speed of fading to silence (e.g once a piano key is released).
 
 Envelopes can be mathematically described and used to shape signals. A common approach in digital sound synthesis is to output all samples at a consistent amplitude and apply an envelope later down the synthesis chain. Digital and analog synthesizers often have built-in ADSR modules to shape the volume of the output and other parameters.  
@@ -136,9 +136,9 @@ Talk about analog synthesis briefly, so the word synthesizer feels less abstract
  The rise of Digital Audio Workstations (DAW) ~\cite{leider2004digital} and Virtual Studio Technology (VST) based plug-ins~\cite{tanev2013virtual} have rapidly transformed the sonic and material landscape of music production in the recent years. Coupled with this rise in popularity is a vast array of commercial products and services dedicated to satiating the need of amateur and professional music producers for unique sounds; most commonly via audio samples: one-shot drum samples, long sustained notes (commonly referred to as pads or textures), and loops (percussive or melodic) are common deliverables. Two notable examples of these commercial services are \textit{loopmasters}\footnote{loopmasters.com} and \textit{splice.com}\footnote{splice.com}. Furthermore, VST plug-ins can emulate complex audio synthesizers and effects which some producers may find daunting or time consuming to work with from scratch. In many cases VST plug-in vendors or unaffiliated enthusiasts sell additional presets for these plugins, targeted towards producers who do not have the time or interest in creating their own. The flexibility of the VST technology allows producers to further modify these presets until their desired sound is reached.
 
 
-
-
-\section{Neural Networks As Synthesizers}
+\section{Neural Networks And Sound}
+\subsection{Neural Networks For Sound Analysis}
+\subsection{Neural Networks as Synthesizers}
 We defined digital synthesis as the "process of generating discrete values which approximate sound waves". We also established that manual generation of these values at high sampling rates is near impossible; A problem which has motivated a wide variety of synthesis techniques which aim to create signals within a linear (or mostly linear) system, in the simplest form possible (**look into simplest form proofs**). Recently, the exponential increase in computing power has motivated a wide range of research in probabilistic sound generation, mainly via generative neural networks. 
 % deterministically, if the input parameters to the system do not change, the output of the system will remain the same \footnote{talk about noise generation methods and seeding}.
 
@@ -149,23 +149,52 @@ Since their emergence in the 1950's, research on ANNs has gone through several e
 Generative neural networks (GNNs) are utilized for the completion of a sequences of values; Often by taking an incomplete sequence as input and outputting the most likely value for the next step. Published in 2016 by Oord et al. WaveNet is considered a seminal breakthrough in the usage ANNs for sound synthesis~\cite{oord2016wavenet}. Surpassing state of the art concatenate and parametric speech synthesis techniques, which work by combining one or more previously recorded audio snippets~\cite{schwarz2007corpus}. When trained on a large corpus of audio samples, GNNs such WaveNet can learn the "predictive distribution for each
 audio sample conditioned on all previous ones"~\cite{oord2016wavenet}. Once this distribution is learned, it can be used to create sounds 1 sample at a time, a slow process, as Mathews predicted. \\
 % Parallel WaveGAN has only 1.44 M parameters and can generate 24 kHz speech waveform 28.68 times faster than real-time on a single GPU environment. Perceptual listening test results verify that our proposed method achieves 4.16 mean opinion score within a Transformer-based text-to-speech framework, which is comparative to the best distillation-based Parallel WaveNet system.
-Oord et al. later proposed a parallel implementation of the WaveNet architecutre, accelerating generation by (**extract benchmarks**)~\cite{oord2017parallel}. Highly optimized GNNs such as WaveGan by Yamamoto et al.~\cite{yamamoto2020parallel} have matched WaveNet's perception performance while significantly reducing the number of parameters and speeding up synthesis (**some benchmarks in comments have to organize them**). Despite its state of the art performance, domain specific optimizations and and relatively small foot-print, WaveGAN requires the tuning of 1.44 million parameters and "generates 24 kHz speech waveform 28.68 times faster than real-time on a single GPU environment" \cite{yamamoto2020parallel}. It should be noted that 24 kHz is half the standard quality for audio, and far lower than what is perceived as "high quality", as previously discussed in section \ref{sec_sampling_rates}. To speed up the generative process, 24 kHz and lower sampling rates are common place in audio generation work utilizing neural networks \cite{oord2017parallel,yamamoto2019parallel,aouameur2019neural,ramires2020neural}.
+Oord et al. later proposed a parallel implementation of the WaveNet architecutre, accelerating generation by (**extract benchmarks**)~\cite{oord2017parallel}. Highly optimized GNNs such as WaveGan by Yamamoto et al.~\cite{yamamoto2020parallel} have matched WaveNet's perception performance while significantly reducing the number of parameters and speeding up synthesis (**some benchmarks in comments have to organize them**). Despite its state of the art performance, domain specific optimizations and and relatively small foot-print, WaveGAN requires the tuning of 1.44 million parameters and "generates 24 kHz speech waveform 28.68 times faster than real-time on a single GPU environment" \cite{yamamoto2020parallel}. It should be noted that 24 kHz is half the standard quality for audio, and far lower than what is perceived as "high quality", as previously discussed in section \ref{sec_sampling_rates}. We found 24 kHz and lower sampling rates to be common place in audio generation work utilizing neural networks \cite{oord2017parallel,yamamoto2019parallel,aouameur2019neural,ramires2020neural}, likely for reducing training and generation time. 
+
 
 % Yet another caveat of such models is the large amount of data that is required for training as well as the hardware, energy and time to carry out the training step. 
 
-
-
-
 % We can create a tone via a deterministic system of equations.  Where every sample is the result of a sine function (**can i show that a sine function is the simplest possible function to create a tone?**) 
 % Mathews said that we can create sound by coding in the samples one at a time ~\cite{mathews1963digital}, but this process is too slow to do by hand, which is why he advocated for digital synthesis.
+% These include (i) ANNs’ success de-
+% pends on both the quality and quantity of the data,
+% (ii) a lack of clear rules or fixed guidelines for
+% optimal ANN architecture design, (iii) a lack of
+% physical concepts and relations, and (iv) the inability
+% to explain in a comprehensible form the process
+% through which a given decision (answer) was made
+% by the ANN (i.e., ANNs criticized for being black
+% boxes) ~\cite{basheer}.
 
-\section{Related Work and Contradistinctions}
+% 
+\section{Goal Oriented Novel Sound Generation}
+
 \label{related}
+\subsection{Tool Selection}
+We define "goal oriented novel sound generation" as any work that seeks to implement a system that is capable of generating novel sounds with a desired characteristic. Based on our review of relevant works, we believe that "goal oriented audio generation" necessitates two essential components: A tool-set for the analysis of sound and a tool-set for creation of sound. As a result, we base our work around learning of the distinguishing features of various sound groups (i.e different types of drums) and using the learned features for generation of sound. In section~\ref{sec_methodology} we introduced these components as the virtual ear and virtual synthesizer. 
+
+ Thus far we have discussed various techniques at our disposal for the implementation of a virtual ear and synthesizers, all with their contextual strengths and weaknesses. In the upcoming sections, we will thoroughly discuss our implementations and the subsequent results. Here, we will review a variety of works which fall under our definition of "goal oriented novel sound generation". Particularly, we are interested in a discussion of goals, chosen methods for the feature extraction, and chosen methods of sound synthesis. 
+%  We will highlight the contradistinctions with our work where appropriate
+
+\subsection{Related Work}
+We categorized reviewed works into three general groups. Those which have used DSP for both feature extraction and synthesis, those which used ANNs for both, those which have used a mix (mostly ANN for feature learning and DSP for synthesis). 
+
+\begin{center}
+
+\begin{table}
+ \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
+work & feature extraction & synthesis & goal \hline
+\end{tabular}}
+\caption{Taxonomy}
+\end{table}
+\end{center}
+
+
 Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal \cite{nsynth2017,yamamoto2019parallel,oord2017parallel}. Even more recently Variational AutoEncoders (VAE's) have been utilized for generation of short percussive samples \cite{aouameur2019neural,ramires2019timbfeat}. In this work however, we opt to use digital signal processing methods to create a virtual synthesizer for the generation of audio signals as it provides several unique advantages:
 \begin{enumerate}[label=\roman*]
   \item Fast, offline rendering of audio with no reliance on GPU: Currently not possible with state of the art models such as parallel WaveGan \cite{yamamoto2019parallel} and parallel WaveNet \cite{oord2017parallel}. 
   \item Rendering at high sampling rates: Performance speed being a common issue, the standard sampling rate in most audio generation work utilizing neural networks appears to be under 24 khz \cite{yamamoto2019parallel,oord2017parallel,aouameur2019neural,ramires2019timbfeat}. However, a significant number of untrained human ears can detect a change in quality of audio between sampling rates of 192 khz and the industry standard of 44.1 khz \cite{reiss2016meta} with a dramatic increase in quality detection after training. Therefore we can safely assume that most producers would prefer their audio samples to have sampling rates of 44.1 khz or higher. In this work, we fix our sampling rate to the 48 khz standard. 
-  \item Neural networks are often viewed as unexplainable black box solutions. Some models such as VAE's can learn an underlying latent space of parameters and capture the "essence" of the different labels in a dataset. However, these spaces are learned in an unsupervised manner and must be manually analysed, perhaps extensively, before they can be understood \cite{esling2018generative}. The use of a virtual synthesizer for audio generation makes our parameters readily understandable and easily modifiable. \\
+  \item Neural networks are viewed as unexplainable black box solutions \cite{basheer2000artificial}. Some models such as VAE's can learn an underlying latent space of parameters and capture the distinguishing features of the different labels in a dataset. However, these spaces are learned in an unsupervised manner and must be manually analysed, perhaps extensively, before they can be understood \cite{esling2018generative}. The use of a virtual synthesizer for audio generation makes our parameters readily understandable and easily modifiable. \\
 \end{enumerate}
 
 Automatic programming of virtual synthesizers has also been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines \cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al. \cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent, impressive work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio \cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation. 
