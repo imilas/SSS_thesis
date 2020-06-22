@@ -8,7 +8,16 @@
 \begin{document}
 
 \chapter{Implementation}
+\section{Approach}
+% \subsection{ANN approaches}
+% Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal \cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Even more recently Variational AutoEncoders (VAE's) have been utilized for generation of short percussive samples \cite{aouameur2019neural,ramires2019timbfeat}. In this work however, we opt to use digital signal processing methods to create a virtual synthesizer for the generation of audio signals as it provides several unique advantages:
+% \begin{enumerate}[label=\roman*]
+%   \item Fast, offline rendering of audio with no reliance on GPU: Currently not possible with state of the art models such as parallel WaveGan \cite{yamamoto2019parallel} and parallel WaveNet \cite{oord2017parallel}. 
+%   \item Rendering at high sampling rates: Performance speed being a common issue, the standard sampling rate in most audio generation work utilizing neural networks appears to be under 24 khz \cite{yamamoto2019parallel,oord2017parallel,aouameur2019neural,ramires2019timbfeat}. However, a significant number of untrained human ears can detect a change in quality of audio between sampling rates of 192 khz and the industry standard of 44.1 khz \cite{reiss2016meta} with a dramatic increase in quality detection after training. Therefore we can safely assume that most producers would prefer their audio samples to have sampling rates of 44.1 khz or higher. In this work, we fix our sampling rate to the 48 khz standard. 
+%   \item Neural networks are viewed as unexplainable black box solutions \cite{basheer2000artificial}. Some models such as VAE's can learn an underlying latent space of parameters and capture the distinguishing features of the different labels in a dataset. However, these spaces are learned in an unsupervised manner and must be manually analysed, perhaps extensively, before they can be understood \cite{esling2018generative}. The use of a virtual synthesizer for audio generation makes our parameters readily understandable and easily modifiable. \\
+% \end{enumerate}
 
+% Automatic programming of virtual synthesizers has also been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines \cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al. \cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent, impressive work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio \cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
 \label{impl}
 
 \section{Virtual Synthesizer}
@@ -105,4 +114,26 @@ being categorized is switched from original percussion samples to virtual synth 
 With our models showing high accuracy on testing data, we combine models in order to increase the efficacy of each phase and address the "open set problem" for our task. For Phase 1 we only determine sounds as percussive if both FC-DVN and CNN-LSTM have determined it as such with over 90\% confidence. For the majority of our random generations that is not the case, but if a randomly generated sound has passed this phase, our three categorizers assign their categorizations to this sound. These categorizers have a moderate degree of agree-ability as seen in \ref{survey}, but often the decision is not unanimous. The fourth method of categorization, "averaged-cat", is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category. 
 
 These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement "virtual ears" with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. Ignoring that some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus. 
+
+
+
+
+\section{Data And Project Replication}
+\label{data}
+
+Our data is a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we further processed to suit our categories, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples will also be made available. Further information about downloading our dataset can be found on this project's github page. 
+
+Our drum categories are claps, hats, kicks, rims/other, shakers, snares and toms. Other categories are chopped guitars, chopped pianos and n-stack-synths (random noise generated by the virtual synth with stack size of n, see \ref{vs}), utilized for learning percussive vs non-percussive sounds. Stack sizes refers to how many synth functions are connected together in a synthesizer.
+Some notes about our dataset:
+
+
+\begin{itemize}
+\item Of the 6000 drum-sounds utilized in our work, the kick, snare and hat categories have the largest share at around 20\% each, while the shaker and rim (other) categories have the smallest at 5\% combined. Due to this we only focused on learning from kicks, snares, toms, claps and hats for Phase 1 of training (along with non-percussive groups of sound) \ref{sec:ear}.
+
+\item For Phase 2 of training we only focused on categorizing snares, claps, kicks, hats and other (percussive sounds such as shakers, rims and unusual percussions that we couldn't categorize were grouped into this category). Non-percussive datasets were not used for this phase. 
+\item In order to offset bias from data imbalance during training of our models, the categorical cross entropy loss was weighted by the group sizes. 
+\item For any given model, 80\% of our data is used for training and 20\% is used for testing. 
+
+\item We limit the size of the n-stack-synths category to 50\% of the total size of our drum dataset. This is done in order to measure whether the features extracted can address the "Open Set Recognition" problem, which will be discussed further in Section \ref{sec:ear}.
+\end{itemize}
 \end{document}
