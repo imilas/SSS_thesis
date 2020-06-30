@@ -69,8 +69,12 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \end{figure*}
 
 \section{The Ear}
+\subsection{Embedding model}
+% http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
+% http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
+\subsection{Two Phased model}
 \label{sec:ear}
-\subsection{Feature Extraction}
+\subsubsection{Feature Extraction}
 What we refer to as an "ear" is any method (such as machine listening) of evaluating a piece of audio, capable of "listening" to a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. Since in this work we are mainly focused on percussive generation, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are deterministic for all programs the ear's evaluations would allow us to associate the categorical probabilities of each sound with the program that generated it. In section \ref{gens} we discuss how these scores were used for navigation of our synthesis towards parameters which give us the desired sonic output.
 
  With our dataset \ref{data} of labeled drum sounds we can confidently categorized unlabeled drum sounds given that we know they are drum sounds. However, a major hurdle towards the implementation of a "drum from non-drum" recognizing ear is that the set of sounds that are not percussive is infinite.
