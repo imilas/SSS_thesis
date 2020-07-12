@@ -63,16 +63,17 @@ What we refer to as an "ear" is any method (such as machine listening) of evalua
 
  With our dataset of labeled drum sounds, discussed in~\ref{data}, we can confidently categorized unlabeled drum sounds given that we know they are drum sounds. However, a major hurdle towards the implementation of a "drum from non-drum" recognizing ear is that the set of sounds that are not percussive is infinite. 
 
-In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that the implementation of our virtual ear falls outside the traditional categorization problem and within the "Open Set Recognition" domain. 
+In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that the implementation of our virtual ear falls outside the traditional categorization problem and within the "Open Set Recognition" (OSR) domain. 
 
-Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. A well documented issue often addressed in works utilizing GANs is that such assumptions lead to scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}.  
+Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works toward the implementations of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}.  
 
 Our work is based around random generation of a sound followed by 2 decisions: \begin{enumerate}
   \item Whether the sound could be used as a drum
   \item If it does sound like a drum, what type of drum should it be?
 \end{enumerate}
 
-The second question can be answered rather easily and in various ways, as later discussed. However, the former decision requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. It also means that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). 
+The second question can be answered rather easily and in various ways, as later discussed. However, the former decision requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. It also means that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). We attribute the relative ease of the latter decision compared the former to the OSR problem. 
+
 
 \begin{figure}
 \centering
