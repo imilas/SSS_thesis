@@ -27,7 +27,9 @@ Our goal is to create a system for the generation of novel drum sounds. In this 
 Here we discuss in more detail the implementations and interactions of these two components. Later on in the chapter, we will discuss our dataset and code which can be used for replication of our project. 
 \section{Virtual Synthesizer}
 \label{vs}
-We used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end and focuses on fast offline generation of audio signals. In our implementation a synthesizer can have any number of sub-modules. The parameters that deterministically dictate the output signal of the sub-module as well as the range of values each parameter can take are shown in table ~\ref{table:1}. We call this number the \textit{stack size}. For the range of parameters each sub-module can take we call the sets of parameters that characterize a synth's sub-modules a \textit{program} (analogous to a preset).  Each sub-module can make an audio signal with the length of 
+We require a synthesizer of sound which is capable of rapidly receiving programs and rendering the corresponding sound offline. We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
+
+Our implementation a synthesizer can have any number of sub-modules. The parameters that dictate the output signal of the sub-module as well as the range of values each parameter can take are shown in table ~\ref{table:1}. We call this number the \textit{stack size}. For the range of parameters each sub-module can take we call the sets of parameters that characterize a synth's sub-modules a \textit{program} (analogous to a preset).  Each sub-module can make an audio signal with the length of 
 % AH: Be consistent about synth, synthesizer, virtual synthesizer, Synth
 0.1-1 second. If the synthesizer has a stack size of more than 1 these audio signals are overlapped and the total amplitude is normalized.
 
@@ -142,7 +144,7 @@ These models can be combined and weighted in various ways and the confidence thr
 \subsection{Embedding Ears}
 % http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
 % http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
-
+% 
 
 \section{Data And Project Replication}
 \label{data}
