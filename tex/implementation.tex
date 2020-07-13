@@ -67,30 +67,25 @@ In our case, drum groups are an example of closed sets, since we believe that a 
 
 Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works toward the implementations of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}.  
 
-Our work is based around random generation of a sound followed by 2 decisions: \begin{enumerate}
-  \item Whether the sound could be used as a drum
-  \item If it does sound like a drum, what type of drum should it be?
-\end{enumerate}
-
-The second question can be answered rather easily and in various ways, as later discussed. However, the former decision requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. It also means that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). We attribute the relative ease of the latter decision compared the former to the OSR problem. 
-
-
-\begin{figure}
-\centering
-\textbf{Visual Representation of Raw Features}\par\medskip
-    \subcaptionbox{Recorded hat sample}{    \includegraphics[width=1\columnwidth]{images/ff1.pdf}
+Once a sound is generated and passed onto the ear, we expect the virtual ear to facilitate our actions in response to two important questions: 
+\emph{
+\begin{quote}
+\text{EQ.1 Could the sound could be used as a drum?}\label{EQ1}
+\\
+\text{EQ.2 If it does sound like a drum, what type of drum should it be?}\label{EQ2}
+\end{quote}
     }
-    \subcaptionbox{Randomly generated audio with percussive qualities, resembling a tight snare}{\includegraphics[width=1\columnwidth]{images/ff2.pdf}}
-    \subcaptionbox{A randomly generated noise with a percussive envelop but non-percussive frequency features (modulated pitch)}
-    { \includegraphics[width=1\columnwidth]{images/ff3.pdf}}
-\caption{Graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.}
-\label{fig:stackspectrums}
-\end{figure}
 
-\subsection{Embedding model}
-% http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
-% http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
-\subsection{Two Phased model}
+
+The second question can be answered rather easily and in various ways, as later discussed. However, the former decision requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. It also means that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). We attribute the relative ease of \hypref{EQ2} relative to~\hypref{EQ1} to be reflective of the OSR problem. 
+
+We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rejection of "noise" from the virtual synthesizer and the rare acceptance of drum-like sounds. By definition, we cannot anticipate what these novel drums will sound like. Considering the limitations of learning by example, and since raw data can clearly separate organic drums from virtual synthetic noise, we believe that transformation and filtering of raw sound data is a critical step of the listening process; A step that will assist with the extraction of the fundamental characteristics that we are seeking and prevent the rejection of novel sounds.
+
+As our synthesizer rapidly produces sounds, the virtual ear will listen to the sounds and accepts those that satisfy some fundamental characteristics of drums. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{EQ2} and~\hypref{EQ1}.
+
+We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{embedding ears} (EEs). As we will discuss in the next sections, TPEs are a combination different models for each of ~\hypref{EQ2} and~\hypref{EQ1}; With the features utilized by these models being manually defined. EEs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
+
+\subsection{Two Phased Ears}
 \label{sec:ear}
 \subsubsection{Feature Extraction}
 
@@ -104,7 +99,17 @@ from the randomly generated sounds produced by virtual synthesizers:
    \item Phase $2$: Given confidence that the sound being categorized is percussive, categorizing its type.
 \end{enumerate}
 We are interested in extracting generalizable, domain agnostic features. In this work we rely entirely on Fast Fourier Transform (FFT) and by extension Short-time Fourier Transforms (STFT) for feature extraction. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when a more accurate representation is desired; via the application of the FFT to a sliding time-window on the signal to create a matrix (a list of vectors). This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step).
-
+\begin{figure}
+\centering
+\textbf{Visual Representation of Raw Features}\par\medskip
+    \subcaptionbox{Recorded hat sample}{    \includegraphics[width=1\columnwidth]{images/ff1.pdf}
+    }
+    \subcaptionbox{Randomly generated audio with percussive qualities, resembling a tight snare}{\includegraphics[width=1\columnwidth]{images/ff2.pdf}}
+    \subcaptionbox{A randomly generated noise with a percussive envelop but non-percussive frequency features (modulated pitch)}
+    { \includegraphics[width=1\columnwidth]{images/ff3.pdf}}
+\caption{Graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.}
+\label{fig:stackspectrums}
+\end{figure}
 % AH: If you need space shorten this paragraph to we use STFT which has worked in past and we use spectral-centroids and zero-crossings
 Various works have demonstrated effective reconstruction of signals given their STFT~\cite{nawab1983signal,griffin1984signal}. For our purpose, if the original signal can be faithfully reconstructed from its STFT, analysis of the STFT may be relied on as source of fundamental features necessary for audible signal categorization. In the interest of keeping the feature space small and fundamental, other methods of feature extraction such as Spectral-Centroids~\cite{schubert2004spectral} and Zero-Crossing Rates~\cite{gouyon2000use} are not utilized.
 
@@ -117,7 +122,7 @@ Using only the STFT of signals as source of feature extraction we defined 3 tran
 \item Spectrum Transformation: This function is simply a Mel Scaled STFT with its values normalized from 0-1. Since this features is a 2D matrix rather than a vector it captures more information about our signal but requires heavier, more complex computational methods to be utilized. 
 \end{enumerate}
 
-\subsection{The Models}
+\subsubsection{The Models}
 Using the described features, we trained several neural network models for Phase 1 and 2 in the Pytorch environment. The task of Phase 1 is to separate drums from not-drums (DrumVsNotDrum, or DVN). The task of Phase 2 is to categorize drums and percussion (DrumVsDrum, or DVD). We kept our feature space small, making it viable for feature selection and model design to be done on a trial and error basis. For all models, accuracy is calculated by prediction of all test dataset labels and the loss function and optimizer are Categorical-CrossEntropy and Adam respectively. Training continues until no reduction in loss and accuracy is observed in 10 epochs.  All activation functions are PReLU:
 \begin {enumerate}
 \item FC-DVN: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for Phase 1. With size of 10x5x10.
@@ -134,6 +139,9 @@ With our models showing high accuracy on testing data, we combine models in orde
 These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement "virtual ears" with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. Ignoring that some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus. 
 
 
+\subsection{Embedding Ears}
+% http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
+% http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
 
 
 \section{Data And Project Replication}
