@@ -29,9 +29,21 @@ Here we discuss in more detail the implementations and interactions of these two
 \label{vs}
 We require a synthesizer of sound which is capable of rapidly receiving programs and rendering the corresponding sound offline. We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
 
-Our implementation a synthesizer can have any number of sub-modules. The parameters that dictate the output signal of the sub-module as well as the range of values each parameter can take are shown in table ~\ref{table:1}. We call this number the \textit{stack size}. For the range of parameters each sub-module can take we call the sets of parameters that characterize a synth's sub-modules a \textit{program} (analogous to a preset).  Each sub-module can make an audio signal with the length of 
-% AH: Be consistent about synth, synthesizer, virtual synthesizer, Synth
-0.1-1 second. If the synthesizer has a stack size of more than 1 these audio signals are overlapped and the total amplitude is normalized.
+Our virtual synthesizer contains a set of one or more submodules. These submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
+
+As we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample within our database. Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time (but the entire sound must fit within the second, that is, a 0.5 second sound cannot begin playing after 0.5 seconds within rendering time frame). If the synthesizer has a stack size of more than 1 the audio signals from each submodule are overlapped and the total amplitude is normalized.
+
+The ADSR parameters shape the amplitude of the signal. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
+Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ set is normalized such that:
+\begin{align*}
+\text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
+v_{norm} = \dfrac{v}{A + D + S + R}
+\end{align*}
+
+Considering drum sounds such as kick or bass drums where the pitch of the sound can quickly slide from high to low, each submodule can slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. Considering this setup, we can predict that in order to generate kick drums using these parameters, the list of notes must vary from high frequencies to low; While other drum types such as hats or shakers require all pitch values to remain static, such that there is not pitch bending. 
+
+
+The OSC type will determine the shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wavetable transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
 
 \begin{table}[h!]
 \centering
@@ -45,8 +57,8 @@ Sustain & 0-3 & relative to A-D-R\\
 Release & 0-3 & relative to A-D-S\\
 OSC type & sine,square,saw & tone type\\
 IsNoise & boolean & whether to generate noise\\
-Sample Length & 0-1 second & - \\
-StartTime & 0-1 second & Length+Start<1\\
+Length & 0-1 second & - \\
+StartTime & 0-1 second & Length+Start$<$1\\
 Amplitude & 0.1-1 & 1 = max amplitude\\
 Pitches(notes) & list of pitches &  range of C0(16.35hz) to B9 \\
 HP filter Cuttoff & 0-20000 & -\\
@@ -54,8 +66,8 @@ LP filter Cuttoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
-\caption{Synthesizer Sub-module Parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each sub-module is in the order of $10^{15}$ }
-\label{table:1}
+\caption{Synthesizer submodule Parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
+\label{table:submodule_params}
 \end{table}
 
 
