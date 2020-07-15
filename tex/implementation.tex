@@ -84,9 +84,9 @@ Traditional classification tasks often make the assumption the data points used 
 Once a sound is generated and passed onto the ear, we expect the virtual ear to facilitate our actions in response to two important questions: 
 \emph{
 \begin{quote}
-\text{EQ.1 Could the sound could be used as a drum?}\label{EQ1}
+\text{EQ.1 Could the sound could be used as a drum?}\label{EQ.1}
 \\
-\text{EQ.2 If it does sound like a drum, what type of drum should it be?}\label{EQ2}
+\text{EQ.2 If it does sound like a drum, what type of drum should it be?}\label{EQ.2}
 \end{quote}
     }
 
@@ -157,6 +157,32 @@ These models can be combined and weighted in various ways and the confidence thr
 % http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
 % http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
 % 
+Like many other categorization tasks, we seek features that capture critical information about our data in the most compact format possible. In essence, feature extraction is often form of dimensionality reduction. While manual definition of the desired features can yield results, we also trained various autoencoder networks to encode our spectral features within small vectors. 
+
+As discussed previously in section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020timbfeat}. 
+
+As automatic encoding of short audio appears possible, we trained a few autoencoder networks on our dataset of drum samples. These networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
+
+We separate our autoencoders in two groups: those which use linear, fully connected layers and those which utilize a Long Short Term Memory (LSTM) layers. For simplicity, we keep the decoder architecture static within all groups. Important to mention is that reported loss values do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa.  
+
+
+For each group a variety of bottleneck sizes and spectrum shapes were tested.
+
+
+
+Next, we used the encoders from the most successful networks to project the test data as well as hundreds of synthetic noise sounds onto a 2-dimensional plane. Referring to~\hypref{EQ.1} and~\hypref{EQ.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, while the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics? 
+
+To test this, we implemented interactive graphs identical to those depcicted here; Where hovering over the datapoint will play the sounds. Manual inspection revealed that synthetic data close to drum clusters are more similar to the clusters than those which are further away. While encouraging, this similarity is not guaranteed and more specialized forms of encoding are needed for reducing the frequency of errors, increasing the similarity of synthetic datapoints to their neighbouring clusters and increasing the distance between drum clusters and synthetic noise data that do not have percussive characteristics. 
+
+As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type.
+
+
+
+
+
+
+
+
 
 \section{Data And Project Replication}
 \label{data}

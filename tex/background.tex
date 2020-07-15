@@ -137,6 +137,7 @@ Talk about analog synthesis briefly, so the word synthesizer feels less abstract
 
 
 \section{Neural Networks And Sound}
+\label{bg:NN}
 \subsection{Neural Networks For Sound Analysis}
 \subsection{Neural Networks as Synthesizers}
 We defined digital synthesis as the "process of generating discrete values which approximate sound waves". We also established that manual generation of these values at high sampling rates is near impossible; A problem which has motivated a wide variety of synthesis techniques which aim to create signals within a linear (or mostly linear) system, in the simplest form possible (**look into simplest form proofs**). Recently, the exponential increase in computing power has motivated a wide range of research in probabilistic sound generation, mainly via generative neural networks. 
@@ -192,7 +193,7 @@ Yee-King et al & LSTM on Paremters & DSP & Synth Pads & \hline
 \caption{for reference, will delete} % AH: Fix the table up and keep it.
 \end{table}
 \end{center}
-Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal \cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Even more recently Variational AutoEncoders (VAE's) have been utilized for generation of short percussive samples \cite{aouameur2019neural,ramires2019timbfeat}.
+Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal \cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Most relevant to us are recent works by Aoumaeur et al. in which variational AutoEncoders (VAE's) have been utilized for generation of percussive samples \cite{aouameur2019neural}; As well as Ramires et al's work in generation of percussive sounds by guiding the output of a feedforward neural network via simple and explainable desired features. 
 Automatic programming of virtual synthesizers has also been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines \cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al. \cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio \cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
 
  
