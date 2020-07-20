@@ -163,26 +163,24 @@ As discussed previously in section \ref{bg:NN}, many variations and applications
 
 As automatic encoding of short audio appears possible, we trained a few autoencoder networks on our dataset of drum samples. These networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
 
-We separate our autoencoders in two groups: those which use linear, fully connected layers and those which utilize a Long Short Term Memory (LSTM) layers. For simplicity, we keep the decoder architecture static within all groups. Important to mention is that reported loss values do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa.  
-
-
-For each group a variety of bottleneck sizes and spectrum shapes were tested.
+ For simplicity, we keep the decoder architecture static within all groups. Important to mention is that reported loss values do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
 
 
 
-Next, we used the encoders from the most successful networks to project the test data as well as hundreds of synthetic noise sounds onto a 2-dimensional plane. Referring to~\hypref{EQ.1} and~\hypref{EQ.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, while the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics? 
+\subsubsection{Architecture and Hyper-Parameter Optimization}
 
-To test this, we implemented interactive graphs identical to those depcicted here; Where hovering over the datapoint will play the sounds. Manual inspection revealed that synthetic data close to drum clusters are more similar to the clusters than those which are further away. While encouraging, this similarity is not guaranteed and more specialized forms of encoding are needed for reducing the frequency of errors, increasing the similarity of synthetic datapoints to their neighbouring clusters and increasing the distance between drum clusters and synthetic noise data that do not have percussive characteristics. 
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and used hyperparameter optimization to extract promising sets.
+
+
+
+
+
+\subsubsection{Feature Extraction}
+Next, we used the encoders from the most successful networks to project the test data as well as hundreds of synthetic noise sounds onto a 2 or 3-dimensional plane. Referring to~\hypref{EQ.1} and~\hypref{EQ.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, while the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics? 
+
+To test this, we implemented interactive graphs identical to those depicted here; Where hovering over the data-points will play the sounds. Manual inspection revealed that synthetic a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. While encouraging, this similarity is not guaranteed and we hypothesize that more specialized forms of encoding are needed for reducing the frequency of errors an strengthening this correlation.
 
 As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type.
-
-
-
-
-
-
-
-
 
 \section{Data And Project Replication}
 \label{data}
