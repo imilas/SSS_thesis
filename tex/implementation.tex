@@ -165,14 +165,48 @@ As automatic encoding of short audio appears possible, we trained a few autoenco
 
  For simplicity, we keep the decoder architecture static within all groups. Important to mention is that reported loss values do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
 
-
-
 \subsubsection{Architecture and Hyper-Parameter Optimization}
-% do multi-objective pareto front stuff if you have time
-Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and used hyperparameter optimization to extract promising sets.
+% could do multi-objective pareto front stuff
+\begin{table}[h!]
+\label{table:hyper_prams}
+\begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
+\hline
+Hyper-Param. & Description  & Values & Distribution\\ \hline
+Model Type      &   Affects encoder's first hidden layer & CNN,FC & Categorical \\  \hline
+Optimizer       & Updates network's weights based on loss & Adam,SGD & Categorical  \\  \hline
+Hidden Layers   & Extra hidden layer for the Encoder & True,False & Categorical \\  \hline
+Time Steps & Temporal granularity of the spectrogram. Affects FFT windowing. & 10,20 & Categorical  \\ \hline
+Learning Rate   &    Optimizer's learning rate  & $1^{-4}$ ... $1^{-1}$ & Uniform      \\ \hline
+Frequency Bins & Number of spectrogram frequency bins & 10, 30,60 & Categorical \\ \hline
 
+Regularization  &  L2 regularization parameter. Penalizes large weights to prevent overfitting & 1^{-6}~...~1^{-1} & Uniform\\ \hline
+Latent Size & Size of bottle neck layer or number encoded features & 8,16,64 & Categorical              \\ \hline
+Dropout Rate & Random zeroing of activations between layers to prevent over-fitting & 0,0.5,0.1 & Categorical\\  \hline
+\end{tabular}
+\caption{The Hyper-Paramter space in which the optimization was conducted. Using GPU accelerated FFT calculations allows the inclusion of spectrogram paramters in this search space.}
+\end{table}
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and audio-transformers and used hyper-parameter optimization to extract promising sets of values~\ref{table:hyper_prams}. 
 
-
+\begin{table}[h!]
+\label{table:hyper_prams}
+\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Conv2d-1 & [-1, 8, 30, 20] &   208 & Encoder's input \newline
+kernel:5x5\newline                  
+stride:1\newline    
+padding:2 \\ \hline
+ReLU-2 & [-1, 8, 30, 20] &   0 & \\  \hline
+MaxPool2d-3 & [-1, 8, 15, 10] & 0 &  kernel:5x5 \newline
+stride:2 \\ \hline
+Dropout-4 & [-1, 8, 15, 10] & 0 &  \\ \hline
+Linear-5 & [-1, 8] & 9,608 & Encoder's output \\ \hline
+Linear-6 & [-1, 256] & 2,304 & Decoder's Input \\ \hline
+Dropout-7 & [-1, 256] & 0 &  \\ \hline
+Linear-8 & [-1, 600 ] &  154,200& Decoder's output\\ \hline
+\end{tabular}
+\caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size}
+\end{table}
 
 
 \subsubsection{Feature Extraction}
