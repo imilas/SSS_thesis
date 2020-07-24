@@ -161,13 +161,13 @@ Like many other categorization tasks, we seek features that capture critical inf
 
 As discussed previously in section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020timbfeat}. 
 
-As automatic encoding of short audio appears possible, we trained a few autoencoder networks on our dataset of drum samples. These networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
+As automatic encoding of short audio appears possible, we designed a number of autoencoder networks for the purpose of extracting features from our dataset of drum samples. Our designed networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
 
- For simplicity, we keep the decoder architecture static within all groups. Important to mention is that reported loss values do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
+We kept our autoencoder designs relatively simple, all with approximately 150,000 parameters. Important to mention is that reported loss values of the model do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
 
 \subsubsection{Architecture and Hyper-Parameter Optimization}
 % could do multi-objective pareto front stuff
-\begin{table}[h!]
+\begin{table}[h]
 \label{table:hyper_prams}
 \begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
 \hline
@@ -183,16 +183,20 @@ Regularization  &  L2 regularization parameter. Penalizes large weights to preve
 Latent Size & Size of bottle neck layer or number encoded features & 8,16,64 & Categorical              \\ \hline
 Dropout Rate & Random zeroing of activations between layers to prevent over-fitting & 0,0.5,0.1 & Categorical\\  \hline
 \end{tabular}
-\caption{The Hyper-Paramter space in which the optimization was conducted. Using GPU accelerated FFT calculations allows the inclusion of spectrogram paramters in this search space.}
+\caption{The Hyper-Paramter space in which the optimization was conducted.}
 \end{table}
-Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and audio-transformers and used hyper-parameter optimization to extract promising sets of values~\ref{table:hyper_prams}. 
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and audio-transformers and used hyper-parameter optimization to extract promising sets of values~\ref{table:hyper_prams}. 
 
-\begin{table}[h!]
-\label{table:hyper_prams}
+The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_prams}. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The "Model Type" parameter dictates whether CNN or fully connected models are selected; If a "fully connected" model is selected, the "hidden layers" parameter selects between the two implementations. The specifications for these models can be found in tables ~\ref{table:FC1_AUTOENCODER}, ~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
+
+\begin{table}[[h]
+
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
 Conv2d-1 & [-1, 8, 30, 20] &   208 & Encoder's input \newline
+Num. Channels:8\newline
 kernel:5x5\newline                  
 stride:1\newline    
 padding:2 \\ \hline
@@ -205,33 +209,154 @@ Linear-6 & [-1, 256] & 2,304 & Decoder's Input \\ \hline
 Dropout-7 & [-1, 256] & 0 &  \\ \hline
 Linear-8 & [-1, 600 ] &  154,200& Decoder's output\\ \hline
 \end{tabular}
-\caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size}
+
+\caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size. Total number of parameters is 166,320}
+\label{table:CNNAUTOENCODER}
+\end{table}
+
+\begin{table}[[h]
+
+\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Linear-1 & [-1, 128]  & 76,928 & Encoder's input \\ \hline
+Dropout-2 & [-1, 128] & 0 &  \\ \hline
+Linear-3 & [-1, 8] & 9,608 & Encoder's output \\ \hline
+Linear-4 & [-1, 128] & 2,304 & Decoder's Input \\ \hline
+Dropout-5 & [-1, 128]  & 0 &  \\ \hline
+Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
+\end{tabular}
+\caption{Fully connected model with only 1 hidden dimension for encoder and decoder. Designed assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 156,512.}
+\label{table:FC1_AUTOENCODER}
+\end{table}
+
+\begin{table}[[h]
+
+\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Linear-1 & [-1, 128]  & 76,928 & Encoder's input \\ \hline
+Dropout-2 & [-1, 128] & 0 &  \\ \hline
+Linear-3 & [-1, 32]  & 4,128 & \\ \hline
+Dropout-4 & [-1, 128] & 0 &  \\ \hline
+Linear-5 & [-1, 8] & 9,608 & Encoder's output \\ \hline
+Linear-4 & [-1, 32] & 2,304 & Decoder's Input \\ \hline
+Dropout-5 & [-1, 32]  & 0 &  \\ \hline
+Linear-4 & [-1, 128] & 2,304 & \\ \hline
+Dropout-5 & [-1, 128]  & 0 &  \\ \hline
+Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
+\end{tabular}
+\caption{Fully connected model with 2 hidden dimensions for encoder and decoder. Designed assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 163,232.}
+\label{table:FC2_AUTOENCODER}
 \end{table}
 
 
+Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trials consisted of 20 epoch of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epoch,s where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space \cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
+\begin{figure}[h]
+\centering
+\textbf{Chronology of Best Loss Values}
+\includegraphics[width=13cm,height=8cm]{images/chapter3/Optimization_History.pdf}
+\caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
+\label{chap3:bestvalues}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\textbf{Loss Value per Epoch for Top 10 Trials}
+\includegraphics[width=12cm,height=6.5cm]{images/chapter3/loss_per_training.pdf}
+\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. This may imply that for this project, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. Considering the y-axis is logged, the learning curves tend to flatten quickly.}
+\label{chap3:top10}
+\end{figure}
+The slice and parallel coordinate graphs depicting the correlation of parameter values with trial results can be seen in figures~\ref{fig:slicegraph} and ~\ref{fig:parallel_coord}. A more concrete method of measuring this correlation is by fitting a fANOVA importance evaluator to our search results \cite{hutter2014efficient}. This evaluator is used to estimate the importance of each parameter based on the trial results. Only trials with 20 epochs are considered for this estimation. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. 
+
+
+\begin{figure}[h]
+\begin{center}
+    \textbf{Hyper-Parameters' Loss Correlation}
+    \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter3/slice_plot.pdf}}
+      \caption{Sliced plot depicting the correlation between hyper-parameters and loss values. The color-scale shows the number of times each parameters has been used in a trial. Our sampling algorithm aims to utilize spaces with higher potential more often. }
+    \end{center}
+    \label{fig:slicegraph}
+\end{figure}
+\begin{figure}[h]
+
+\begin{center}
+    \textbf{ Parallel Coordinates of Hyper-Parameter Sets' Loss}
+    \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter3/parallel_coord.pdf}}
+      \caption{Not sure if worth keeping. Paths connect hyper-parameters in a set. Path's are colored based on loss value.}
+    \end{center}
+    \label{fig:parallel_coord}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\textbf{Estimated Parameter Importance}
+\includegraphics[width=12cm,height=6cm]{images/chapter3/ParameterImportances_final.pdf}
+\caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration.}
+\label{chap3:param_importance}
+\end{figure}
+
+
+
 \subsubsection{Feature Extraction}
+
+\begin{table}[T]
+\begin{tabular}{|p{6cm}|p{6cm}|}
+\hline
+Hyper-Param. & Value  \\ \hline
+Model Type      &  CNN  \\ \hline
+Optimizer       & Adam  \\ \hline
+Hidden Layers   & -  \\\hline
+Learning Rate   &  0.001145\\ \hline
+Frequency Bins & 30 \\ \hline
+Time Steps & 20 \\ \hline
+Latent Size & 64 \\ \hline
+Regularization & 3.25^{-6}\\ \hline
+Dropout Rate & 0.5 \\ \hline
+\end{tabular}
+\caption{Best model's hyper-parameters}
+\label{table:best_params}
+\end{table}
+
 Next, we used the encoders from the most successful networks to project the test data as well as hundreds of synthetic noise sounds onto a 2 or 3-dimensional plane. Referring to~\hypref{EQ.1} and~\hypref{EQ.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, while the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics? 
 
-To test this, we implemented interactive graphs identical to those depicted here; Where hovering over the data-points will play the sounds. Manual inspection revealed that synthetic a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. While encouraging, this similarity is not guaranteed and we hypothesize that more specialized forms of encoding are needed for reducing the frequency of errors an strengthening this correlation.
+To test this, we implemented interactive graphs identical to those depicted here; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera. Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. While encouraging, this similarity is not guaranteed and we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
 
+\begin{figure}[h!]
+\centering
+\textbf{2 Dimensional Projection of Latent Variables}\par\medskip
+ \includegraphics[width=13cm,height=13cm]{images/chapter3/t-SNE_2d.pdf}
+\caption{Projection of an embedding model's 8 dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples.}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\textbf{3D t-SNE Projection}\par\medskip
+\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam0.pdf}}}}
+
+\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam3.pdf}}}}
+
+\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam1.pdf}}}
+\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam2.pdf}}}}
+\caption{Our feature projections and interactive graphs can also be done in 3D}
+\end{figure}
 As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type.
 
-\section{Data And Project Replication}
-\label{data}
+% \section{Data And Project Replication}
 
-Our data is a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we further processed to suit our categories, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples will also be made available. Further information about downloading our dataset can be found on this project's github page. 
+% Our data is a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we further processed to suit our categories, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples will also be made available. Further information about downloading our dataset can be found on this project's github page. 
 
-Our drum categories are claps, hats, kicks, rims/other, shakers, snares and toms. Other categories are chopped guitars, chopped pianos and n-stack-synths (random noise generated by the virtual synth with stack size of n, see ~\ref{vs}), utilized for learning percussive vs non-percussive sounds. Stack sizes refers to how many synth functions are connected together in a synthesizer.
-Some notes about our dataset:
+% Our drum categories are claps, hats, kicks, rims/other, shakers, snares and toms. Other categories are chopped guitars, chopped pianos and n-stack-synths (random noise generated by the virtual synth with stack size of n, see ~\ref{vs}), utilized for learning percussive vs non-percussive sounds. Stack sizes refers to how many synth functions are connected together in a synthesizer.
+% Some notes about our dataset:
 
 
-\begin{itemize}
-\item Of the 6000 drum-sounds utilized in our work, the kick, snare and hat categories have the largest share at around 20\% each, while the shaker and rim (other) categories have the smallest at 5\% combined. Due to this we only focused on learning from kicks, snares, toms, claps and hats for Phase 1 of training (along with non-percussive groups of sound) ~\ref{sec:ear}.
+% \begin{itemize}
+% \item Of the 6000 drum-sounds utilized in our work, the kick, snare and hat categories have the largest share at around 20\% each, while the shaker and rim (other) categories have the smallest at 5\% combined. Due to this we only focused on learning from kicks, snares, toms, claps and hats for Phase 1 of training (along with non-percussive groups of sound) ~\ref{sec:ear}.
 
-\item For Phase 2 of training we only focused on categorizing snares, claps, kicks, hats and other (percussive sounds such as shakers, rims and unusual percussions that we couldn't categorize were grouped into this category). Non-percussive datasets were not used for this phase. 
-\item In order to offset bias from data imbalance during training of our models, the categorical cross entropy loss was weighted by the group sizes. 
-\item For any given model, 80\% of our data is used for training and 20\% is used for testing. 
+% \item For Phase 2 of training we only focused on categorizing snares, claps, kicks, hats and other (percussive sounds such as shakers, rims and unusual percussions that we couldn't categorize were grouped into this category). Non-percussive datasets were not used for this phase. 
+% \item In order to offset bias from data imbalance during training of our models, the categorical cross entropy loss was weighted by the group sizes. 
+% \item For any given model, 80\% of our data is used for training and 20\% is used for testing. 
 
-\item We limit the size of the n-stack-synths category to 50\% of the total size of our drum dataset. This is done in order to measure whether the features extracted can address the "Open Set Recognition" problem, which will be discussed further in Section ~\ref{sec:ear}.
-\end{itemize}
+% \item We limit the size of the n-stack-synths category to 50\% of the total size of our drum dataset. This is done in order to measure whether the features extracted can address the "Open Set Recognition" problem, which will be discussed further in Section ~\ref{sec:ear}.
+% \end{itemize}
 \end{document}
