@@ -252,7 +252,7 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 
 
 Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trials consisted of 20 epoch of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epoch,s where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space \cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
 \textbf{Chronology of Best Loss Values}
 \includegraphics[width=13cm,height=8cm]{images/chapter3/Optimization_History.pdf}
@@ -260,17 +260,16 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \label{chap3:bestvalues}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
 \textbf{Loss Value per Epoch for Top 10 Trials}
 \includegraphics[width=12cm,height=6.5cm]{images/chapter3/loss_per_training.pdf}
 \caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. This may imply that for this project, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. Considering the y-axis is logged, the learning curves tend to flatten quickly.}
 \label{chap3:top10}
 \end{figure}
-The slice and parallel coordinate graphs depicting the correlation of parameter values with trial results can be seen in figures~\ref{fig:slicegraph} and ~\ref{fig:parallel_coord}. A more concrete method of measuring this correlation is by fitting a fANOVA importance evaluator to our search results \cite{hutter2014efficient}. This evaluator is used to estimate the importance of each parameter based on the trial results. Only trials with 20 epochs are considered for this estimation. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. 
 
 
-\begin{figure}[h]
+\begin{figure}[t]
 \begin{center}
     \textbf{Hyper-Parameters' Loss Correlation}
     \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter3/slice_plot.pdf}}
@@ -278,14 +277,17 @@ The slice and parallel coordinate graphs depicting the correlation of parameter 
     \end{center}
     \label{fig:slicegraph}
 \end{figure}
-\begin{figure}[h]
 
+The slice and parallel coordinate graphs depicting the correlation of parameter values with trial results can be seen in figures~\ref{fig:slicegraph} and ~\ref{fig:parallel_coord}. A more concrete method of measuring this correlation is by fitting a fANOVA importance evaluator to our search results \cite{hutter2014efficient}. This evaluator is used to estimate the importance of each parameter based on the trial results. Only trials with 20 epochs are considered for this estimation. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. 
+
+\begin{figure}[th]
 \begin{center}
     \textbf{ Parallel Coordinates of Hyper-Parameter Sets' Loss}
     \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter3/parallel_coord.pdf}}
       \caption{Not sure if worth keeping. Paths connect hyper-parameters in a set. Path's are colored based on loss value.}
+       \label{fig:parallel_coord}
     \end{center}
-    \label{fig:parallel_coord}
+   
 \end{figure}
 
 \begin{figure}[h]
@@ -342,16 +344,14 @@ To test this, we implemented interactive graphs identical to those depicted here
 \end{figure}
 As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type.
 
-% \section{Data And Project Replication}
+\section{Data And Project Replication}
 
-% Our data is a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we further processed to suit our categories, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples will also be made available. Further information about downloading our dataset can be found on this project's github page. 
+Our data is a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we further processed to suit our categories, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar} and ~\ref{db:sampleswap}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
 
-% Our drum categories are claps, hats, kicks, rims/other, shakers, snares and toms. Other categories are chopped guitars, chopped pianos and n-stack-synths (random noise generated by the virtual synth with stack size of n, see ~\ref{vs}), utilized for learning percussive vs non-percussive sounds. Stack sizes refers to how many synth functions are connected together in a synthesizer.
-% Some notes about our dataset:
-
+We prioritized making generalizable tools which can learn from and produce a variety of different sounds. We utilized these databases depending on the task at hand and the models being utilized. We also merged similar drum groups to simplify tasks. The "merge-able" groups are specified in table~\ref{db:merge-map}. Where relevant, we will specify which databases have been used and whether any merging of sound groups has taken place. 
 
 % \begin{itemize}
-% \item Of the 6000 drum-sounds utilized in our work, the kick, snare and hat categories have the largest share at around 20\% each, while the shaker and rim (other) categories have the smallest at 5\% combined. Due to this we only focused on learning from kicks, snares, toms, claps and hats for Phase 1 of training (along with non-percussive groups of sound) ~\ref{sec:ear}.
+% \item The kick, snare and hat categories have the largest share at around 20\% each, while the shaker and rim (other) categories have the smallest at 5\% combined. Due to this we only focused on learning from kicks, snares, toms, claps and hats for Phase 1 of training (along with non-percussive groups of sound) ~\ref{sec:ear}.
 
 % \item For Phase 2 of training we only focused on categorizing snares, claps, kicks, hats and other (percussive sounds such as shakers, rims and unusual percussions that we couldn't categorize were grouped into this category). Non-percussive datasets were not used for this phase. 
 % \item In order to offset bias from data imbalance during training of our models, the categorical cross entropy loss was weighted by the group sizes. 
@@ -359,4 +359,64 @@ As t-SNE results are not classifiers in of themselves, we create a model which u
 
 % \item We limit the size of the n-stack-synths category to 50\% of the total size of our drum dataset. This is done in order to measure whether the features extracted can address the "Open Set Recognition" problem, which will be discussed further in Section ~\ref{sec:ear}.
 % \end{itemize}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+\hline
+kick & snare & clap & tom\_high & tom\_mid & tom\_low & hihat\_closed &  hihat\_open & rim \\ \hline
+648 & 732 & 118 & 179 & 139 &  188 & 187 & 280 & 105 \\\hline
+\end{tabular}
+\caption{Database 1: Mixed sources}
+\label{db:self}
+\end{table}
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+kick & snare & clap & tom & clap & hat & rim & shaker  \\ \hline
+1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
+\end{tabular}
+\caption{Database 2: Royalty free sounds sourced from "Music Radar"}
+\label{db:radar}
+\end{table}
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+ kick & snare & clap & hat & other \\\hline
+ 533 & 372 & 230 & 105 & 281 \\ \hline
+\end{tabular}
+\caption{Database 3: Free sounds sourced from the "Sample Swap" project}
+\label{db:sampleswap}
+\end{table}
+
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|lll|}
+\hline
+ Synth Noise Type &1 Stack & 3 Stacks  & 5 Stacks \\ \hline
+ Number of Examples &2000 & 2000 & 2000 & \hline
+\end{tabular}
+\caption{Database of random noise examples from our virtual synthesizers}
+\end{table}
+
+\begin{table}[]
+\centering
+\begin{tabular}{|p{3cm}|p{8cm}|}
+\hline
+ Merged Name & Possible Merged Groups \\ \hline
+ Kicks & low toms and kicks \\
+ Toms & toms and mid toms \\
+ Snares & snares and high toms  \\
+ Hats & high hats and low hats \\ 
+ Other & rims,shakers and other percussive sounds with few representative samples \\ \hline
+\end{tabular}
+\caption{Databases may be simplified based on these mappings. }
+\label{merge_map}
+\end{table}
+
 \end{document}
