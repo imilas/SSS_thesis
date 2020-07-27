@@ -65,7 +65,7 @@ Length & 0-1 second & - \\
 StartTime & 0-1 second & Length+Start$<$1\\
 Amplitude & 0.1-1 & 1 = max amplitude\\
 Pitches(notes) & list of pitches &  range of C0(16.35hz) to B9 \\
-HP filter Cuttoff & 0-20000Hz & -\\
+HP filter Cuttoff & 0-20000hz & -\\
 LP filter Cuttoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
@@ -165,7 +165,7 @@ These models can be combined and weighted in various ways and the confidence thr
 % 
 Like many other categorization tasks, we seek features that capture critical information about our data in the most compact format possible. In essence, feature extraction is often form of dimensionality reduction. While manual definition of the desired features can yield results, we also trained various autoencoder networks to encode our spectral features within small vectors. 
 
-As discussed previously in section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020timbfeat}. 
+As discussed previously in section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020neural}. 
 
 As automatic encoding of short audio appears possible, we designed a number of autoencoder networks for the purpose of extracting features from our dataset of drum samples. Our designed networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
 
@@ -256,7 +256,7 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Each trials consisted of 20 epoch of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epoch,s where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space \cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
 \begin{figure}[htbp]
 \centering
-\textbf{Chronology of Best Loss Values}
+\textbf{Tracing the Best Loss Values}
 \includegraphics[width=12cm,height=7cm]{images/chapter3/Optimization_History.pdf}
 \caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
 \label{chap3:bestvalues}
@@ -266,7 +266,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \centering
 \textbf{Loss Value per Epoch for Top 10 Trials}
 \includegraphics[width=12cm,height=6.5cm]{images/chapter3/loss_per_training.pdf}
-\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. This may imply that for this project, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. Considering the y-axis is logged, the learning curves tend to flatten quickly.}
+\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. The learning curves tend to flatten quickly. Therefore, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. }
 \label{chap3:top10}
 \end{figure}
 
@@ -300,10 +300,8 @@ The slice and parallel coordinate graphs depicting the correlation of parameter 
 \label{chap3:param_importance}
 \end{figure}
 
-
-
 \subsubsection{Feature Extraction}
-
+\label{fig:embedding_FE}
 \begin{table}[htbp]
 \centering
 \begin{tabular}{|p{6cm}|p{6cm}|}
@@ -322,7 +320,7 @@ Dropout Rate & 0.5 \\ \hline
 \caption{Top performing hyper-parameter set}
 \label{table:best_params}
 \end{table}
-To better understand the delineation potential of encoder features from the most successful networks, we trained a CNN network using \%50 of db1. The remaining \%50 as well as approximately 1000 randomly selected sounds from NoiseDB were encoded into 8 dimensions. These 8-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. Referring to~\hypref{EQ.1} and~\hypref{EQ.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
+To better understand the delineation potential of encoder features from the most successful networks, we trained a CNN network using \%50 of db1. The remaining \%50 as well as approximately 1000 randomly selected sounds from NoiseDB were encoded into 8 dimensions. These 8-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
 \begin{figure}[htbp!]
 \centering
 \textbf{2 Dimensional Projection of Latent Variables}\par\medskip
@@ -344,11 +342,8 @@ To better understand the delineation potential of encoder features from the most
 \caption{Our feature projections and interactive graphs can also be done in 3D}
 \label{fig:3d_tsne}
 \end{figure}
-To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera. Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. While encouraging, this similarity is not guaranteed and we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
-
-\subsubsection{Possible Explanation for Embedding Ear's Effectiveness}
-We recursively run the autoencoder on new sounds and display the results in figures ~\ref{fig:recreations}. Spectrograms belonging to percussive groups retain their unique characteristics for a few time steps, while details in most synthetic noise spectrograms are quickly dissipated.  It is possible that this "confusion" by the encoder leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem.
-\begin{figure}[hpb!]
+To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembeling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
+\begin{figure}[b!]
 \centering
 \textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
 \makebox[\linewidth][c]{%
@@ -364,11 +359,18 @@ We recursively run the autoencoder on new sounds and display the results in figu
 \end{subfigure}%
 }\\
 \caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The top spectrograms are originals. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum specrograms retain their original form better than synthetic noise.}
+\label{fig:recreations}
 \end{figure}
+
+\subsubsection{Possible Explanation for Embedding Ear's Effectiveness}
+We recursively run the autoencoder on new sounds and display the results in figures ~\ref{fig:recreations}. Spectrograms belonging to percussive groups retain their unique characteristics for a few time steps, while details in most synthetic noise spectrograms are quickly dissipated.  It is possible that this "confusion" by the encoder leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem. 
+
 
 
 \subsection{Mixed Ear Models}
-As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. 
+As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. To address the problems mentioned in~\ref{fig:embedding_FE}, we include the envelope features along with the embeddings. 
+
+
 \section{Data And Project Replication}
 
 Our data sources are a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar}, ~\ref{db:sampleswap} and ~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
@@ -425,7 +427,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
  Number of Examples &2000 & 2000 & 2000 & \hline
 \end{tabular}
 \caption{Database of random noise examples from our virtual synthesizers}
-\label{db:sampleswap}
+\label{db:noise}
 \end{table}
 
 \begin{table}[h!]
