@@ -41,11 +41,13 @@ Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ s
 \text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
 v_{norm} = \dfrac{v}{A + D + S + R}
 \end{align*}
+ The OSC type will determine the wave-shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wavetable transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
 
-Considering drum sounds such as kick or bass drums where the pitch of the sound can quickly slide from high to low, each submodule can slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. Considering this setup, we can predict that in order to generate kick drums using these parameters, the list of notes must vary from high frequencies to low; While other drum types such as hats or shakers require all pitch values to remain static, such that there is not pitch bending. 
+Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound. Our more successful attempts at creation of synthetic kick or bass drums are often characterized by quick, exponential decrease of a sine-wave's pitch from medium to low audible frequencies. To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
+
+% Considering this setup, we predict that in order to generate kick drums using these parameters, the list of notes must vary from high frequencies to low; While other drum types such as hats or shakers require all pitch values to remain static, such that pitch bending does not occur. 
 
 
-The OSC type will determine the shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wavetable transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
 
 \begin{table}[h!]
 \centering
@@ -63,7 +65,7 @@ Length & 0-1 second & - \\
 StartTime & 0-1 second & Length+Start$<$1\\
 Amplitude & 0.1-1 & 1 = max amplitude\\
 Pitches(notes) & list of pitches &  range of C0(16.35hz) to B9 \\
-HP filter Cuttoff & 0-20000 & -\\
+HP filter Cuttoff & 0-20000Hz & -\\
 LP filter Cuttoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
@@ -75,39 +77,41 @@ Filter Order & 4,8,16 & butterworth filter order \\
 
 \section{The Ear}
 
-What we refer to as an "ear" is any method (such as machine listening) of evaluating a piece of audio, capable of "listening" to a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on percussive generation, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
+What we refer to as an "ear" is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}; The ideal ear for our task will be capable of "listening" to a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on percussive generation, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
 
- With our dataset of labeled drum sounds, discussed in~\ref{data}, we can confidently categorized unlabeled drum sounds given that we know they are drum sounds. However, a major hurdle towards the implementation of a "drum from non-drum" recognizing ear is that the set of sounds that are not percussive is infinite. 
+We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rejection of "noise" from the virtual synthesizer and the rare acceptance of drum-like sounds. By definition, we cannot anticipate what these novel drums will sound like. Considering the limitations of learning by example, and since raw data can clearly separate organic drums from virtual synthetic noise, we believe that transformation and filtering of raw sound data is a critical step of the listening process; A step that will assist with the extraction of the fundamental characteristics that we are seeking and prevent the rejection of novel sounds.
 
-In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that the implementation of our virtual ear falls outside the traditional categorization problem and within the "Open Set Recognition" (OSR) domain. 
+ With our dataset of labeled drum sounds, discussed in~\ref{data}, we can confidently categorize unlabeled drum sounds given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum \textquotedblright recognizing ear is that the set of sounds that are not percussive is infinite. 
+
+In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that the implementation of our virtual ear falls outside the traditional categorization problem and within the "Open Set Recognition" (OSR) domain~\cite{geng2020recent,mundt2019open}. 
 
 Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works toward the implementations of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}.  
 
 Once a sound is generated and passed onto the ear, we expect the virtual ear to facilitate our actions in response to two important questions: 
 \emph{
 \begin{quote}
-\text{EQ.1 Could the sound could be used as a drum?}\label{EQ.1}
+\text{Decision.1 Could the sound could be used as a drum?}\label{Decision.1}
 \\
-\text{EQ.2 If it does sound like a drum, what type of drum should it be?}\label{EQ.2}
+\text{Decision.2 If it does sound like a drum, what type of drum should it be?}\label{Decision.2}
 \end{quote}
     }
 
 
-The second question can be answered rather easily and in various ways, as later discussed. However, the former decision requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. It also means that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). We attribute the relative ease of \hypref{EQ2} relative to~\hypref{EQ1} to be reflective of the OSR problem. 
+\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. Also a consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). Much easier to answer is \hypref{Decision.2}, where we found satisfying results with a variety of different approaches. We attribute the relative ease of \hypref{Decision.2} relative to~\hypref{Decision.1} to be reflective of the OSR problem. 
 
-We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rejection of "noise" from the virtual synthesizer and the rare acceptance of drum-like sounds. By definition, we cannot anticipate what these novel drums will sound like. Considering the limitations of learning by example, and since raw data can clearly separate organic drums from virtual synthetic noise, we believe that transformation and filtering of raw sound data is a critical step of the listening process; A step that will assist with the extraction of the fundamental characteristics that we are seeking and prevent the rejection of novel sounds.
 
-As our synthesizer rapidly produces sounds, the virtual ear will listen to the sounds and accepts those that satisfy some fundamental characteristics of drums. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{EQ2} and~\hypref{EQ1}.
 
-We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{embedding ears} (EEs). As we will discuss in the next sections, TPEs are a combination different models for each of ~\hypref{EQ2} and~\hypref{EQ1}; With the features utilized by these models being manually defined. EEs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
+As our synthesizer rapidly produces sounds, the virtual ear will listen to the sounds and accepts those that satisfy some fundamental characteristics of drums. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{Decision.2} and~\hypref{Decision.1}.
+
+We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{embedding ears} (EEs). As we will discuss in the next sections, TPEs are a combination different models for each of ~\hypref{Decision.2} and~\hypref{Decision.1}; With the features utilized by these models being manually defined. EEs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
 \subsection{Two Phased Ears}
 \label{sec:ear}
 \subsubsection{Feature Extraction}
 
 
-   % AH: is the virtual synthesizer a synth or a synthesizer that makes synthesizer
-  % AH: you should make it 1 instance of a generated synth 
+
+% AH: you should make it 1 instance of a generated synth 
 We only consider 1 second long sounds made with a single stacked synth, yet the set of possible synthesizer parameters (and we assume, the sound generated by the synth given these parameters) is extremely large. In our case, as discussed in Section ~\ref{survey}, the majority of sounds generated by the synth do not resemble percussion.  We determined that there are 2 steps necessary to effectively extract percussive sounds
 from the randomly generated sounds produced by virtual synthesizers: 
 \begin{enumerate}
