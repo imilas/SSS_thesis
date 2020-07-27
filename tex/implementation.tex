@@ -27,13 +27,15 @@ Our goal is to create a system for the generation of novel drum sounds. In this 
 Here we discuss in more detail the implementations and interactions of these two components. Later on in the chapter, we will discuss our dataset and code which can be used for replication of our project. 
 \section{Virtual Synthesizer}
 \label{vs}
-We require a synthesizer of sound which is capable of rapidly receiving programs and rendering the corresponding sound offline. We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
+We require a synthesizer of sound which is capable of rapidly receiving programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer iteself or created externally by a person or algorithm.  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
 
-Our virtual synthesizer contains a set of one or more submodules. These submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
+% todo-add figure of how it would work
+% AH-are they only sequentially composed?
+Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
 As we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample within our database. Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time (but the entire sound must fit within the second, that is, a 0.5 second sound cannot begin playing after 0.5 seconds within rendering time frame). If the synthesizer has a stack size of more than 1 the audio signals from each submodule are overlapped and the total amplitude is normalized.
 
-The ADSR parameters shape the amplitude of the signal. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
+The ADSR parameters shape the entire amplitude of the signal. Each submodule creates its signal at full amplitude then shapes it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
 Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ set is normalized such that:
 \begin{align*}
 \text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
@@ -251,7 +253,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \begin{figure}[htbp]
 \centering
 \textbf{Chronology of Best Loss Values}
-\includegraphics[width=13cm,height=8cm]{images/chapter3/Optimization_History.pdf}
+\includegraphics[width=12cm,height=7cm]{images/chapter3/Optimization_History.pdf}
 \caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
 \label{chap3:bestvalues}
 \end{figure}
@@ -341,11 +343,28 @@ To better understand the delineation potential of encoder features from the most
 To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera. Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. While encouraging, this similarity is not guaranteed and we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
 
 \subsubsection{Possible Explanation for Embedding Ear's Effectiveness}
-We recursively run the autoencoder on new sounds and display the results in figures ~\ref{fig:recreation1} and ~\ref{fig:recreation2}. Spectrograms belonging to percussive groups or are recreated accurately, while details in synthetic noise spectrograms are quickly dissipated, unless the noise has percussive characteristics. We hypothesize that this "confusion" by the encoder leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem.
+We recursively run the autoencoder on new sounds and display the results in figures ~\ref{fig:recreations}. Spectrograms belonging to percussive groups retain their unique characteristics for a few time steps, while details in most synthetic noise spectrograms are quickly dissipated.  It is possible that this "confusion" by the encoder leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem.
+\begin{figure}[hpb!]
+\centering
+\textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
+\makebox[\linewidth][c]{%
+\begin{subfigure}[b]{.6\textwidth}
+\centering
+\includegraphics[width=.95\textwidth]{images/chapter3/Drums_reacreation.pdf}
+% \caption{a test subfigure}
+\end{subfigure}%
+\begin{subfigure}[b]{.6\textwidth}
+\centering
+\includegraphics[width=.95\textwidth]{images/chapter3/Synth Noise_reacreation.pdf}
+% \caption{a test subfigure}
+\end{subfigure}%
+}\\
+\caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The top spectrograms are originals. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum specrograms retain their original form better than synthetic noise.}
+\end{figure}
 
 
 \subsection{Mixed Ear Models}
-As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type.
+As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. 
 \section{Data And Project Replication}
 
 Our data sources are a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar}, ~\ref{db:sampleswap} and ~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
