@@ -170,7 +170,7 @@ As discussed previously in section \ref{bg:NN}, many variations and applications
 As automatic encoding of short audio appears possible, we designed a number of autoencoder networks for the purpose of extracting features from our dataset of drum samples. Our designed networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
 
 We kept our autoencoder designs relatively simple, all with approximately 150,000 parameters. Important to mention is that reported loss values of the model do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
-\begin{table}[h]
+\begin{table}[h!]
 \label{table:hyper_prams}
 \begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
 \hline
@@ -282,7 +282,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \end{figure}
 \begin{figure}[h!]
 \begin{center}
-    \textbf{ Parallel Coordinates of Hyper-Parameter Sets' Loss}
+    \textbf{ Parallel Coordinates of Hyper-Parameter Sets and Loss}
     \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter3/parallel_coord.pdf}}
       \caption{Not sure if worth keeping. Paths connect hyper-parameters in a set. Path's are colored based on loss value.}
        \label{fig:parallel_coord}
@@ -290,60 +290,19 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
    
 \end{figure}
 
-The slice and parallel coordinate graphs depicting the correlation of parameter values with trial results can be seen in figures~\ref{fig:slicegraph} and ~\ref{fig:parallel_coord}. A more concrete method of measuring this correlation is by fitting a fANOVA importance evaluator to our search results \cite{hutter2014efficient}. This evaluator is used to estimate the importance of each parameter based on the trial results. Only trials with 20 epochs are considered for this estimation. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. 
+We depict the correlation of parameter values with trial results in figures~\ref{fig:slicegraph} and~\ref{fig:parallel_coord}. We extract a more concrete measurement of hyper-parameter influence using Hutter et al.'s fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to "Model Type" and "Optimizer" parameters, despite a visible difference depicted in the slice-graph. This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the "averaging" of loss results regardless of variance: For example, the slice-graph depicts CNN models as having the best and worst results while FC models are reliably average; Making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
 
-\begin{figure}[h]
+\begin{figure}[t!]
 \centering
 \textbf{Estimated Parameter Importance}
 \includegraphics[width=14cm,height=7cm]{images/chapter3/ParameterImportances_final.pdf}
-\caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration.}
+\caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration. We attribute the contrast between the results here and those in figure~\ref{fig:slicegraph} and~\ref{fig:parallel_coord} to the irregular rate of sampling from the hyper-parameter space.}
 \label{chap3:param_importance}
 \end{figure}
 
-\subsubsection{Feature Extraction}
-\label{fig:embedding_FE}
-\begin{table}[htbp]
-\centering
-\begin{tabular}{|p{6cm}|p{6cm}|}
-\hline
-Hyper-Param. & Value  \\ \hline
-Model Type      &  CNN  \\ \hline
-Optimizer       & Adam  \\ \hline
-Hidden Layers   & -  \\\hline
-Learning Rate   &  0.001145\\ \hline
-Frequency Bins & 30 \\ \hline
-Time Steps & 20 \\ \hline
-Latent Size & 8 \\ \hline
-Regularization & 3.25^{-6}\\ \hline
-Dropout Rate & 0.5 \\ \hline
-\end{tabular}
-\caption{Top performing hyper-parameter set}
-\label{table:best_params}
-\end{table}
-To better understand the delineation potential of encoder features from the most successful networks, we trained a CNN network using \%50 of db1. The remaining \%50 as well as approximately 1000 randomly selected sounds from NoiseDB were encoded into 8 dimensions. These 8-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
-\begin{figure}[htbp!]
-\centering
-\textbf{2 Dimensional Projection of Latent Variables}\par\medskip
- \includegraphics[width=\linewidth]{images/chapter3/t-SNE_2d.pdf}
-\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples.}
-\label{fig:2d_tsne}
-\end{figure}
-
-
-\begin{figure}[htbp!]
-\centering
-\textbf{3D t-SNE Projection}\par\medskip
-\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam0.pdf}}}}
-
-\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam3.pdf}}}}
-
-\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam1.pdf}}}
-\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam2.pdf}}}}
-\caption{Our feature projections and interactive graphs can also be done in 3D}
-\label{fig:3d_tsne}
-\end{figure}
-To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembeling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
-\begin{figure}[b!]
+\subsubsection{Possible Explanation for Embedding Ear's Effectiveness}
+How well does our best autoencoder work? What happens if we create a feedback loop where a decoded spectrograms are fed through the network again? 
+\begin{figure}[h!]
 \centering
 \textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
 \makebox[\linewidth][c]{%
@@ -362,20 +321,76 @@ To test this, we implemented interactive graphs identical to those depicted in f
 \label{fig:recreations}
 \end{figure}
 
-\subsubsection{Possible Explanation for Embedding Ear's Effectiveness}
-We recursively run the autoencoder on new sounds and display the results in figures ~\ref{fig:recreations}. Spectrograms belonging to percussive groups retain their unique characteristics for a few time steps, while details in most synthetic noise spectrograms are quickly dissipated.  It is possible that this "confusion" by the encoder leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem. 
+We recursively run the autoencoder on new sounds and display the results in figure ~\ref{fig:recreations}. The results are displayed for 1, 2, 10 and 100 recursions. Spectrograms belonging to percussive groups retain their unique characteristics for a few time steps, while details in most synthetic noise spectrograms are quickly dissipated. A major point of concern here is that recursively recreated synthetic noise spectrograms tend to take on drum characteristics. This is possibly prompted by our encoder only having been exposed to drums sounds prior.  Yet it is possible that the "confusion" demonstrated by the encoder after the initial reconstruction leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem.  
 
 
+
+\subsubsection{Feature Extraction}
+\label{fig:embedding_FE}
+\begin{table}[htbp!]
+\centering
+\begin{tabular}{|p{6cm}|p{6cm}|}
+\hline
+Hyper-Param. & Value  \\ \hline
+Model Type      &  CNN  \\ \hline
+Optimizer       & Adam  \\ \hline
+Hidden Layers   & -  \\\hline
+Learning Rate   &  0.001145\\ \hline
+Frequency Bins & 30 \\ \hline
+Time Steps & 20 \\ \hline
+Latent Size & 64 \\ \hline
+Regularization & 3.25^{-6}\\ \hline
+Dropout Rate & 0.5 \\ \hline
+\end{tabular}
+\caption{Top performing hyper-parameter set}
+\label{table:best_params}
+\end{table}
+\begin{figure}[h!]
+\centering
+\textbf{2 Dimensional Projection of Latent Variables}\par\medskip
+ \includegraphics[width=0.90\linewidth]{images/chapter3/t-SNE_2d.pdf}
+\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples.}
+\label{fig:2d_tsne}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\textbf{3D t-SNE Projection}\par\medskip
+\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam0.pdf}}}}
+
+\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam3.pdf}}}}
+
+\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam1.pdf}}}
+\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam2.pdf}}}}
+\caption{Our feature projections and interactive graphs can also be done in 3D}
+\label{fig:3d_tsne}
+\end{figure}
+To better understand the delineation potential of the encoded features,  we trained an autoencoder with our top performing hyper-parameter set, shown in table ~\ref{table:best_params}. We used \%80 of MixedDB to train the model for 200 epochs. Using this model, we encoded the remaining \%20 and approximately 1000 randomly selected sounds from NoiseDB into 64 dimensions. These 64-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
+
+
+To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembeling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
+
+We see possible benefits in a mixture of envelope features with embedding features. In section~\ref{chap3:mixed_ear_models}, we analyze the potential gains in using both features for extraction of drum-like sounds from synthetic noise. 
 
 \subsection{Mixed Ear Models}
-As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. To address the problems mentioned in~\ref{fig:embedding_FE}, we include the envelope features along with the embeddings. 
+\label{chap3:mixed_ear_models}
+As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. To address the problems mentioned in~\ref{fig:embedding_FE}, we include the envelope features along with the embedding and measure the change in precision, recall and accuracy before and after the inclusion of envelope features.
+
+We reuse the model trained on \%80 of MixedDB as feature extractor. We use a combination of RadarDB and FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. Our final training database for mixed ear models is described in table~\ref{table:memDB}.
+
+
+
+
+
+
+
 
 
 \section{Data And Project Replication}
 
 Our data sources are a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar}, ~\ref{db:sampleswap} and ~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
 
-We prioritized making generalizable tools which can learn from and produce a variety of different sounds. We utilized these databases depending on the task at hand and the models being utilized. We also merged similar drum groups to simplify tasks. The "merge-able" groups are specified in table~\ref{db:merge-map}. Where relevant, we will specify which databases have been used and whether any merging of sound groups has taken place. 
+We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks. The "merge-able" groups are specified in table~\ref{db:merge-map}. Where relevant, we will specify which databases have been used and whether any merging or purging of sound groups has taken place. 
 
 % \begin{itemize}
 % \item The kick, snare and hat categories have the largest share at around 20\% each, while the shaker and rim (other) categories have the smallest at 5\% combined. Due to this we only focused on learning from kicks, snares, toms, claps and hats for Phase 1 of training (along with non-percussive groups of sound) ~\ref{sec:ear}.
@@ -416,7 +431,7 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
  DB Name & kick & snare & clap & hat & other \\\hline
  FreeDB & 533 & 372 & 230 & 105 & 281 \\ \hline
 \end{tabular}
-\caption{Database 3: Free sounds sourced from the "Sample Swap" project. Simplified for our purposes                                 The version available for download contains more sample groups.}
+\caption{Database 3: Free sounds sourced from the "Sample Swap" project. Simplified for our purposes. The version available for download contains more sample groups. The "other" category contains a variety of percussive sounds.}
 \label{db:sampleswap}
 \end{table}
 \begin{table}[h!]
@@ -439,9 +454,9 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
  Toms & toms and mid toms \\
  Snares & snares and high toms  \\
  Hats & high hats and low hats \\ 
- Other & rims,shakers and other percussive sounds with few representative samples \\ \hline
+ Other & rims, shakers and other percussive sounds with few representative samples \\ \hline
 \end{tabular}
-\caption{Databases may be simplified based on these mappings. }
+\caption{These mappings may be used to simplify databases. }
 \label{merge_map}
 \end{table}
 
