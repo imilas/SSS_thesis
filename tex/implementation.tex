@@ -376,12 +376,34 @@ We see possible benefits in a mixture of envelope features with embedding featur
 \label{chap3:mixed_ear_models}
 As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. To address the problems mentioned in~\ref{fig:embedding_FE}, we include the envelope features along with the embedding and measure the change in precision, recall and accuracy before and after the inclusion of envelope features.
 
-We reuse the model trained on  MixedDB as our embedding feature extractor. We use a combination of RadarDB and FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. We also exclude samples longer than 1 second, to exclude potentially mislabeled data. Our final training database for mixed ear models is described in table~\ref{db:memDB}.
+We reuse the model trained on  MixedDB as our embedding feature extractor. We use a combination of RadarDB, FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. We also exclude samples longer than 1 second, to exclude potentially mislabeled data. Our final training database for mixed ear models is described in table~\ref{db:memDB}.
 
 \subsubsection{Model Selection}
-Using our encoding and envelope features to represent audio, five classification algorithms were trained for the task of categorizing the five different sound groups.
-The specifications of these algorithms are described in table~\ref{table:mem_model_selection}. The models were trained using 5-fold cross validation and 80/20 train-to-test ratio. ~\ref{fig:mem_model_selection}. 
+Using our encoding and envelope features to represent audio, five classification models were trained for the task of categorizing the five different sound groups. For both hyper-parameter optimization, the models were trained using 5-fold cross validation and 80/20 train-to-test ratio, with the average F-Score being used as the performance measurement. For inter-model comparisons, the procedure is the same except 10-fold cross validation is used. Our models were derived from scikit-learn's implementations of these classifiers~\cite{pedregosa2011scikit}. Before inter-model comparisons, we conducted a grid-search for each model on at least one of its possibly decisive hyper-parameters. The classifiers and other notable specifications are presented in table~\ref{table:mem_model_selection}. We introduced class weights where possible to mitigate the effects of an imbalanced dataset~\cite{provost2000machine,chawla2004special}. When used, class weights are calculated as the ratio of the number of samples in each class to the number of total samples. 
 
+\begin{table}[t]
+\centering \hspace*{-0.8cm}
+\begin{threeparttable}
+\begin{tabular}[width=0.95\paperwidth]{|l|l|l|}
+\hline
+Model name & Tuned Parameters\tnote{\dag}  & Used Weights? \tnote{\ddag} \\\hline
+ Support Vector Classifier (SVC) &  Gamma:0.001, C:100, kernel:rbf & Yes\\
+ LinearSVC & C:10 & Yes\\
+ K Nearest Neighbours & Num. Neighbours:30 &  No \\
+ RandomForestClassifier & Num Estimators:500 - & Yes \\
+ Extra Trees Classifier & Num Estimators:1100 & Yes\\
+ \hline
+\end{tabular}
+
+\caption{Models implemented for comparison using envelope and embedded features. }
+\begin{tablenotes}
+\item[\dag] Tuned parameters values are based on grid-searching for best f-score. Parameters not mentioned have neither been tuned nor changed from scikit-learn's default values (as of version 0.23)
+\item[\ddag] Class weights are used unless not applicable to classifier.
+\end{tablenotes}
+
+\label{table:mem_model_selection}
+\end{threeparttable}
+\end{table}
 
 \subsubsection{Addition of Envelope Features to Embedding}
 
@@ -389,20 +411,16 @@ The specifications of these algorithms are described in table~\ref{table:mem_mod
 
 \subsubsection{}
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
  DB Name & kick & snare & clap & hat & Synthetic Noise\\\hline
  MixedEarDB & 1334 & 1035 & 401 & 1275 & 1000 \\ \hline
 \end{tabular}
-\caption{Database 3: A database put together by combination of radarDB, FreeDB and NoiseDB}
+\caption{MixedEarDB: A database put together by combination of radarDB, FreeDB and NoiseDB}
 \label{db:memDB}
 \end{table}
-
-
-
-
 
 
 
