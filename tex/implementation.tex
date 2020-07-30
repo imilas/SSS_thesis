@@ -317,7 +317,7 @@ How well does our best autoencoder work? What happens if we create a feedback lo
 % \caption{a test subfigure}
 \end{subfigure}%
 }\\
-\caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The top spectrograms are originals. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum specrograms retain their original form better than synthetic noise.}
+\caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The first row depicts the unaltered spectrograms. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum spectrograms retain their original form better than synthetic noise.}
 \label{fig:recreations}
 \end{figure}
 
@@ -376,9 +376,29 @@ We see possible benefits in a mixture of envelope features with embedding featur
 \label{chap3:mixed_ear_models}
 As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each drum sound to predict its type. To address the problems mentioned in~\ref{fig:embedding_FE}, we include the envelope features along with the embedding and measure the change in precision, recall and accuracy before and after the inclusion of envelope features.
 
-We reuse the model trained on \%80 of MixedDB as feature extractor. We use a combination of RadarDB and FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. Our final training database for mixed ear models is described in table~\ref{table:memDB}.
+We reuse the model trained on  MixedDB as our embedding feature extractor. We use a combination of RadarDB and FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. We also exclude samples longer than 1 second, to exclude potentially mislabeled data. Our final training database for mixed ear models is described in table~\ref{db:memDB}.
+
+\subsubsection{Model Selection}
+Using our encoding and envelope features to represent audio, five classification algorithms were trained for the task of categorizing the five different sound groups.
+The specifications of these algorithms are described in table~\ref{table:mem_model_selection}. The models were trained using 5-fold cross validation and 80/20 train-to-test ratio. ~\ref{fig:mem_model_selection}. 
 
 
+\subsubsection{Addition of Envelope Features to Embedding}
+
+
+
+\subsubsection{}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+ DB Name & kick & snare & clap & hat & Synthetic Noise\\\hline
+ MixedEarDB & 1334 & 1035 & 401 & 1275 & 1000 \\ \hline
+\end{tabular}
+\caption{Database 3: A database put together by combination of radarDB, FreeDB and NoiseDB}
+\label{db:memDB}
+\end{table}
 
 
 
@@ -388,7 +408,7 @@ We reuse the model trained on \%80 of MixedDB as feature extractor. We use a com
 
 \section{Data And Project Replication}
 
-Our data sources are a large set of drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar}, ~\ref{db:sampleswap} and ~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
+Our data sources are a large set of 2 second or shorter drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as musicradar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar}, ~\ref{db:sampleswap} and ~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. Further information about downloading our dataset can be found on the project's github page. 
 
 We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks. The "merge-able" groups are specified in table~\ref{db:merge-map}. Where relevant, we will specify which databases have been used and whether any merging or purging of sound groups has taken place. 
 
@@ -434,6 +454,8 @@ RadarDB & 1054 & 842   & 353 & 349 &  353 & 1561& 131 & 121 \\ \hline
 \caption{Database 3: Free sounds sourced from the "Sample Swap" project. Simplified for our purposes. The version available for download contains more sample groups. The "other" category contains a variety of percussive sounds.}
 \label{db:sampleswap}
 \end{table}
+
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{|l|lll|}
