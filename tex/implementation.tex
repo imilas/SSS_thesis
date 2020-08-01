@@ -373,7 +373,7 @@ We see possible benefits in a mixture of envelope features with embedding featur
 
 \subsection{Mixed Ear Models}
 \label{chap3:mixed_ear_models}
-As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each sound group to predict its type. This differs from two-phased ears as we are simultaneously categorizing a new sound's drum type or putting it in the "synthetic noise" category. We also tackle the Drum vs Not-Drum problem using our embedding features.
+As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each sound group to predict its type. This differs from two-phased ears as we are simultaneously categorizing a new sound's drum type or putting it in the "synthetic noise" category. We call this task drum vs drum vs not-drum, or "DvDvN". We also tackle the Drum vs Not-Drum problem using our embedding features.
 
 As discussed in Section \label{fig:embedding_FE}, manual t-SNE inspections highlighted the disregard for envelope shapes as a major source of failure. We compare the performance of our models before and after the addition of envelope features (a vector of size 10) to the feature space. 
 
@@ -425,26 +425,55 @@ Using our encoding and envelope features to represent audio, five classification
     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter3/mme_comparisons_mme.pdf}}
     \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the \%88-92 range. Envelope features improve classification accuracy for all models. }
+    \label{fig:f1_allg_box}
     \end{center}
-\label{fig:f1_allg_box}
+
 \end{figure}
 
 
 We're also interested in how these models perform on the binary drum vs not drum task.
-After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As showin in figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvd_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in figures~\ref{fig:conf_f1}.
+After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in figures~\ref{fig:conf_f1}.
 
 
 \begin{figure}[h!]   
+
     \begin{center}
         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter3/mme_comparisons_dvn.pdf}}
     \caption{F-Score results for each cross-validation. Models perform better as there are less categorization groups. Envelope features increase accuracy for all models. Random Forest and Extra Trees remain the top two models. }
+    \label{fig:f1_dvn_box}
     \end{center}
-\label{fig:f1_dvd_box}
+
 \end{figure}
 
 
+\begin{figure}[htbp!]
+\begin{center}
+    \textbf{Classification Report of Best Performing Model}\par\medskip
+    \makebox[\textwidth]{
+    \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=9cm,height=9cm]{images/chapter3/f1_mme.pdf}
+    \includegraphics[width=9cm,height=9cm]{images/chapter3/f1_dvn.pdf}
+    }
+    
+    }
+    
+\end{center}
 
+\begin{center}
+    \makebox[\textwidth]{
+    \subfloat[Confusion matrices for both tasks]{ \includegraphics[width=9cm,height=9cm]{images/chapter3/conf_mme.pdf}
+    \includegraphics[width=9cm,height=9cm]{images/chapter3/conf_dvn.pdf}
+    }}
+\end{center}
+
+
+\caption{F-Scores and confusion matrix of ExtraTrees model for both DvDvN and drum vs not-drum categorization.}
+\label{fig:conf_f1}
+\end{figure}
+
+Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual insepction, we cannot confirm the extend of this model's usefulness. 
+
+We create the mixed ear model by combining our encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming novel generations section, we will present the results of a two person survey where the accuracy of the two-ear model is analyzed given 500 synthetic noise sounds categorized as drums. 
 
 
 
