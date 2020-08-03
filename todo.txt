@@ -8,11 +8,11 @@
     - Can you cluster the results so we can get a soundfont of an instrument?
 * To learn:
     - look up physical synthesis
-* Genetic search on envelope only, then graph onto interactive plot
+
 
 * Add prior work:
     - [x] Gather prior work
-    - [ ] Write more  about prior work
+    - [x] Write more  about prior work
 
 * Write results of genetic search
     -[x] Change synth params
@@ -22,18 +22,4 @@
     -[ ] write results in paper
 
 * Do bandit search
-    -[x] Do week 1 of RL course
-    -[ ] figure out what's next
 
-* Test variation of models' score 
-    -[x] Gather data
-    -[ ] Find method of test
-    -[ ] Write results
-
-* Shrink data base? How many drums groups to use?
-
-* Fix the latex warnings
-
-* Make free drum database
-    -[x] Make it
-    -[ ] Host it

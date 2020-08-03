@@ -257,7 +257,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \begin{figure}[htbp]
 \centering
 \textbf{Tracing the Best Loss Values}
-\includegraphics[width=12cm,height=7cm]{images/chapter3/Optimization_History.pdf}
+\includegraphics[width=12cm,height=7cm]{images/chapter_3/Optimization_History.pdf}
 \caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
 \label{chap3:bestvalues}
 \end{figure}
@@ -265,7 +265,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \begin{figure}[htbp]
 \centering
 \textbf{Loss Value per Epoch for Top 10 Trials}
-\includegraphics[width=12cm,height=6.5cm]{images/chapter3/loss_per_training.pdf}
+\includegraphics[width=12cm,height=6.5cm]{images/chapter_3/loss_per_training.pdf}
 \caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. The learning curves tend to flatten quickly. Therefore, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. }
 \label{chap3:top10}
 \end{figure}
@@ -274,7 +274,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \begin{figure}[t]
 \begin{center}
     \textbf{Hyper-Parameters' Loss Correlation}
-    \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter3/slice_plot.pdf}}
+    \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter_3/slice_plot.pdf}}
       \caption{Sliced plot depicting the correlation between hyper-parameters and loss values. The color-scale shows the number of times each parameters has been used in a trial. Our sampling algorithm aims to utilize spaces with higher potential more often. }
     \label{fig:slicegraph}
     \end{center}
@@ -283,7 +283,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \begin{figure}[h!]
 \begin{center}
     \textbf{ Parallel Coordinates of Hyper-Parameter Sets and Loss}
-    \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter3/parallel_coord.pdf}}
+    \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter_3/parallel_coord.pdf}}
       \caption{Not sure if worth keeping. Paths connect hyper-parameters in a set. Path's are colored based on loss value.}
        \label{fig:parallel_coord}
     \end{center}
@@ -295,7 +295,7 @@ We depict the correlation of parameter values with trial results in figures~\ref
 \begin{figure}[t!]
 \centering
 \textbf{Estimated Parameter Importance}
-\includegraphics[width=14cm,height=7cm]{images/chapter3/ParameterImportances_final.pdf}
+\includegraphics[width=14cm,height=7cm]{images/chapter_3/ParameterImportances_final.pdf}
 \caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration. We attribute the contrast between the results here and those in figure~\ref{fig:slicegraph} and~\ref{fig:parallel_coord} to the irregular rate of sampling from the hyper-parameter space.}
 \label{chap3:param_importance}
 \end{figure}
@@ -308,12 +308,12 @@ How well does our best autoencoder work? What happens if we create a feedback lo
 \makebox[\linewidth][c]{%
 \begin{subfigure}[b]{.6\textwidth}
 \centering
-\includegraphics[width=.95\textwidth]{images/chapter3/Drums_reacreation.pdf}
+\includegraphics[width=.95\textwidth]{images/chapter_3/Drums_reacreation.pdf}
 % \caption{a test subfigure}
 \end{subfigure}%
 \begin{subfigure}[b]{.6\textwidth}
 \centering
-\includegraphics[width=.95\textwidth]{images/chapter3/Synth Noise_reacreation.pdf}
+\includegraphics[width=.95\textwidth]{images/chapter_3/Synth Noise_reacreation.pdf}
 % \caption{a test subfigure}
 \end{subfigure}%
 }\\
@@ -347,7 +347,7 @@ Dropout Rate & 0.5 \\ \hline
 \begin{figure}[h!]
 \centering
 \textbf{2 Dimensional Projection of Latent Variables}\par\medskip
- \includegraphics[width=0.90\linewidth]{images/chapter3/t-SNE_2d.pdf}
+ \includegraphics[width=0.90\linewidth]{images/chapter_3/t-SNE_2d.pdf}
 \caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples.}
 \label{fig:2d_tsne}
 \end{figure}
@@ -355,12 +355,12 @@ Dropout Rate & 0.5 \\ \hline
 \begin{figure}[htbp!]
 \centering
 \textbf{3D t-SNE Projection}\par\medskip
-\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam0.pdf}}}}
+\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam0.pdf}}}}
 
-\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter3/3d_t-SNE_symdrum_type_cam3.pdf}}}}
+\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam3.pdf}}}}
 
-\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam1.pdf}}}
-\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter3/3d_t-SNE_symdrum_type_cam2.pdf}}}}
+\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam1.pdf}}}
+\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam2.pdf}}}}
 \caption{Our feature projections and interactive graphs can also be done in 3D}
 \label{fig:3d_tsne}
 \end{figure}
@@ -423,7 +423,7 @@ Using our encoding and envelope features to represent audio, five classification
 \begin{figure}[htbp!]
     \begin{center}
     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
-    \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter3/mme_comparisons_mme.pdf}}
+    \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_mme.pdf}}
     \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the \%88-92 range. Envelope features improve classification accuracy for all models. }
     \label{fig:f1_allg_box}
     \end{center}
@@ -439,7 +439,7 @@ After grouping all drums together, we repeat the model selection process above. 
 
     \begin{center}
         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
-    \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter3/mme_comparisons_dvn.pdf}}
+    \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_dvn.pdf}}
     \caption{F-Score results for each cross-validation. Models perform better as there are less categorization groups. Envelope features increase accuracy for all models. Random Forest and Extra Trees remain the top two models. }
     \label{fig:f1_dvn_box}
     \end{center}
@@ -451,8 +451,8 @@ After grouping all drums together, we repeat the model selection process above. 
 \begin{center}
     \textbf{Classification Report of Best Performing Model}\par\medskip
     \makebox[\textwidth]{
-    \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=9cm,height=9cm]{images/chapter3/f1_mme.pdf}
-    \includegraphics[width=9cm,height=9cm]{images/chapter3/f1_dvn.pdf}
+    \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_mme.pdf}
+    \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_dvn.pdf}
     }
     
     }
@@ -461,8 +461,8 @@ After grouping all drums together, we repeat the model selection process above. 
 
 \begin{center}
     \makebox[\textwidth]{
-    \subfloat[Confusion matrices for both tasks]{ \includegraphics[width=9cm,height=9cm]{images/chapter3/conf_mme.pdf}
-    \includegraphics[width=9cm,height=9cm]{images/chapter3/conf_dvn.pdf}
+    \subfloat[Confusion matrices for both tasks]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/conf_mme.pdf}
+    \includegraphics[width=9cm,height=9cm]{images/chapter_3/conf_dvn.pdf}
     }}
 \end{center}
 
