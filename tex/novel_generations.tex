@@ -16,18 +16,17 @@
  With our current model, a single iteration of this pipeline will take approximately 50 milliseconds for Synthesizers with stack sizes of 8 or less. This means around 20 iterations can be done per second using a single process. This pipeline scales up efficiently with multiprocessing. We have not measured the iteration latency for this pipeline when a GPU is leveraged. For reference, our CPU measurements are collected on a 2012 Macbook Air running Ubuntu 18.04.
  In future work we will attempt guided generation via genetic and other heuristic search methods. Here we attempt a deep analysis of the randomly generated samples and the corresponding scores given by the ear. This analysis can expose weaknesses in our methodology which can be improved for future works where various search methods will be evaluated.
   
-  \section{Genetic Search}
-%  introduce genetic search and how it works for our project
-% 3 graphs for 3 stack sizes trying to find a certain type of drum
 
 
- \section{Survey of Randomly Generated Drums}
-\label{survey}
+ \section{Survey of Two-Phased Ear Performance}
+\label{survey:2p}
 \begin{figure}[H]
-\centering
-\includegraphics[width=1.1\linewidth]{images/cat.pdf}
-\caption{Frequency of assigned labels for the human categorizers and the average categorizer}
-\label{fig:freq-survey}
+    \begin{center}
+    \makebox[\textwidth]{
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_2p.pdf}}
+    \end{center}
+    \caption{Frequency of assigned labels for the categorizations by persons and the average categorizer}
+\label{fig:freq-survey-2p}
 \end{figure}
 To measure the quality of the samples produced by our pipeline and the power of our models, we randomly generated around 50-60 samples in the following categories: "snare", "kick", "hat", "clap" and "other" (combination of rims, 
 shakers and unusual percussive sounds"). These samples were determined to be percussive and then categorized by 4 different models (FC, CNNLSTM, E+F and AVG). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category). Both reviewers then categorized these samples without knowledge of other categorizations (human or computation models). It's important to note:
@@ -62,5 +61,19 @@ Possible takeaways from this survey:
 \caption{\label{kappa_table}Table of Fleiss' kappa coefficient to measure the degree of agreement between humans (HvH), humans with FC model (H+FC), humans with CNNLSTM model, humans with all models (H+ALL), and the 3 models }
 \end{table}
 \end{center}
+
+ \section{Survey of Two-Phased Ear Performance}
+\label{survey:2p}
+\begin{figure}[H]
+    \begin{center}
+    \makebox[\textwidth]{
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_mme.pdf}}
+    \end{center}
+    \caption{Frequency of assigned labels for the categorizations by persons and the Mixed Ear Model}
+\label{fig:freq-survey-2p}
+\end{figure}
+\section{Genetic Search}
+%  introduce genetic search and how it works for our project
+% 3 graphs for 3 stack sizes trying to find a certain type of drum
 
 \end{document}

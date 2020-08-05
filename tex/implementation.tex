@@ -449,7 +449,7 @@ After grouping all drums together, we repeat the model selection process above. 
 
 \begin{figure}[htbp!]
 \begin{center}
-    \textbf{Classification Report of Best Performing Model}\par\medskip
+    \textbf{ Classification Report for DvDvN and DvN  }\par\medskip
     \makebox[\textwidth]{
     \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_mme.pdf}
     \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_dvn.pdf}
@@ -461,7 +461,7 @@ After grouping all drums together, we repeat the model selection process above. 
 
 \begin{center}
     \makebox[\textwidth]{
-    \subfloat[Confusion matrices for both tasks]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/conf_mme.pdf}
+    \subfloat[Confusion matrices]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/conf_mme.pdf}
     \includegraphics[width=9cm,height=9cm]{images/chapter_3/conf_dvn.pdf}
     }}
 \end{center}
@@ -471,7 +471,7 @@ After grouping all drums together, we repeat the model selection process above. 
 \label{fig:conf_f1}
 \end{figure}
 
-Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual insepction, we cannot confirm the extend of this model's usefulness. 
+Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual inspection, we cannot confirm the extent of this model's usefulness. 
 
 We create the mixed ear model by combining our encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming novel generations section, we will present the results of a two person survey where the accuracy of the two-ear model is analyzed given 500 synthetic noise sounds categorized as drums. 
 
