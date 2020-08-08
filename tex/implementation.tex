@@ -24,6 +24,21 @@
 \section{Our Goal}
 Our goal is to create a system for the generation of novel drum sounds. In this chapter, we will discuss the two main components of our system: The \textit{virtual synthesizer} and the \textit{virtual ear}. A quick outline of our generative pipeline is this: Random programs will be sent to the virtual synthesizer, modifying its parameters. As the virtual synthesizer creates sounds based on these programs, the virtual ear will listen to the sounds and determine if they should be categorized as drums. If so, which category of drum do they belong to. 
 
+
+ \begin{figure}[h!]
+    \begin{center}
+    \textbf{Pipeline Design}
+    \makebox[\textwidth]{
+    \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_4/pipeline.pdf}}}
+    \end{center}
+    \caption{ 
+
+    
+    }
+\label{fig:ven_data}
+\end{figure}
+
+
 Here we discuss in more detail the implementations and interactions of these two components. Later on in the chapter, we will discuss our dataset and code which can be used for replication of our project. 
 \section{Virtual Synthesizer}
 \label{vs}
@@ -74,7 +89,8 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \label{table:submodule_params}
 \end{table}
 
-
+\subsubsection{Is the Virtual Synthesizer Deterministic?}
+\label{chap3:synth_deterministic}
 \section{The Ear}
 
 What we refer to as an "ear" is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}; The ideal ear for our task will be capable of "listening" to a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on percussive generation, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.

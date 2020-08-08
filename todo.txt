@@ -22,4 +22,5 @@
     -[ ] write results in paper
 
 * Do bandit search
+* MSE is probably a bad loss functions, but what's the alternative?
 
