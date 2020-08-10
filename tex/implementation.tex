@@ -41,7 +41,7 @@ Here we discuss in more detail the implementations and interactions of these two
 
 \section{Virtual Synthesizer}
 \label{vs}
-We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm.  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
+We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm.  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in Section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
 
 
 % AH-are they only sequentially composed?
@@ -49,21 +49,9 @@ Our virtual synthesizer contains a set of one or more submodules. Each submodule
 
 As we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample within our database. Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time (but the entire sound must fit within the second, that is, a 0.5 second sound cannot begin playing after 0.5 seconds within rendering time frame). If the synthesizer has a stack size of more than 1 the audio signals from each submodule are overlapped and the total amplitude is normalized.
 
-The ADSR parameters shape the entire amplitude of the signal. Each submodule creates its signal at full amplitude then shapes it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
-Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ set is normalized such that:
-\begin{align*}
-\text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
-v_{norm} = \dfrac{v}{A + D + S + R}
-\end{align*}
- The OSC type will determine the wave-shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wavetable transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
-
-Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound. Our more successful attempts at creation of synthetic kick or bass drums are often characterized by quick, exponential decrease of a sine-wave's pitch from medium to low audible frequencies. To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
-
-% Considering this setup, we predict that in order to generate kick drums using these parameters, the list of notes must vary from high frequencies to low; While other drum types such as hats or shakers require all pitch values to remain static, such that pitch bending does not occur. 
 
 
-
-\begin{table}[h!]
+\begin{table}[ht!]
 \centering
 \resizebox{\columnwidth}{!}{\begin{tabular}{ |c|c|c| } 
 \hline
@@ -87,16 +75,42 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \caption{Synthesizer submodule Parameters. Despite the simplicity of the parameters and our efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
 \label{table:submodule_params}
 \end{table}
+The ADSR parameters shape the entire amplitude of the signal. Each submodule creates its signal at full amplitude then shapes it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
+Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ set is normalized such that:
+\begin{align*}
+\text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
+v_{norm} = \dfrac{v}{A + D + S + R}
+\end{align*}
+ The OSC type will determine the wave-shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wavetable transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
+
+Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound. Our more successful attempts at creation of synthetic kick or bass drums are often characterized by quick, exponential decrease of a sine-wave's pitch from medium to low audible frequencies. To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
+
+% Considering this setup, we predict that in order to generate kick drums using these parameters, the list of notes must vary from high frequencies to low; While other drum types such as hats or shakers require all pitch values to remain static, such that pitch bending does not occur. 
+
 
 \subsubsection{Is the Virtual Synthesizer Deterministic?}
 \label{chap3:synth_deterministic}
 \section{The Ear}
 
-What we refer to as an "ear" is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}; The ideal ear for our task will be capable of "listening" to a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on percussive generation, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
+What we refer to as an "ear" is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}; The ideal ear for our task will be capable of "listening" to a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on percussive generation, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In Section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
 
 We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rejection of "noise" from the virtual synthesizer and the rare acceptance of drum-like sounds. By definition, we cannot anticipate what these novel drums will sound like. Considering the limitations of learning by example, and since raw data can clearly separate organic drums from virtual synthetic noise, we believe that transformation and filtering of raw sound data is a critical step of the listening process; A step that will assist with the extraction of the fundamental characteristics that we are seeking and prevent the rejection of novel sounds.
 
- With our dataset of labeled drum sounds, discussed in~\ref{data}, we can confidently categorize unlabeled drum sounds given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum \textquotedblright recognizing ear is that the set of sounds that are not percussive is infinite. 
+ With our dataset of labeled drum sounds, discussed in Section ~\ref{data}, we can confidently categorize unlabeled drum sounds given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum \textquotedblright recognizing ear is that the set of sounds that are not percussive is infinite. 
+
+ 
+ \begin{figure}[h!]
+    \begin{center}
+    \textbf{Data Overview}
+    \makebox[\textwidth]{
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/venn_data.pdf}}
+    \end{center}
+    \caption{ 
+    Scales are symbolic (true scales are unknowable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number, but we prefer to keep no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
+    
+    }
+\label{fig:ven_data}
+\end{figure}
 
 In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that the implementation of our virtual ear falls outside the traditional categorization problem and within the "Open Set Recognition" (OSR) domain~\cite{geng2020recent,mundt2019open}. 
 
@@ -166,7 +180,7 @@ Using the described features, we trained several neural network models for Phase
 \item CNN-DVD: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. A combination of a CNN model with output channel size of 4, kernel of size of 5, another CNN model with output channel size of 8 and kernel of size 3. Followed by a fully connected network of shape 100x20x6.
 \item FC-DVD: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Size of 400x200x50.
 \end{enumerate}
-The parameters are hand-picked and un-tuned. As discussed in section ~\ref{survey}, higher accuracy rates in these models do not translate to higher agreeableness with humans. leading us to believe that model accuracy on test data alone cannot be relied upon when the domain of sounds 
+The parameters are hand-picked and un-tuned. As discussed in Section ~\ref{survey}, higher accuracy rates in these models do not translate to higher agreeableness with humans. leading us to believe that model accuracy on test data alone cannot be relied upon when the domain of sounds 
 being categorized is switched from original percussion samples to virtual synth sounds.
 
 With our models showing high accuracy on testing data, we combine models in order to increase the efficacy of each phase and address the "open set problem" for our task. For Phase 1 we only determine sounds as percussive if both FC-DVN and CNN-LSTM have determined it as such with over 90\% confidence. For the majority of our random generations that is not the case, but if a randomly generated sound has passed this phase, our three categorizers assign their categorizations to this sound. These categorizers have a moderate degree of agree-ability as seen in ~\ref{survey}, but often the decision is not unanimous. The fourth method of categorization, "averaged-cat", is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category. 
@@ -180,7 +194,7 @@ These models can be combined and weighted in various ways and the confidence thr
 % 
 Like many other categorization tasks, we seek features that capture critical information about our data in the most compact format possible. In essence, feature extraction is often form of dimensionality reduction. While manual definition of the desired features can yield results, we also trained various autoencoder networks to encode our spectral features within small vectors. 
 
-As discussed previously in section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020neural}. 
+As discussed previously in Section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020neural}. 
 
 As automatic encoding of short audio appears possible, we designed a number of autoencoder networks for the purpose of extracting features from our dataset of drum samples. Our designed networks are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
 
@@ -384,7 +398,7 @@ To better understand the delineation potential of the encoded features,  we trai
 
 To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembeling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
 
-We see possible benefits in a mixture of envelope features with embedding features. In section~\ref{chap3:mixed_ear_models}, we analyze the potential gains in using both features for extraction of drum-like sounds from synthetic noise. 
+We see possible benefits in a mixture of envelope features with embedding features. In Section~\ref{chap3:mixed_ear_models}, we analyze the potential gains in using both features for extraction of drum-like sounds from synthetic noise. 
 
 \subsection{Mixed Ear Models}
 \label{chap3:mixed_ear_models}
@@ -488,7 +502,7 @@ After grouping all drums together, we repeat the model selection process above. 
 
 Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual inspection, we cannot confirm the extent of this model's usefulness. 
 
-We create the mixed ear model by combining our encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming novel generations section, we will present the results of a two person survey where the accuracy of the two-ear model is analyzed given 500 synthetic noise sounds categorized as drums. 
+We create the mixed ear model by combining our encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming novel generations Section, we will present the results of a two person survey where the accuracy of the two-ear model is analyzed given 500 synthetic noise sounds categorized as drums. 
 
 
 
