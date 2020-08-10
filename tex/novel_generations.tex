@@ -30,6 +30,8 @@ To assess the performance of each pipeline, we randomly create drum programs and
  \hline
  if either& 180 & 0.47 & 0.50 & 0.48 & 0.48 &  0.34 \\
  \hline
+ bad or other & 180 & 0.47 & 0.50 & 0.48 & 0.48 &  0.34 \\
+ \hline
 \end{tabular}}
 \caption{\label{kappa_table}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+ALL), and the 3 models }
 \end{table}
@@ -39,7 +41,7 @@ shakers and unusual percussive sounds"). This gave us a total of 257 samples. Th
     \item Each responder had an additional category of "bad" for samples that they deemed not percussive. The "bad" category indicates that the sample should have been skipped in Phase 1. 
     \item With 6 categorization groups, responders had the same categorization in 47\% of cases.
     \item The agreement between the responders and AVG was 44\% and 47\%.
-    \item Of 257 samples responders agreed with FC, CNNLSTM, AVG and E+F respectively in 78, 76, 76 and 46 of cases.
+    \item Of 257 samples, the responders agreed with FC, CNNLSTM, AVG and E+F respectively in 78, 76, 76 and 46 of cases.
 \end{itemize}
 
 \begin{figure}[h!]
@@ -51,7 +53,7 @@ shakers and unusual percussive sounds"). This gave us a total of 257 samples. Th
     \caption{Frequency of assigned labels by persons vs the true number of labels}
 \label{fig:freq-survey-2p}
 \end{figure}
-We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements shocased in \ref{kappa_table} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as "bad" by the authors, as samples that persons deem to be "bad" indicate a failure in Phase 1 and arguably should not have been categorized by the models at all. Dropping of samples that both authors deemed "bad" causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed bad by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
+We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements shocased in \ref{kappa_table} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as "bad" by the authors, as samples that persons deem to be "bad" indicate a failure in Phase 1 and should not have been categorized by the models at all. Dropping of samples that both authors deemed "bad" causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed bad by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
 
 \subsection{Takeaways Of The Two Phased Pipeline Survey}
 \label{survey1_takeaway}
@@ -64,7 +66,23 @@ We assess the reliability of agreement between persons and categorization models
  \section{Survey of Mixed-Models Ear Performance}
  Keeping the other components of the pipeline the same, we replace the two-phased ear in the previous pipeline with the MME. Our survey differs from the previous survey in that the pipeline only creates the four drum categories. The "other" category is only assigned by survey responders. This means that two out of six possible categories are only available to responders, therefore there is an inherent bias towards worse agreeably scores compared to last survey. Our main concern here is changes in the amount of "bad" samples. 
  
- 
+The results from the two surveys are not easily comparable. However, no improvements in agree-ability or a decrease in the number of bad samples can be seen, infact the opposite is more likely to be true. However, we are yielding comparable results to the TPE pipeline despite having a fraction of the features to learn from. This shows that latent layers of an autoencoder network can be used as a low-dimensional proxy for representation of more complex inputs. 
+ \begin{table}[t]
+ \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
+ \hline
+ Drop Rule & Size & HvH & H+MME \\
+ \hline
+ No Drop & 300 & 0.336 & 0.250\\ 
+ \hline
+ Assigned Bad By Both & 249 & 0.260 & 0.270 \\
+ \hline
+ Assigned Bad By Either & 151 & 0.460 &  0.473 \\
+ \hline
+ No Bad Or Others & 120 & 0.620   &  0.560 \\
+ \hline
+\end{tabular}}
+\caption{\label{kappa_table}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH) and persons and MME. We also measure the agreeability scores after dropping bad samples if both or either persons assigned the sample as such. }
+\end{table}
 \label{survey:2p}
 \begin{figure}[htpb]
     \begin{center}
@@ -75,20 +93,7 @@ We assess the reliability of agreement between persons and categorization models
     \caption{Frequency of assigned labels by persons vs the true number of labels}
 \label{fig:freq-survey-2p}
 \end{figure}
-\begin{table}[htbp]
- \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
- \hline
- Drop Bad? & Size & HvH & H+MME \\
- \hline
- No & 300 & 0.336 & -  \\ 
- \hline
- if both & - & - & - \\
- \hline
- if either& 151 & - &  0.473 \\
- \hline
-\end{tabular}}
-\caption{\label{kappa_table}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+ALL), and the 3 models }
-\end{table}
+
 % \section{Genetic Search}
 % %  introduce genetic search and how it works for our project
 % % 3 graphs for 3 stack sizes trying to find a certain type of drum
