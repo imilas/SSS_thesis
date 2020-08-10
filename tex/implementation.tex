@@ -22,26 +22,44 @@
 % Automatic programming of virtual synthesizers has also been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines \cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al. \cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent, impressive work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio \cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
 \label{impl}
 \section{Our Goal}
-Our goal is to create a system for the generation of novel drum sounds. In this chapter, we will discuss the two main components of our system: The \textit{virtual synthesizer} and the \textit{virtual ear}. A quick outline of our generative pipeline is this: The virtual synthesizer will rapidly generate random programs and the corresponding sounds.. As the virtual synthesizer creates sounds based on these programs, the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. In case of search, other algorithms can create programs for the synthesizer and receive the rating/categorization assigned by the virtual ear. This outline is illestrated in figure~\ref{fig:pipeline_outline}.
+Our goal is to create a system for the generation of novel drum sounds. In this chapter, we will discuss the two main components of our system: The \textit{virtual synthesizer} and the \textit{virtual ear}. A quick outline of our generative pipeline is this: The virtual synthesizer will rapidly generate random programs and the corresponding sounds. As the virtual synthesizer creates sounds based on these programs, the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. In case of search, other algorithms can create programs for the synthesizer and receive the rating/categorization assigned by the virtual ear. A visual representation of our pipeline is illustrated in  figure~\ref{fig:pipeline_outline}.
 
-Here we discuss in more detail the implementations and interactions of these two components. Later on in the chapter, we will discuss our dataset and code which can be used for replication of each part of the project. 
+In Section~\ref{vs} we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. We believe that a number of these noise samples can be substituted for drums of various categories. We refer to the set of synthetic noise samples which can be considered novel drums as $\mathcal{N}$. The task of the virtual ear is to listen to the outputs of the virtual synthesizer and extract the samples belonging to $\mathcal{N}$ with the highest possible precision and recall. When our pipeline is constructed, we expose the ear to a number of synthetic noises and observe the extracted sounds. We call this procedure a hearing test, and the set of sounds recieved by the ear $\mathcal{H}$. 
 
- \begin{figure}[h!]
+To train an effective synthetic ear, there are a variety of sound groups which need to be accounted for. For examples, a common feature shared in percussive sounds is the quick \emph{attack} (rise in volume) at the onset of impact followed by an instant, continuous \emph{decay} (drop in volume) until silence is reached~\cite{barry2005drum}. For a virtual ear to learn these and other common features, we require a set of examples for what drums do and do not sound like. The synthetic ear needs to separate drum sounds from "not-drum" sounds and categorize various types of drums. We call these tasks "DVN" and "DVD" respectively. We train our models by example, therefore, any given set of training data $\mathcal{T}$ must have an adequate number of positive ($\mathcal{T^{+}}$) and negative ($\mathcal{T^{-}}$) examples. We can use manually labeled data-sets of drums to extract features unique to percussive sounds. Can we non-tautologically describe what features are unique and common in non-percussive sounds? In this work, we seek to represent not-drums using a relatively small subset of sounds output by the virtual synthesizer. We consider the search for the succinct representation of $\mathcal{T^{-}}$ as a significant hurdle in our implementation.
+
+
+\\
+In this chapter we discuss in more detail the implementations and interactions of these two components. Details about the data-sets and code which can be used for replication of each part of the project can be found in Section~\ref{sec:data}.
+
+ \begin{figure}[t!]
     \begin{center}
     \textbf{Pipeline Design}
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_4/pipeline.pdf}}}
     \end{center}
-    \caption{ 
-
-    
+    \caption{A blueprint of our desired pipeline which allows each component to be implemented in a number of ways. Our implementation of this workflow also allows for easy parallelization when needed.
     }
 \label{fig:pipeline_outline}
 \end{figure}
 
+
+
+\begin{figure}[t!]
+    \begin{center}
+    \textbf{Data Overview}
+    \makebox[\textwidth]{
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/venn_data.pdf}}
+    \end{center}
+    \caption{ 
+    Scales are symbolic (true scales are unknowable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number, but we prefer to keep no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
+    }
+\label{fig:ven_data}
+\end{figure}
+
 \section{Virtual Synthesizer}
 \label{vs}
-We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm.  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in Section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
+We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm (for example, with heuristic search).  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in Section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
 
 
 % AH-are they only sequentially composed?
@@ -99,19 +117,6 @@ We are not looking for the perfect imitation of organic drums using a synthesize
  With our dataset of labeled drum sounds, discussed in Section ~\ref{data}, we implement several well performing algorithms for categorizing unlabeled drum sounds, given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum \textquotedblright recognizing ear is that the set of sounds that are not percussive is infinite. In this project we treat the variety of sounds created by the virtual synthesizer as an infinite set and seek to represent the "not drum" set with as few samples as possible.
 
  
- \begin{figure}[h!]
-    \begin{center}
-    \textbf{Data Overview}
-    \makebox[\textwidth]{
-    \includegraphics[width=1.1\linewidth]{images/chapter_4/venn_data.pdf}}
-    \end{center}
-    \caption{ 
-    Scales are symbolic (true scales are unknowable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number, but we prefer to keep no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
-    
-    }
-\label{fig:ven_data}
-\end{figure}
-
 In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that a major subtask in the implementation of our virtual ear falls outside the traditional categorization problem and within the "Open Set Recognition" (OSR) domain~\cite{geng2020recent,mundt2019open}. 
 
 Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works toward the implementations of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}.  
@@ -130,17 +135,6 @@ Traditional classification tasks often make the assumption the data points used 
 
 Our goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{Decision.2} and~\hypref{Decision.1}.
 
- \begin{figure}[t!]
-    \begin{center}
-    \textbf{Data Overview}
-    \makebox[\textwidth]{
-    \includegraphics[width=1.1\linewidth]{images/chapter_4/venn_data.pdf}}
-    \end{center}
-    \caption{ 
-    Scales are symbolic (true scales are unknowable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number, but we prefer to keep no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
-    }
-\label{fig:ven_data}
-\end{figure}
 
 We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{embedding ears} (EEs). As we will discuss in the next sections, TPEs are a combination different models for each of ~\hypref{Decision.2} and~\hypref{Decision.1}; With the features utilized by these models being manually defined. EEs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
