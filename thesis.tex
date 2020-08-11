@@ -171,23 +171,21 @@
 \subfile{\main/tex/background.tex}
 \subfile{\main/tex/implementation.tex}
 \subfile{\main/tex/novel_generations.tex}
-% \subfile{\main/tex/conclusion.tex}
+% \subfile{\main/tex/futurework.tex}
+\subfile{\main/tex/conclusion.tex}
 
-% Renaming bibliography: http://tex.stackexchange.com/questions/12597/
+
 \renewcommand\bibname{References}
 \clearpage\addcontentsline{toc}{chapter}{\bibname}
 % add the above line to get "References" in the table of contents.
 \singlespacing % optional;  Bibliography is better in single spacing
-               %            but you may choose different
-               %            Don't use \singlespacing if your thesis
-               %            is already in single spacing
+
 \bibliography{\main/main.bib}
 \bibliographystyle{plain}
 
 \doublespacing
 
-% Appendices are optional.
-%
+
 % Standard `\appendix` macro will not put the word "appendix" before TOC entries.
 % See https://tex.stackexchange.com/questions/44858/
 \begin{appendices}

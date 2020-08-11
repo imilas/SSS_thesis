@@ -2,6 +2,9 @@
 % See https://tex.stackexchange.com/questions/153312/
 \providecommand{\main}{..}
 \documentclass[\main/thesis.tex]{subfiles}
+\externaldocument{}
+
+
 
 \begin{document}
 
@@ -28,9 +31,9 @@ are another promising avenue; However, for reasons such as efficiency, tractabil
 
 Before we further cover details of the project, it's important to give a quick introduction to the basics of computerized audio generation and evaluation that were made use of in this project.
 \subsection{How Can A Computer Make Sounds?}
-\ref{sec:computer makes sound}
+\label{sec:computer_make_sound}
 Your computer can make a wide variety of sounds in wide variety of ways. You can use it to record real life audio and play it back. You can hit its various instruments, surfaces, and objects with a drumstick. You can also program it to make noise using software.
-Sounds are transmitted via waveforms. Your computer can emulate the physical characteristics of basic waveforms by evaluating the output of periodic functions such as sines and cosines. Evaluation of basic periodic functions is the simplest form of software audio generation \cite[chapter~5]{mitchell2009basicsynth}.
+Sounds are transmitted via waveforms. Your computer can emulate the physical characteristics of basic waveforms by evaluating the output of periodic functions such as sines and cosines. Evaluation of basic periodic functions is the simplest form of software audio generation~\cite{mitchell2009basicsynthChap5}.
 
 For example, think of the universally recognizable "dialing" sounds (DTMF) that communication networks use during typical phone calls. You can program your computer to make similar noises by feeding a range of equally spaced values between 0 and $2\pi$ to a sinusoidal function at a rate that's audible to human ears\footnote{Human audible range is approximately 30Hz to 15000KHz}. 
 
@@ -45,7 +48,7 @@ This generative system is called an \textit{oscillator} and its output is a wave
 \end{figure*}
 
 
- Most organic sounds---sounds from the natural environment, and its flora and fauna---are much more complex than the output of a single oscillator and their digital approximation requires a combination of multiple (perhaps thousands) of pure tones. However, with careful programming, DSP techniques can be used to replicate almost any sound, which is why they have powered commercial digital synthesizers for over half a century \cite{jenkins2019analog} and continue to remain a popular method of audio synthesis amongst artists. Another advantage to using DSP for sound generation is that the synthesizers we build using these functions are tractable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers  simpler compared to the evaluation of synthesizers that utilize probabilistic models.
+ Most organic sounds---sounds from the natural environment, and its flora and fauna---are much more complex than the output of a single oscillator and their digital approximation requires a combination of multiple (perhaps thousands) of pure tones. However, with careful programming, DSP techniques can be used to replicate almost any sound, which is why they have powered commercial digital synthesizers for over half a century \cite{jenkins2019analog} and continue to remain a popular method of audio synthesis among artists. Another advantage to using DSP for sound generation is that the synthesizers we build using these functions are tractable: the output is determined by the input and reproducible. This makes the evaluation of a set of inputs (or parameters) to our synthesizers  simpler compared to the evaluation of synthesizers that utilize probabilistic models.
  
 In the next chapters we will discuss our work towards a system for automatic \textit{generation of sounds}, capable of rapid generation of short (under 1 second) audio clips. Our approach entailed the implementation of a virtual sound synthesizer that can take a set of instructions, or \textit{programs}, as input and generate the corresponding audio. A by-product of this approach is that the sounds generated may sound extremely in-organic, yet perfectly usable by more experimental artists, adding a desirable "novel" factor. 
 
@@ -58,7 +61,7 @@ Suppose a person is given a set of recordings of solo musical instruments being 
 
  Computers can be programmed to quickly extract the majority of these feature types for us. With shorter audio clips (such as the drum sounds we're interested in), personal subjectivity might play a smaller role in describing sounds, making the categorization task easier.
 
-In our work, we find simple features such as frequency content (high pitch vs low pitch), length, and envelope (change in loudness, how fast the sounds reaches its maximum loudness and fades away) to be powerful features for the categorization of drum sounds. Later on we will discuss our algorithms for extraction of these and other features in \ref{impl}. We will also discuss how these extracted features were used to train models that can automatically categorize new sounds.  
+In our work, we find simple features such as frequency content (high pitch vs low pitch), length, and envelope (change in loudness, how fast the sounds reaches its maximum loudness and fades away) to be powerful features for the categorization of drum sounds. Later on we will discuss our algorithms for extraction of these and other features in~\ref{implementation}. We will also discuss how these extracted features were used to train models that can automatically categorize new sounds.  
 %  We will cover our curation of a database of sounds \ref{data} and its usage for the design and training of machine learning models to learn the characteristics of different drum groups. We will discuss how these models can be used rapidly evaluate each output and curate those which resemble drum sounds.
 
 %% TODO: Throw a diagram in here?
@@ -72,7 +75,7 @@ Given the tools at our disposal, our attempt is centered around a generative pip
 \end{itemize}
 % AH: Optional. Can be removed or reduced later
 Our components are designed with modularity and parallelizability in mind. This allows each component to be debugged, modified, and improved without requiring modifications in other components while additionally increasing the scalability and speed of experiments. 
-Section \ref{impl} contains further discussion of the components as well as the code that glues the project together.
+Section~\ref{implementation} contains further discussion of the components as well as the code that glues the project together.
 
 While the main focus of this project is the generation of novel percussive sounds, our methodology indicates promising results with regards to creation of new presets for any virtual synth without the need for a-priori knowledge of the functions or its parameters (i.e the effect of parameter modulation on the sonic output). We also demonstrate the viability of a virtual synthesizers based on Digital Signal Processing (DSP) methods for fast, unsupervised creation of novel audio, discussed in more detail in section \ref{related}. 
 
