@@ -28,8 +28,9 @@
 \usepackage{subcaption}
 \usepackage{caption}
 \usepackage{threeparttable} %annotations for table
-\usepackage [autostyle, english = american]{csquotes}
-\MakeOuterQuote{"}
+\usepackage{csquotes}
+
+
 
 %%%%%%%%%%%%%%%%%%
 % Packages Setup %
@@ -102,6 +103,8 @@
 
 \newcommand{\onlyinsubfile}[1]{#1}
 \newcommand{\notinsubfile}[1]{}
+
+
 \begin{document}
 \renewcommand{\onlyinsubfile}[1]{}
 \renewcommand{\notinsubfile}[1]{#1}
@@ -168,7 +171,7 @@
 \subfile{\main/tex/background.tex}
 \subfile{\main/tex/implementation.tex}
 \subfile{\main/tex/novel_generations.tex}
-\subfile{\main/tex/conclusion.tex}
+% \subfile{\main/tex/conclusion.tex}
 
 % Renaming bibliography: http://tex.stackexchange.com/questions/12597/
 \renewcommand\bibname{References}

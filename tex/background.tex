@@ -57,7 +57,6 @@ As briefly discussed in section \ref{sec:computer make sound}, sound can take on
 
 In this context, \textit{sampling rate}, is an important feature of digital sound, referring to the number of samples per second of audio (measured in Hertz, or Hz). Sampling rate is not the only important factor when recording audio as it is important to record the samples with not just speed, but also precision. Assuming perfect sensors, precision is the range of possible values we can assign to each sample. It is determined by bit depth: the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while "high quality" audio indicates an increase in bit rate or bit depth \cite{reiss2016meta}. Although subject to diminishing returns, high quality audio may be preferable to most musicians and audio-engineers; In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of people are able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training~\cite{reiss2016meta}. 
 
-% AH: please use word~\cite{author} not word \cite{author}
 
 \begin{figure}[h]
 \label{fig_sampling_rate}
@@ -66,7 +65,7 @@ In this context, \textit{sampling rate}, is an important feature of digital soun
 \caption{Reconstruction of a periodic, continuous wave at three different sampling levels. Higher sampling rates result in higher reconstruction accuracy. } % AH: this is linear interpolation many sound cards will convert the last signal back into the original wave just fine
 \end{figure}
 
-\\\\
+
 \subsection{Loudness, Amplitudes and Envelopes}
 Loudness is a subjective description of a sound's intensity or energy levels. It varies based on the complexity of sounds, the frequencies present, and hearing ability of the listener \cite{fletcher1933loudness,cook1999chap6}. It can only be measured relatively, by establishing a benchmark sound and surveying populations on the relative intensities \cite{cook1999chap6}. Since loudness and intensity of sound correlate with the amplitude of digital waveforms (the values assigned to the samples), an imperfect but convenient alternative method for inferring the the loudness of digital sounds is to compare relative amplitudes. 
 

@@ -99,15 +99,44 @@ Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ s
 \text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
 v_{norm} = \dfrac{v}{A + D + S + R}
 \end{align*}
- The OSC type will determine the wave-shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wavetable transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
+ The OSC type will determine the wave-shape of the signal. We limited this parameter to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the OSC type will simply be used for the generation of noise via random wave-table transformations. Before the filter and ADSR envelope take affect, the generated noise will have similar characteristics to white noise. 
 
 Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound. Our more successful attempts at creation of synthetic kick or bass drums are often characterized by quick, exponential decrease of a sine-wave's pitch from medium to low audible frequencies. To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
 
 % Considering this setup, we predict that in order to generate kick drums using these parameters, the list of notes must vary from high frequencies to low; While other drum types such as hats or shakers require all pitch values to remain static, such that pitch bending does not occur. 
 
 
-\subsubsection{Is the Virtual Synthesizer Deterministic?}
+\subsection{Is the Virtual Synthesizer Deterministic?}
 \label{chap3:synth_deterministic}
+It is crucial that the same set of synthesizer parameters result in identical, or near identical sounds. Our synthesizer modules are capable of producing random waves, or "noise". This type of sound will vary each time it is produced. Manual listening does not show sonic variation between multiple creation of the same set of parameters, but how does this affect our ear models?
+
+We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set 10 times using the LSTM-DVN model. This model measures the probability of a sound belong to the drum/percussion category, and will be discussed in more detail in Section~\ref{TPE_models}. Put simply, we are creating the sonic output of the same parameter set multiple times and measuring its effect on one of our models. We repeat this experiment for stack sizes of 2 and 8 and show the results in figure~\ref{fig:synth_deterministic}.
+
+
+\begin{figure}[htbp!]
+\begin{center}
+    \textbf{ Variation in Repeated Evaluations of Parameters }\par\medskip
+    \makebox[\textwidth]{
+    \subfloat[1 Stack]{ \includegraphics[width=18cm,height=6cm]{images/chapter_3/eval_stability_stacksize1.pdf}
+
+    }}
+
+    \makebox[\textwidth]{
+    \subfloat[2 Stacks]{ \includegraphics[width=18cm,height=6cm]{images/chapter_3/eval_stability_stacksize2.pdf}
+
+    }}
+    
+    \makebox[\textwidth]{
+    \subfloat[8 Stacks]{ \includegraphics[width=18cm,height=6cm]{images/chapter_3/eval_stability_stacksize8.pdf}
+
+    }}
+\end{center}
+
+\caption{Repeated evaluations of randomly generated parameters shows little variation in scores. While the parameter sets to not vary, the sounds generated from the parameter sets vary if the parameter set calls for randomly generated noise. We do not believe these variations to be significant.}
+\label{fig:synth_deterministic}
+\end{figure}
+
+
 \section{The Ear}
 
 What we refer to as an "ear" is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for our task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on generation of novel percussive sounds, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In Section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
@@ -141,11 +170,8 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
 \subsection{Two Phased Ears}
 \label{sec:ear}
 \subsubsection{Feature Extraction}
-
-
-
 % AH: you should make it 1 instance of a generated synth 
-We only consider 1 second long sounds made with a single stacked synth, yet the set of possible synthesizer parameters (and we assume, the sound generated by the synth given these parameters) is extremely large. In our case, as discussed in Section ~\ref{survey}, the majority of sounds generated by the synth do not resemble percussion.  We determined that there are 2 steps necessary to effectively extract percussive sounds
+Throughout the project, we work with 1 second long sounds made with synthesizers with stack sizes of 8 or fewer, yet the set of possible synthesizer parameters (and we assume, the sound generated by the synth given these parameters) is extremely large. In our case, as discussed in Section ~\ref{survey}, the majority of sounds generated by the synth do not resemble percussion.  We determined that there are 2 steps necessary to effectively extract percussive sounds
 from the randomly generated sounds produced by virtual synthesizers: 
 \begin{enumerate}
    \item  Phase $1$: Binary separation of sounds with percussive features from non-percussive sounds.
@@ -176,6 +202,7 @@ Using only the STFT of signals as source of feature extraction we defined 3 tran
 \end{enumerate}
 
 \subsubsection{The Models}
+\label{TPE_models}
 Using the described features, we trained several neural network models for Phase 1 and 2 in the Pytorch environment. The task of Phase 1 is to separate drums from not-drums (DrumVsNotDrum, or DVN). The task of Phase 2 is to categorize drums and percussion (DrumVsDrum, or DVD). We kept our feature space small, making it viable for feature selection and model design to be done on a trial and error basis. For all models, accuracy is calculated by prediction of all test dataset labels and the loss function and optimizer are Categorical-CrossEntropy and Adam respectively. Training continues until no reduction in loss and accuracy is observed in 10 epochs.  All activation functions are PReLU:
 \begin {enumerate}
 \item FC-DVN: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for Phase 1. With size of 10x5x10.
