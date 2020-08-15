@@ -11,9 +11,9 @@
 \label{gens}
 \label{surveys}
 \section{The Pipeline}
- In the previous chapter, we discussed our implementation of a \emph{virtual synthesizer}, which generates 1 second long sounds (or sonic noise) based on its parameters. We also discussed our expectations of an ideal \emph{virtual ear} along with multiple implementation attempts and measurements for accuracy. 
+ In the previous chapter, we discussed our implementation of a \emph{virtual synthesizer}, which generates 1 second long sounds (or sonic noise) based on its parameters. We also discussed our expectations of an ideal \emph{virtual ear} along with multiple implementation attempts and measurements for accuracy. Putting these components together, we conceptualized a generative pipeline for creation of novel drum sounds, shown in figure~\ref{fig:pipeline_outline}.
  
- We expect the virtual synthesizer to make sounds, which we call \enquote{synthetic noise}. We also expect the ideal virtual synthesizer to create identical sounds, given the same program. We verified These claims in Section \ref{chap3:synth_deterministic}. Much harder to verify are our expectations of the virtual ear. If a small subset of synthetic noise can stand in for percussive sounds, then the ideal synthetic ear will be able to the desired sounds from noise with high recall and precision. Low recall will cause a slow-down of the pipeline and loss of novel sounds. Low precision will make manual cleanup of generated samples a requirement. Critically, manual over-sight is necessary to assess the performance of the ear. 
+ We expect the virtual synthesizer to make sounds, which we call \enquote{synthetic noise}. We also expect the ideal virtual synthesizer to create identical sounds, given the same program. We verified These claims in Section~\ref{chap3:synth_deterministic}. Much harder to verify are our expectations of the virtual ear. If a small subset of synthetic noise can stand in for percussive sounds, then the ideal synthetic ear will be able to the desired sounds from noise with high recall and precision. Low recall will cause a slow-down of the pipeline and loss of novel sounds. Low precision will make manual cleanup of generated samples a requirement. Critically, manual over-sight is necessary to assess the performance of the ear. 
 
 To assess the performance of each pipeline, we randomly create drum programs and generate and the corresponding signal. This signal is then fed through the ear model to determine if the signal is percussive. If so, a category is assigned to the sound. This sound and the corresponding synthesizer program are saved to hard-disk. Here we assess the success rate of two different pipelines by manual inspection and categorization of a randomly selected subset of its results. We cross reference the manual categorizations with the categories assigned by the virtual ear: Do we agree that the sounds are percussive? Do we agree with the drum group assigned to the percussive sounds?
  
@@ -53,7 +53,7 @@ shakers and unusual percussive sounds). This gave us a total of 257 samples. The
     \caption{Frequency of assigned labels by persons vs the true number of labels}
 \label{fig:freq-survey-2p}
 \end{figure}
-We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements shocased in \ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by the authors, as samples that persons deem to be \enquote{bad} indicate a failure in Phase 1 and should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed bad by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
+We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements shocased in~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by the authors, as samples that persons deem to be \enquote{bad} indicate a failure in Phase 1 and should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed bad by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
 
 \subsection{Takeaways Of The Two Phased Pipeline Survey}
 \label{survey1_takeaway}
@@ -65,12 +65,6 @@ We assess the reliability of agreement between persons and categorization models
 
  \section{Survey of Mixed-Models Ear Performance}
  Keeping the other components of the pipeline the same, we replace the two-phased ear in the previous pipeline with the MME. Our survey differs from the previous survey in that the pipeline only creates the four drum categories. The \enquote{other} category is only assigned by survey responders. This means that two out of six possible categories are only available to responders, therefore there is an inherent bias towards worse agreeably scores compared to last survey. Our main concern here is changes in the amount of \enquote{bad} samples. We show measurments before and after dropping all \enquote{bad} and \enquote{other} samples for a fairer comparison with the TPE pipeline.
- 
- \subsection{Takeaways Of The Two Phased Pipeline Survey}
-\label{survey1_takeaway}
-The results from the two surveys are not easily comparable. However, no major improvements in agree-ability or a decrease in the number of bad samples can be seen, in fact, the opposite is more likely to be true. However, we are yielding comparable results to the TPE pipeline despite having a fraction of the features to learn from (latent layer + 10 envelope features). This shows that latent layers of an autoencoder network can be used as a low-dimensional proxy for representation of more complex inputs, despite the autoencoder not being trained for such a task. 
-
-Agree-ability scores for MME pipeline are often lower, but we reiterate that this can be caused by having two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{bad} and \enquote{other} samples. Here, both persons agree with each other and with the MME at a stronger rate than in the TPE pipeline, despite having similar number of samples (120 for MME and 154 for TPE) and equal number of categories to choose from. This values are observed in the last rows of tables~\ref{kappa_table_TPE} and ~\ref{kappa_table_MME}. The higher DVD categorization accuracy achieved by the mixed-model ear compared to the best two-phaased ear is consistent with this observation: Given that the sound being categorized is a drum, the MME will yield better results that the TPE. However, the MME pipeline does not yield better results in the DVN task. 
 
  \begin{table}[t]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
@@ -88,7 +82,7 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
 \end{tabular}}
 \caption{\label{kappa_table_MME}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH) and persons and MME. We also measure the agreeability scores after dropping bad samples if both or either persons assigned the sample as such. We also measure agree-ability when all samples deemed \enquote{bad} or \enquote{other} by either person are removed.}
 \end{table}
-\label{survey:2p}
+
 \begin{figure}[htpb]
     \begin{center}
     \textbf{Category Assignment Frequency For MME Survey}
@@ -97,7 +91,13 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
     \end{center}
     \caption{Frequency of assigned labels by persons vs the true number of labels}
 \label{fig:freq-survey-2p}
-\end{figure}
+\end{figure} 
+\subsection{Takeaways Of The MME Pipeline Survey}
+\label{survey2_takeaway}
+The results from the two surveys are not easily comparable. However, no major improvements in agree-ability or a decrease in the number of bad samples can be seen, in fact, the opposite is more likely to be true. However, we are yielding comparable results to the TPE pipeline despite having a fraction of the features to learn from (latent layer + 10 envelope features). This shows that latent layers of an autoencoder network can be used as a low-dimensional proxy for representation of more complex inputs, despite the autoencoder not being trained for such a task. 
+
+Agree-ability scores for MME pipeline are often lower, but we reiterate that this can be caused by having two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{bad} and \enquote{other} samples. Here, both persons agree with each other and with the MME at a stronger rate than in the TPE pipeline, despite having similar number of samples (120 for MME and 154 for TPE) and equal number of categories to choose from. This values are observed in the last rows of tables~\ref{kappa_table_TPE} and ~\ref{kappa_table_MME}. The higher DVD categorization accuracy achieved by the mixed-model ear compared to the best two-phaased ear is consistent with this observation: Given that the sound being categorized is a drum, the MME will yield better results that the TPE. However, the MME pipeline does not yield better results in the DVN task. 
+
 
 % \section{Genetic Search}
 % %  introduce genetic search and how it works for our project

@@ -51,7 +51,7 @@ In this chapter we discuss in more detail the implementations and interactions o
     \includegraphics[width=1.1\linewidth]{images/chapter_4/venn_data.pdf}}
     \end{center}
     \caption{ 
-    Scales are symbolic (true scales are unknowable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number, but we prefer to keep no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
+    Scales are symbolic (true scales are not measurable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number(we can generate as any number of random samples), but we prefer to keep it no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
     }
 \label{fig:ven_data}
 \end{figure}
@@ -116,22 +116,22 @@ We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set
 \begin{center}
     \textbf{ Variation in Repeated Evaluations of Parameters }\par\medskip
     \makebox[\textwidth]{
-    \subfloat[1 Stack]{ \includegraphics[width=18cm,height=6cm]{images/chapter_3/eval_stability_stacksize1.pdf}
+    \subfloat[1 Stack]{ \includegraphics[width=17cm,height=5.67cm]{images/chapter_3/eval_stability_stacksize1.pdf}
 
     }}
 
     \makebox[\textwidth]{
-    \subfloat[2 Stacks]{ \includegraphics[width=18cm,height=6cm]{images/chapter_3/eval_stability_stacksize2.pdf}
+    \subfloat[2 Stacks]{ \includegraphics[width=17cm,height=5.67cm]{images/chapter_3/eval_stability_stacksize2.pdf}
 
     }}
     
     \makebox[\textwidth]{
-    \subfloat[8 Stacks]{ \includegraphics[width=18cm,height=6cm]{images/chapter_3/eval_stability_stacksize8.pdf}
+    \subfloat[8 Stacks]{ \includegraphics[width=17cm,height=5.67cm]{images/chapter_3/eval_stability_stacksize8.pdf}
 
     }}
 \end{center}
 
-\caption{Repeated evaluations of randomly generated parameters shows little variation in scores. While the parameter sets to not vary, the sounds generated from the parameter sets vary if the parameter set calls for randomly generated noise. We do not believe these variations to be significant.}
+\caption{Repeated evaluation of signals from identical paramter-sets shows little variation in scores. Multiple renditions of the same parameter-set vary if the parameter-set calls for generation of 1 or more random wave-shapes. We do not believe these variations to be significant.}
 \label{fig:synth_deterministic}
 \end{figure}
 
