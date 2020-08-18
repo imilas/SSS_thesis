@@ -136,7 +136,7 @@ Talk about analog synthesis briefly, so the word synthesizer feels less abstract
 
 \section{Neural Networks And Sound}
 \label{bg:NN}
-% \subsection{Neural Networks For Sound Analysis}
+
 \subsection{Neural Networks as Synthesizers}
 We defined digital synthesis as the \enquote{process of generating discrete values which approximate sound waves}. We also established that manual generation of these values at high sampling rates is near impossible; A problem which has motivated a wide variety of synthesis techniques which aim to create signals within a linear (or mostly linear) system, in the simplest form possible (**look into simplest form proofs**). Recently, the exponential increase in computing power has motivated a wide range of research in probabilistic sound generation, mainly via generative neural networks. 
 % deterministically, if the input parameters to the system do not change, the output of the system will remain the same \footnote{talk about noise generation methods and seeding}.
@@ -155,7 +155,8 @@ Oord et al. later proposed a parallel implementation of the WaveNet architecutre
 
 % We can create a tone via a deterministic system of equations.  Where every sample is the result of a sine function (**can i show that a sine function is the simplest possible function to create a tone?**) 
 % Mathews said that we can create sound by coding in the samples one at a time ~\cite{mathews1963digital}, but this process is too slow to do by hand, which is why he advocated for digital synthesis.
-% These include (i) ANNs’ success de-
+
+%""" These include (i) ANNs’ success de-
 % pends on both the quality and quantity of the data,
 % (ii) a lack of clear rules or fixed guidelines for
 % optimal ANN architecture design, (iii) a lack of
@@ -163,7 +164,7 @@ Oord et al. later proposed a parallel implementation of the WaveNet architecutre
 % to explain in a comprehensible form the process
 % through which a given decision (answer) was made
 % by the ANN (i.e., ANNs criticized for being black
-% boxes) ~\cite{basheer}.
+% boxes) ~\cite{basheer}""".
 
 % 
 \section{Goal Oriented Novel Sound Generation}
@@ -173,25 +174,25 @@ Oord et al. later proposed a parallel implementation of the WaveNet architecutre
 We define \enquote{goal oriented novel sound generation} as any work that seeks to implement a system that is capable of generating novel sounds with a desired characteristic. Based on our review of relevant works, we believe that \enquote{goal oriented audio generation} necessitates two essential components: A tool-set for the analysis of sound and a tool-set for creation of sound. As a result, we base our work around learning of the distinguishing features of various sound groups (i.e different types of drums) and using the learned features for generation of sound. In Section~\ref{sec_methodology} we introduced these components as the virtual ear and virtual synthesizer. 
 
  Thus far we have discussed various techniques at our disposal for the implementation of a virtual ear and synthesizers, all with their contextual strengths and weaknesses. In the upcoming Sections, we will thoroughly discuss our implementations and the subsequent results. Here, we will review a variety of works which fall under our definition of \enquote{goal oriented novel sound generation}. Particularly, we are interested in a discussion of goals, chosen methods for the feature extraction, and chosen methods of sound synthesis. 
-%  We will highlight the contradistinctions with our work where appropriate
 
 \subsection{Related Work}
 ANN or DSP approaches can be taken to the implementation of a virtual ear and a virtual synthesizer. The development of ANN frameworks has led to works which have utilized ANNs for both components. Also common are works have leveraged a mixture of both approaches, commonly by utilization of ANNs for the virtual ear and DSP methods for synthesis.
 
 \begin{center}
 \begin{table}[h*]
+\hline
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
 work & feature extraction & synthesis & specilization & \hline
 Oord et al & CNN & CNN &Speech& \hline
 Yamamoto et al & GAN & GAN&Speech & \hline
 Aouameur et al & Latent layer& Decoding of Latent Layers & Percussion & \hline
-Ramires et al & Latent layer & Decoding of Latent Layers & Percussion & \hline
+Ramires et al & Latent layer & FeedForward Network & Percussion & \hline
 Yee-King et al & LSTM on Paremters & DSP & Synth Pads & \hline
 \end{tabular}}
-\caption{for reference, will delete} % AH: Fix the table up and keep it.
+\caption{Quick reference for related works}
 \end{table}
 \end{center}
-Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Most relevant to us are recent works by Aoumaeur et al. in which variational AutoEncoders (VAE's) have been utilized for generation of percussive samples~\cite{aouameur2019neural}; As well as Ramires et al's work in generation of percussive sounds by guiding the output of a feedforward neural network via simple and explainable desired features. 
+Numerous deep, neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Most relevant to us are recent works by Aoumaeur et al. in which variational AutoEncoders (VAE's) have been utilized for generation of percussive samples~\cite{aouameur2019neural}; As well as Ramires et al's work in generation of percussive sounds by guiding the output of a feedforward neural network via a small set of latent features. 
 Automatic programming of virtual synthesizers has also been a topic of interest. In early 2000s, Interactive Genetic Algorithms (IGA's) were utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. Since this work appears more focused on pads and textures rather than drums, feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new audio~\cite{esling2019universal}. As stated before, our work explores the rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer, exploring the actual parameter space rather than its latent representation.
 
  
