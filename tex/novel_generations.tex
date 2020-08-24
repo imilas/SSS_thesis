@@ -22,7 +22,7 @@ To assess the performance of each pipeline, we randomly create drum programs and
 \begin{table}[htbp]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c c c c||} 
  \hline
- Drop Rule & Size & HvH & H+FC & H+CNN & H+ALL & 3 models \\ [0.5ex] 
+ Drop Rule & Size & HvH & H+FC & H+CNN & H+E/F & 3 models \\ [0.5ex] 
  \hline
  No Drops & 257 &0.37 & 0.35 & 0.36 & 0.36 & 0.28\\ 
  \hline
@@ -33,15 +33,14 @@ To assess the performance of each pipeline, we randomly create drum programs and
  Assigned \enquote{Bad} or \enquote{Other} By Either & 154 & 0.47 & 0.59 & 0.54 & 0.50 &  0.35 \\
  \hline
 \end{tabular}}
-\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+ALL), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
+\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH), persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
 \end{table}
 To measure the quality of the samples produced by our pipeline combined with the TP ear models, we run the model until an adequate number of samples in each category are saved to disk. Next, we randomly generated around 50 samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, 
-shakers and unusual percussive sounds). This gave us a total of 257 samples. These samples were determined to be percussive and then categorized by 4 different models (FC, CNNLSTM, E+F and AVG). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category). Both reviewers then categorized these samples without knowledge of other categorizations (person or computation models). It's important to note:
+shakers and unusual percussive sounds). This gave us a total of 257 samples. These samples were determined to be percussive and then categorized by 3 different models (FC, CNNLSTM, E+F). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category). Both reviewers then categorized these samples without knowledge of other categorizations (person or computation models). It's important to note:
 \begin{itemize}
     \item Each responder had an additional category of bad for samples that they deemed not percussive. The \enquote{bad} category indicates that the sample should have been skipped in Phase 1. 
     \item With 6 categorization groups, responders had the same categorization in 47\% of cases.
-    \item The agreement between the responders and AVG was 44\% and 47\%.
-    \item Of 257 samples, the responders agreed with FC, CNNLSTM, AVG and E+F respectively in 78, 76, 76 and 46 of cases. This indicates no major difference in model types and agree-ability, with E+F being the worst performer.
+    \item Of 257 samples, the responders agreed with FC, CNNLSTM, and E+F respectively in 78, 76, and 46 of cases. The loss of spectrum data appears to lower performance.
 \end{itemize}
 
 \begin{figure}[h!]
@@ -53,7 +52,7 @@ shakers and unusual percussive sounds). This gave us a total of 257 samples. The
     \caption{Frequency of assigned labels by persons vs the true number of labels}
 \label{fig:freq-survey-2p}
 \end{figure}
-We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements shocased in~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by the authors, as samples that persons deem to be \enquote{bad} indicate a failure in Phase 1 and should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed bad by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
+We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicating perfect agreement. Our kappa measurements showcased in~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{bad} by the authors, as samples that persons deem to be \enquote{bad} indicate a failure in Phase 1 and should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed bad by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
 
 \subsection{Takeaways Of The Two Phased Pipeline Survey}
 \label{survey1_takeaway}
@@ -64,7 +63,7 @@ We assess the reliability of agreement between persons and categorization models
 \end{itemize}
 
  \section{Survey of Mixed-Models Ear Performance}
- Keeping the other components of the pipeline the same, we replace the two-phased ear in the previous pipeline with the MME. Our survey differs from the previous survey in that the pipeline only creates the four drum categories. The \enquote{other} category is only assigned by survey responders. This means that two out of six possible categories are only available to responders, therefore there is an inherent bias towards worse agreeably scores compared to last survey. Our main concern here is changes in the amount of \enquote{bad} samples. We show measurments before and after dropping all \enquote{bad} and \enquote{other} samples for a fairer comparison with the TPE pipeline.
+ Keeping the other components of the pipeline the same, we replace the two-phased ear in the previous pipeline with the MME. Our survey differs from the previous survey in that the pipeline only creates the four drum categories. The \enquote{other} category is only assigned by survey responders. This means that two out of six possible categories are only available to responders, therefore there is an inherent bias towards worse agreeably scores compared to last survey. Our main concern here is changes in the amount of \enquote{bad} samples. We show measurements before and after dropping all \enquote{bad} and \enquote{other} samples for a fairer comparison with the TPE pipeline.
 
  \begin{table}[t]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
@@ -80,7 +79,7 @@ We assess the reliability of agreement between persons and categorization models
 Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
  \hline
 \end{tabular}}
-\caption{\label{kappa_table_MME}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH) and persons and MME. We also measure the agreeability scores after dropping bad samples if both or either persons assigned the sample as such. We also measure agree-ability when all samples deemed \enquote{bad} or \enquote{other} by either person are removed.}
+\caption{\label{kappa_table_MME}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH) and persons and MME. We measure the agreeability scores after dropping bad samples if both or either persons assigned the sample as such. We also measure agree-ability when all samples deemed \enquote{bad} or \enquote{other} by either person are removed.}
 \end{table}
 
 \begin{figure}[htpb]
@@ -94,7 +93,7 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
 \end{figure} 
 \subsection{Takeaways Of The MME Pipeline Survey}
 \label{survey2_takeaway}
-The results from the two surveys are not easily comparable. However, no major improvements in agree-ability or a decrease in the number of bad samples can be seen, in fact, the opposite is more likely to be true. However, we are yielding comparable results to the TPE pipeline despite having a fraction of the features to learn from (latent layer + 10 envelope features). This shows that latent layers of an autoencoder network can be used as a low-dimensional proxy for representation of more complex inputs, despite the autoencoder not being trained for such a task. 
+The results from the two surveys are not easily comparable. However, no major improvements in agree-ability or a decrease in the number of bad samples can be seen, in fact, the opposite is more likely to be true. However, we are yielding comparable results to the TPE pipeline despite having a fraction of the features to learn from (latent layer + 10 envelope features). Suggesting that latent representations of autoencoder networks can be used as general, low-dimensional proxies for representation of complex inputs. 
 
 Agree-ability scores for MME pipeline are often lower, but we reiterate that this can be caused by having two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{bad} and \enquote{other} samples. Here, both persons agree with each other and with the MME at a stronger rate than in the TPE pipeline, despite having similar number of samples (120 for MME and 154 for TPE) and equal number of categories to choose from. This values are observed in the last rows of tables~\ref{kappa_table_TPE} and ~\ref{kappa_table_MME}. The higher DVD categorization accuracy achieved by the mixed-model ear compared to the best two-phaased ear is consistent with this observation: Given that the sound being categorized is a drum, the MME will yield better results that the TPE. However, the MME pipeline does not yield better results in the DVN task. 
 

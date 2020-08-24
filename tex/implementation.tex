@@ -23,7 +23,7 @@
 \section{Our Goal}
 Our goal is to create a system for the generation of novel drum sounds. In this chapter, we will discuss the two main components of our system: The \textit{virtual synthesizer} and the \textit{virtual ear}. A quick outline of our generative pipeline is this: The virtual synthesizer will rapidly generate random programs and the corresponding sounds. As the virtual synthesizer creates sounds based on these programs, the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. In case of search, other algorithms can create programs for the synthesizer and receive the rating/categorization assigned by the virtual ear. A visual representation of our pipeline is illustrated in  figure~\ref{fig:pipeline_outline}.
 
-In Section~\ref{vs} we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. We believe that a number of these noise samples can be substituted for drums of various categories. We refer to the set of synthetic noise samples which can be considered novel drums as $\mathcal{N}$. The task of the virtual ear is to listen to the outputs of the virtual synthesizer and extract the samples belonging to $\mathcal{N}$ with the highest possible precision and recall. When our pipeline is constructed, we expose the ear to a number of synthetic noises and observe the extracted sounds. We call this procedure a hearing test, and the set of sounds recieved by the ear $\mathcal{H}$. 
+In Section~\ref{vs} we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. We believe that a number of these noise samples can be substituted for drums of various categories. We refer to the set of synthetic noise samples which can be considered novel drums as $\mathcal{N}$. The task of the virtual ear is to listen to the outputs of the virtual synthesizer and extract the samples belonging to $\mathcal{N}$ with the highest possible precision and recall. When our pipeline is constructed, we expose the ear to a number of synthetic noises and observe the extracted sounds. We call this procedure a hearing test, and the set of sounds received by the ear $\mathcal{H}$. 
 
 To train an effective synthetic ear, there are a variety of sound groups which need to be accounted for. For examples, a common feature shared in percussive sounds is the quick \emph{attack} (rise in volume) at the onset of impact followed by an instant, continuous \emph{decay} (drop in volume) until silence is reached~\cite{barry2005drum}. For a virtual ear to learn these and other common features, we require a set of examples for what drums do and do not sound like. The synthetic ear needs to separate drum sounds from \enquote{not-drum} sounds and categorize various types of drums. We call these tasks \enquote{DVN} and \enquote{DVD} respectively. We train our models by example, therefore, any given set of training data $\mathcal{T}$ must have an adequate number of positive ($\mathcal{T^{+}}$) and negative ($\mathcal{T^{-}}$) examples. We can use manually labeled data-sets of drums to extract features unique to percussive sounds. Can we non-tautologically describe what features are unique and common in non-percussive sounds? In this work, we seek to represent not-drums using a relatively small subset of sounds output by the virtual synthesizer. We consider the search for the succinct representation of $\mathcal{T^{-}}$ as a significant hurdle in our implementation.
 
@@ -42,19 +42,6 @@ In this chapter we discuss in more detail the implementations and interactions o
 \label{fig:pipeline_outline}
 \end{figure}
 
-
-
-\begin{figure}[t!]
-    \begin{center}
-    \textbf{Data Overview}
-    \makebox[\textwidth]{
-    \includegraphics[width=1.1\linewidth]{images/chapter_4/venn_data.pdf}}
-    \end{center}
-    \caption{ 
-    Scales are symbolic (true scales are not measurable). Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number(we can generate as any number of random samples), but we prefer to keep it no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
-    }
-\label{fig:ven_data}
-\end{figure}
 
 \section{Virtual Synthesizer}
 \label{vs}
@@ -84,8 +71,8 @@ Length & 0-1 second & - \\
 StartTime & 0-1 second & Length+Start$<$1\\
 Amplitude & 0.1-1 & 1 = max amplitude\\
 Pitches(notes) & list of pitches &  range of C0(16.35hz) to B9 \\
-HP filter Cuttoff & 0-20000hz & -\\
-LP filter Cuttoff & 20000-HP & never lower than HP cutoff\\
+HP filter Cutoff & 0-20000hz & -\\
+LP filter Cutoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
@@ -137,10 +124,11 @@ We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set
 
 
 \section{The Ear}
+What we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for our task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on generation of novel percussive sounds, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. Our synthesizer outputs are close to deterministic for all programs, therefore evaluations of the ear would allow us to associate scores of the sound with the parameter values (or program) that generated it. In Section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
 
-What we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for our task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on generation of novel percussive sounds, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. As our synthesizer outputs are close to deterministic for all programs, the evaluations of the ear would allow us to associate scores of the sound with the program that generated it. In Section~\ref{gens} we discuss how these scores can be used to navigate synthesis towards parameters which give us the desired sonic output.
+We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot anticipate what these novel drums will sound like. All we know is that the accepted sounds are synthesizer noises which the synthetic ear has determined to be similar to drum-sounds. 
 
-We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rejection of \enquote{noise} from the virtual synthesizer and the rare acceptance of drum-like sounds. By definition, we cannot anticipate what these novel drums will sound like. Considering the limitations of learning by example, and since raw data can clearly separate organic drums from virtual synthetic noise, we believe that transformation and filtering of raw sound data is a critical step of the listening process; A step that will assist with the extraction of the fundamental characteristics that we are seeking and prevent the rejection of novel sounds.
+Figure~\ref{fig:ven_data} highlights a critical problems with this approach. we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples of what percussive instruments sound like is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making. It likely includes a number of sounds which to our ears could be used as drums. During the hearing test, the virtual ear continually receives synthesizer noises ($\mathcal{H}$) for classification. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is critical to ensure that the change in learning domains---particularly with the case of positive examples of percussive instruments---does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points. 
 
  With our dataset of labeled drum sounds, discussed in Section~\ref{sec:data}, we implement several well performing algorithms for categorizing unlabeled drum sounds, given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum \textquotedblright recognizing ear is that the set of sounds that are not percussive is infinite. In this project we treat the variety of sounds created by the virtual synthesizer as an infinite set and seek to represent the \enquote{not drum} set with as few samples as possible.
 
@@ -151,21 +139,30 @@ Traditional classification tasks often make the assumption the data points used 
  Once a sound is generated and passed onto the ear, we expect the virtual ear to facilitate our actions in response to two important questions: 
 \emph{
 \begin{quote}
-\text{Decision.1 Could the sound could be used as a drum?}\label{Decision.1}
+\text{Decision.1 Could the sound be used as a drum?}\label{Decision.1}
 \\
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}\label{Decision.2}
 \end{quote}
     }
 
 
-\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. Also a consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). Much easier to answer is \hypref{Decision.2}, where we found satisfying results with a variety of different approaches. We attribute the relative ease of \hypref{Decision.2} relative to~\hypref{Decision.1} to be reflective of the OSR problem. 
-
+\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). Much easier to answer is \hypref{Decision.2}, where we found satisfying results with a variety of different approaches. We attribute the relative ease of \hypref{Decision.2} relative to~\hypref{Decision.1} to be reflective of the OSR problem. 
 
 Our goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{Decision.2} and~\hypref{Decision.1}.
 
-
 We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{embedding ears} (EEs). As we will discuss in the next sections, TPEs are a combination different models for each of ~\hypref{Decision.2} and~\hypref{Decision.1}; With the features utilized by these models being manually defined. EEs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
+\begin{figure}[htbp!]
+    \begin{center}
+    \textbf{Data Overview}
+    \makebox[\textwidth]{
+    \includegraphics[width=1\linewidth]{images/chapter_4/venn_data.pdf}}
+    \end{center}
+    \caption{ 
+    Scales are symbolic (true scales are not measurable and/or subjective).  $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number(we can generate as any number of random samples), but we prefer to keep it no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
+    }
+\label{fig:ven_data}
+\end{figure}
 \subsection{Two Phased Ears}
 \label{sec:ear}
 \subsubsection{Feature Extraction}
@@ -188,7 +185,7 @@ We are interested in extracting generalizable, domain agnostic features. In this
 \caption{Graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.}
 \label{fig:stackspectrums}
 \end{figure}
-% AH: If you need space shorten this paragraph to we use STFT which has worked in past and we use spectral-centroids and zero-crossings
+
 Various works have demonstrated effective reconstruction of signals given their STFT~\cite{nawab1983signal,griffin1984signal}. For our purpose, if the original signal can be faithfully reconstructed from its STFT, analysis of the STFT may be relied on as source of fundamental features necessary for audible signal categorization. In the interest of keeping the feature space small and fundamental, other methods of feature extraction such as Spectral-Centroids~\cite{schubert2004spectral} and Zero-Crossing Rates~\cite{gouyon2000use} are not utilized.
 
 Using only the STFT of signals as source of feature extraction we defined 3 transformation functions which we believe to capture important, unique attributes of percussive sounds.  These functions were applied at training time to 1 second audio samples before being sent to a classifier; transforming a signal into a set of features which we hope can capture the necessary information for our categorization task. 
@@ -215,7 +212,7 @@ being categorized is switched from original percussion samples to virtual synth 
 
 With our models showing high accuracy on testing data, we combine models in order to increase the efficacy of each phase and address the \enquote{open set problem} for our task. For Phase 1 we only determine sounds as percussive if both FC-DVN and CNN-LSTM have determined it as such with over 90\% confidence. For the majority of our random generations that is not the case, but if a randomly generated sound has passed this phase, our three categorizers assign their categorizations to this sound. These categorizers have a moderate degree of agree-ability as seen in~\ref{surveys}, but often the decision is not unanimous. The fourth method of categorization, \enquote{averaged-cat}, is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category. 
 
-These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. Ignoring that some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus. 
+These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus. 
 
 
 \subsection{Embedding Ears}
@@ -246,8 +243,9 @@ Latent Size & Size of bottle neck layer or number encoded features & 8,16,64 & C
 Dropout Rate & Random zeroing of activations between layers to prevent over-fitting & 0,0.5,0.1 & Categorical\\  \hline
 \end{tabular}
 \caption{The Hyper-Paramter space in which the optimization was conducted.}
-\end{table}
 \label{table:hyper_params}
+\end{table}
+
 \subsubsection{Architecture and Hyper-Parameter Optimization}
 % could do multi-objective pareto front stuff
 
@@ -255,7 +253,7 @@ Within the context of machine learning, a model's \emph{hyper-parameters} are fi
 
 The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
 
-\begin{table}[[h]
+\begin{table}[h]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
@@ -277,7 +275,7 @@ Linear-8 & [-1, 600 ] &  154,200& Decoder's output\\ \hline
 \label{table:CNNAUTOENCODER}
 \end{table}
 
-\begin{table}[[h]
+\begin{table}[h]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
@@ -292,7 +290,7 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \label{table:FC1_AUTOENCODER}
 \end{table}
 
-\begin{table}[[h]
+\begin{table}[h]
 
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
@@ -426,8 +424,7 @@ Dropout Rate & 0.5 \\ \hline
 \end{figure}
 To better understand the delineation potential of the encoded features,  we trained an autoencoder with our top performing hyper-parameter set, shown in table~\ref{table:best_params}. We used \%80 of MixedDB to train the model for 200 epochs. Using this model, we encoded the remaining \%20 and approximately 1000 randomly selected sounds from NoiseDB into 64 dimensions. These 64-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. Referring to~\hypref{Decision.1} and~\hypref{Decision.2} to define our expectation of a useful encoder, we expect the drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
 
-
-To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; Interactive graphs allow interactions such as playing the samples(by hovering the cursor on-top) and movement of the scene camera.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembeling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
+To test this, we implemented interactive graphs identical to those depicted in figures \ref{fig:2d_tsne} and~\ref{fig:3d_tsne}; These graphs allow for interactions such as playing the samples (by hovering the cursor on-top) and movement of the scene camera for a closer look at clusters.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembeling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
 
 We see possible benefits in a mixture of envelope features with embedding features. In Section~\ref{chap3:mixed_ear_models}, we analyze the potential gains in using both features for extraction of drum-like sounds from synthetic noise. 
 
@@ -487,23 +484,17 @@ Using our encoding and envelope features to represent audio, five classification
     \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the \%88-92 range. Envelope features improve classification accuracy for all models. }
     \label{fig:f1_allg_box}
     \end{center}
-
 \end{figure}
 
-
 We're also interested in how these models perform on the binary drum vs not drum task.
-After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in figures~\ref{fig:conf_f1}.
-
-
+After grouping all drums together, we repeat the model selection process above. We also repeat the hyper-parameter optimization step where no changes appeared necessary except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As show in in figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top two models on \%80 of our database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in figures~\ref{fig:conf_f1_dvn}.
 \begin{figure}[h!]   
-
     \begin{center}
         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_dvn.pdf}}
     \caption{F-Score results for each cross-validation. Models perform better as there are less categorization groups. Envelope features increase accuracy for all models. Random Forest and Extra Trees remain the top two models. }
     \label{fig:f1_dvn_box}
     \end{center}
-
 \end{figure}
 
 
@@ -516,7 +507,7 @@ After grouping all drums together, we repeat the model selection process above. 
     }
     
     }
-    
+\label{fig:conf_f1_dvd}
 \end{center}
 
 \begin{center}
@@ -528,7 +519,7 @@ After grouping all drums together, we repeat the model selection process above. 
 
 
 \caption{F-Scores and confusion matrix of ExtraTrees model for both DvDvN and drum vs not-drum categorization.}
-\label{fig:conf_f1}
+\label{fig:conf_f1_dvn}
 \end{figure}
 
 Based on these reports, having multiple options for drum categorization does not noticeably influence our models accuracy in categorizing synthetic noise as synthetic noise. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9).  We therefore use the DvDvN implementation as it simultaneously categorizes drum types and separates noise from drums. However, without manual inspection, we cannot confirm the extent of this model's usefulness. 
