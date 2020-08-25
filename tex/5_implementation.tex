@@ -7,7 +7,7 @@
 
 
 \begin{document}
-\chapter{Make Noise, Hear Drums}
+\chapter{Making Noise, Hearing Drums}
 \label{implementation}
 
 
@@ -36,15 +36,13 @@ In this chapter we discuss in more detail the implementations and interactions o
 
 \section{Virtual Synthesizer}
 \label{vs}
-We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm (for example, with heuristic search).  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in Section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals.
+We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm (for example, with heuristic search).  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in Section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals. 
 
 
 % AH-are they only sequentially composed?
 Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
 As we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample within our database. Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time (but the entire sound must fit within the second, that is, a 0.5 second sound cannot begin playing after 0.5 seconds within rendering time frame). If the synthesizer has a stack size of more than 1 the audio signals from each submodule are overlapped and the total amplitude is normalized.
-
-
 
 \begin{table}[t!]
 \centering
@@ -89,7 +87,6 @@ It is crucial that the same set of synthesizer parameters result in identical, o
 
 We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set 10 times using the LSTM-DVN model. This model measures the probability of a sound belong to the drum/percussion category, and will be discussed in more detail in Section~\ref{TPE_models}. Put simply, we are creating the sonic output of the same parameter set multiple times and measuring its effect on one of our models. We repeat this experiment for stack sizes of 2 and 8 and show the results in figure~\ref{fig:synth_deterministic}.
 
-\subsubsection{Notes on Creativity and Constraints}
 \begin{figure}[htbp!]
 \begin{center}
     \textbf{ Variation in Repeated Evaluations of Parameters }\par\medskip
