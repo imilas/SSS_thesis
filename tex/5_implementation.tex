@@ -176,6 +176,16 @@ As t-SNE results are not classifiers in of themselves, we create a model which u
 As discussed in Section \label{fig:embedding_FE}, manual t-SNE inspections highlighted the disregard for envelope shapes as a major source of failure. We compare the performance of our models before and after the addition of envelope features (a vector of size 10) to the feature space. 
 
 We reuse the model trained on  MixedDB as our embedding feature extractor. We use a combination of RadarDB, FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. We also exclude samples longer than 1 second, to exclude potentially mislabeled data. Our final training database for mixed ear models is described in table~\ref{db:memDB}.
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+ DB Name & kick & snare & clap & hat & Synthetic Noise\\\hline
+ MixedEarDB & 1334 & 1035 & 401 & 1275 & 1000 \\ \hline
+\end{tabular}
+\caption{MixedEarDB: A database put together by combination of radarDB, FreeDB and NoiseDB}
+\label{db:memDB}
+\end{table}
 
 \subsubsection{Model Selection}
 Using our encoding and envelope features to represent audio, five classification models were trained for the task of categorizing the five different sound groups. For hyper-parameter optimization, the models were trained using 5-fold cross validation and 80/20 train-to-test ratio. The F-Score result of each cross-validation is the unweighted average F-Score of all groups. For inter-model comparisons, the procedure is the same except 10-fold cross validations are used. Our models were derived from scikit-learn's implementations of these classifiers~\cite{pedregosa2011scikit}. Before inter-model comparisons, we conducted a grid-search for each model on at least one of its possibly decisive hyper-parameters. The classifiers and other notable specifications are presented in table~\ref{table:mem_model_selection}. We introduced class weights where possible to mitigate the effects of an imbalanced dataset~\cite{provost2000machine,chawla2004special}. When utilized, the weight for each class $c$  is calculated as:
@@ -206,16 +216,6 @@ Using our encoding and envelope features to represent audio, five classification
     \end{tablenotes}
     \label{table:mem_model_selection}
     \end{threeparttable}
-\end{table}
-\begin{table}[hp!]
-\centering
-\begin{tabular}{|l|l|l|l|l|l|}
-\hline
- DB Name & kick & snare & clap & hat & Synthetic Noise\\\hline
- MixedEarDB & 1334 & 1035 & 401 & 1275 & 1000 \\ \hline
-\end{tabular}
-\caption{MixedEarDB: A database put together by combination of radarDB, FreeDB and NoiseDB}
-\label{db:memDB}
 \end{table}
 
 \begin{figure}[htbp!]

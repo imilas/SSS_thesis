@@ -158,22 +158,7 @@ Oord et al. later proposed a parallel implementation of the WaveNet architecutre
     \item \textit{Speed of Rendering}: Neural network synthesis is costly. Sub 24 khz sampling rates are common in most works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
     \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount for rendering time for each time-step~\cite{yamamoto2020parallel}. Our virtual synthesizer produces audio by solving a linear system of equations. The added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
 \end{enumerate}
-% Yet another caveat of such models is the large amount of data that is required for training as well as the hardware, energy and time to carry out the training step. 
 
-% We can create a tone via a deterministic system of equations.  Where every sample is the result of a sine function (**can i show that a sine function is the simplest possible function to create a tone?**) 
-% Mathews said that we can create sound by coding in the samples one at a time ~\cite{mathews1963digital}, but this process is too slow to do by hand, which is why he advocated for digital synthesis.
-
-%""" These include (i) ANNs’ success de-
-% pends on both the quality and quantity of the data,
-% (ii) a lack of clear rules or fixed guidelines for
-% optimal ANN architecture design, (iii) a lack of
-% physical concepts and relations, and (iv) the inability
-% to explain in a comprehensible form the process
-% through which a given decision (answer) was made
-% by the ANN (i.e., ANNs criticized for being black
-% boxes) ~\cite{basheer}""".
-
-% 
 \section{Goal Oriented Novel Sound Generation}
 
 \label{related}
