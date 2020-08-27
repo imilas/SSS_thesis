@@ -36,11 +36,9 @@ In this chapter we discuss in more detail the implementations and interactions o
 
 \section{Virtual Synthesizer}
 \label{vs}
-We require a synthesizer of sound which is capable of rapidly receiving or creating programs and rendering the corresponding sound offline. These programs can be generated randomly by the synthesizer itself or created externally by a person or algorithm (for example, with heuristic search).  We anticipate that any synthesizer with such capabilities can be integrated into our system; Here, we do not prioritize perfect replication of organic sounds as unusual synthesis methods will likely lead to novel sound generation. As discussed in Section~\ref{sec_digital_synthesis}, we opted for a set of classical DSP methods to build our synthesizer. For our project, we used the python based Pippi library for sound generation\footnote{https://github.com/luvsound/pippi}. This library uses a C back-end\footnote{https://github.com/PaulBatchelor/Soundpipe} and focuses on fast offline generation of audio signals. 
+ To create sounds, we need digital synthesizers capable of rapidly receiving or creating programs and rendering the corresponding sound offline. We use classical DSP to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. Our implementation of a synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
 
-
-%  
- \begin{figure}[tbp]
+ \begin{figure}[htbp]
     \begin{center}
     % \textbf{Synthesizer SubModule }
     \makebox[\textwidth]{
@@ -51,15 +49,15 @@ We require a synthesizer of sound which is capable of rapidly receiving or creat
 \label{fig:submodule}
 \end{figure}
 
- \begin{figure}[tbp]
+ \begin{figure}[htbp]
     \begin{center}
     % \textbf{Synthesizer SubModule }
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1\linewidth]{images/chapter_3/synthesizer_all_blocks.pdf}}}
     \end{center}
-    \caption{The output of a synthesizer is the normalized addition of all its submodule outputs. 
+    \caption{The output of the virtual synthesizer is the normalized addition of the output of its submodules. A synthesizer can have any number of submodules. 
     }
-\label{fig:submodule}
+\label{fig:synth_modules}
 \end{figure}
 Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
@@ -171,6 +169,16 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
 \label{fig:ven_data}
 \end{figure}
 \subsection{Two Phased Ears}
+\begin{figure}[t!]
+    \begin{center}
+    \textbf{TPE Design}
+    \makebox[\textwidth]{
+    \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_3/TPE_ear.pdf}}}
+    \end{center}
+    \caption{ dis a tpe}
+\label{fig:TPE_design}
+\end{figure}
+
 \label{sec:ear}
 \subsubsection{The Models}
 \label{TPE_models}
@@ -189,6 +197,16 @@ With our models showing high accuracy on testing data, we combine models in orde
 
 These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus. 
 \subsection{Mixed Ear Models}
+
+\begin{figure}[t!]
+    \begin{center}
+    \textbf{MEM Design}
+    \makebox[\textwidth]{
+    \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_3/MEM_ear.pdf}}}
+    \end{center}
+    \caption{ dis a MEM}
+\label{fig:TPE_design}
+\end{figure}
 \label{chap3:mixed_ear_models}
 As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each sound group to predict its type. This differs from two-phased ears as we are simultaneously categorizing a new sound's drum type or putting it in the \enquote{synthetic noise} category. We call this task drum vs drum vs not-drum, or \enquote{DvDvN}. We also tackle the Drum vs Not-Drum problem using our embedding features.
 
