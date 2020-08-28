@@ -155,7 +155,7 @@ Traditional classification tasks often make the assumption the data points used 
 
 Our goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{Decision.2} and~\hypref{Decision.1}.
 
-We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). As we will discuss in the next sections, TPEs are a combination different models for each of ~\hypref{Decision.2} and~\hypref{Decision.1}; With the features utilized by these models being manually defined. mixed ear models use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
+We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of ~\hypref{Decision.2} and~\hypref{Decision.1}. The features utilized by these models are manually defined. mixed ear models use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
 \begin{figure}[htbp!]
     \begin{center}
@@ -163,9 +163,7 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
     \makebox[\textwidth]{
     \includegraphics[width=1\linewidth]{images/chapter_4/venn_data.pdf}}
     \end{center}
-    \caption{ 
-    Scales are symbolic (true scales are not measurable and/or subjective).  $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. The size of $\mathcal{T^{-}}$ can be set to any number(we can generate as any number of random samples), but we prefer to keep it no larger than  $\mathcal{T^{+}}$. $\mathcal{H}$ is a series of sounds sent to the ear for classification. The ideal ear will detect  $\mathcal{H^{+}}$, the overlap of $\mathcal{H}$ and $\mathcal{N}$, with high precision and recall. 
-    }
+    \caption{ An illustration of the discrepancy between the sounds we use to train our classifiers and the type of sounds the classifier is expected to classify. $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. The inclusion of sounds in this group may vary from person to person. Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. For $\mathcal{T^{-}}$, we can generate any number of random samples. $\mathcal{H}$ is a series of sounds sent to the ear for classification.}
 \label{fig:ven_data}
 \end{figure}
 \subsection{Two Phased Ears}
@@ -175,7 +173,7 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_3/TPE_ear.pdf}}}
     \end{center}
-    \caption{ dis a tpe}
+    \caption{TPE's receive a sound and make decisions sequentially.}
 \label{fig:TPE_design}
 \end{figure}
 
@@ -204,7 +202,7 @@ These models can be combined and weighted in various ways and the confidence thr
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_3/MEM_ear.pdf}}}
     \end{center}
-    \caption{ dis a MEM}
+    \caption{MEMs use both FFT features and embedding features to make both decisions simultaneously. }
 \label{fig:TPE_design}
 \end{figure}
 \label{chap3:mixed_ear_models}
