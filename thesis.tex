@@ -30,12 +30,31 @@
 \usepackage{caption}
 \usepackage{threeparttable} %annotations for table
 \usepackage{csquotes}
+% for code embedding
+\usepackage{listings}
 
+\lstset{escapeinside={@(}{)@}}
+% %%%%%%%%%%%
+\usepackage{xcolor}
 
+\definecolor{backcolour}{rgb}{0.98,0.98,1}
 
-%%%%%%%%%%%%%%%%%%
-% Packages Setup %
-%%%%%%%%%%%%%%%%%%
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
 % Cross-References; https://tex.stackexchange.com/q/77774/
 \zxrsetup{toltxlabel}
 % Hyperlink configuration

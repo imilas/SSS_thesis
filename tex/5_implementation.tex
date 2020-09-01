@@ -179,11 +179,31 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
 
 \label{sec:ear}
 \subsubsection{The Models}
+%\lstset{language=Python}
 \label{TPE_models}
-Using the described features, we trained several neural network models for Phase 1 and 2 in the Pytorch environment. The task of Phase 1 is to separate drums from not-drums (DrumVsNotDrum, or DVN). The task of Phase 2 is to categorize drums and percussion (DrumVsDrum, or DVD). We kept our feature space small, making it viable for feature selection and model design to be done on a trial and error basis. For all models, accuracy is calculated by prediction of all test dataset labels and the loss function and optimizer are Categorical-CrossEntropy and Adam respectively. Training continues until no reduction in loss and accuracy is observed in 10 epochs.  All activation functions are PReLU:
+% Default fixed font does not support bold face
+
+\lstset{escapeinside={@(}{)@}}
+
+Using the described features, we trained several neural network models for Phase 1 and 2 in the Pytorch environment. The task of Phase 1 is to separate drums from not-drums (DrumVsNotDrum, or DVN). The task of Phase 2 is to categorize drums and percussion (DrumVsDrum, or DVD). We kept our feature space small, making it viable for feature selection and model design to be done on a trial and error basis. For all models, accuracy is calculated by prediction of all test dataset labels and the loss function and optimizer are Categorical-CrossEntropy and Adam respectively. Training continues until no reduction in loss and accuracy is observed in 10 epochs. 
+
+\begin{lstlisting}[caption=CNNLSTM-dvn]
+                    Layer                 Output Shape
+                =======================================
+                    Conv2d-1             [@($\mathcal{B}$)@, 2, 20, 20]
+                      ReLU-2             [@($\mathcal{B}$)@, 2, 20, 20]
+                   Dropout-3             [@($\mathcal{B}$)@, 800]
+                  LSTMCell-4             [[@($\mathcal{B}$)@, 20], [@($\mathcal{B}$)@, 20]]
+                    Linear-5             [@($\mathcal{B}$)@, 2]
+                   Softmax-6             [@($\mathcal{B}$)@, 2]
+                =======================================
+\end{lstlisting}
+
+
 \begin {enumerate}
 \item FC-DVN: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for Phase 1. With size of 10x5x10.
 \item CNNLSTM-DVN: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on our test set. Its structure is the combination of a CNN with 2 output channels and kernel size $(7,3)$; Followed by an LSTM model of hidden size 800 and a fully connected layer of size 20x2.
+
 \item E+F-DVD: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Size of 50x10x2x6.
 \item CNN-DVD: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. A combination of a CNN model with output channel size of 4, kernel of size of 5, another CNN model with output channel size of 8 and kernel of size 3. Followed by a fully connected network of shape 100x20x6.
 \item FC-DVD: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Size of 400x200x50.
