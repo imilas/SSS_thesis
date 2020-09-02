@@ -178,7 +178,7 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
 \end{figure}
 
 \label{sec:ear}
-\subsubsection{The Models}
+
 %\lstset{language=Python}
 \label{TPE_models}
 % Default fixed font does not support bold face
@@ -187,27 +187,125 @@ We cover the implementation of these virtual ear models in two sections: \emph{t
 
 Using the described features, we trained several neural network models for Phase 1 and 2 in the Pytorch environment. The task of Phase 1 is to separate drums from not-drums (DrumVsNotDrum, or DVN). The task of Phase 2 is to categorize drums and percussion (DrumVsDrum, or DVD). We kept our feature space small, making it viable for feature selection and model design to be done on a trial and error basis. For all models, accuracy is calculated by prediction of all test dataset labels and the loss function and optimizer are Categorical-CrossEntropy and Adam respectively. Training continues until no reduction in loss and accuracy is observed in 10 epochs. 
 
-\begin{lstlisting}[caption=CNNLSTM-dvn]
-                    Layer                 Output Shape
-                =======================================
-                    Conv2d-1             [@($\mathcal{B}$)@, 2, 20, 20]
-                      ReLU-2             [@($\mathcal{B}$)@, 2, 20, 20]
-                   Dropout-3             [@($\mathcal{B}$)@, 800]
-                  LSTMCell-4             [[@($\mathcal{B}$)@, 20], [@($\mathcal{B}$)@, 20]]
-                    Linear-5             [@($\mathcal{B}$)@, 2]
-                   Softmax-6             [@($\mathcal{B}$)@, 2]
-                =======================================
-\end{lstlisting}
 
+\subsubsection{DVN Models}
+\textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for Phase 1. With size of 10x5x10. \\
+\begin{center}
+\vbox{
+    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+            Layer                       Details
+            ========================================================
+            Linear                      in_features=400 
+                                        out_features=20 
+                                        bias=True
+            PReLU                       
+            Linear                      in_features=20
+                                        out_features=10 
+                                        bias=True
+            PReLU
+            Linear                      in_features=10
+                                        out_features=4
+                                        bias=True
+            PReLU
+            Linear                      in_features=4
+                                        out_features=2
+                                        bias=True
+            Softmax                     DVN probabilities
+                        
+        \end{lstlisting}}
+\end{center}
+\textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on our test set. Its structure is the combination of a CNN with 2 output channels and kernel size $(7,3)$; Followed by an LSTM model of hidden size 800 and a fully connected layer of size 20x2.\\
+\begin{center}
+\vbox{
+    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+            Layer                       Details
+            ========================================================
+            Conv2d                  kernel size = (7, 3)
+                                    stride = (1, 1)
+                                    padding = (3, 1)
+            ReLU
+            Dropout                 probability = 0.5
+            LSTMCell                hidden size = 800
+                                    input size = @($\mathcal{F}$)@
+            Linear                  in_features = @($\mathcal{F}$)@
+                                    out_features = 2
+                                    bias=True
+            Softmax                 DVN probabilities
+\end{lstlisting}}
+\end{center}
 
-\begin {enumerate}
-\item FC-DVN: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for Phase 1. With size of 10x5x10.
-\item CNNLSTM-DVN: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on our test set. Its structure is the combination of a CNN with 2 output channels and kernel size $(7,3)$; Followed by an LSTM model of hidden size 800 and a fully connected layer of size 20x2.
+\subsubsection{DVD Models}
+\textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Size of 50x10x2x6.\\
+\begin{center}
+\vbox{
+    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+            Layer                       Details
+            ========================================================
+            Linear                      in_features = 10+50 
+                                        out_features = 30
+                                        bias = True
+            PReLU                       
+            Linear                      in_features = 30
+                                        out_features = 10
+                                        bias = True
+            PReLU                       
+            Linear                      in_features = 10
+                                        out_features = 10
+                                        bias = True
+            PReLU     
+            Linear                      in_features = 10
+                                        out_features = @($\mathcal{C}$)@
+                                        bias = True
+            Softmax                     drum type probabilities
+        \end{lstlisting}}
+\end{center}
 
-\item E+F-DVD: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Size of 50x10x2x6.
-\item CNN-DVD: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. A combination of a CNN model with output channel size of 4, kernel of size of 5, another CNN model with output channel size of 8 and kernel of size 3. Followed by a fully connected network of shape 100x20x6.
-\item FC-DVD: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Size of 400x200x50.
-\end{enumerate}
+\textbf{CNN-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. A combination of a CNN model with output channel size of 4, kernel of size of 5, another CNN model with output channel size of 8 and kernel of size 3. Followed by a fully connected network of shape 100x20x6.\\
+\begin{center}
+\vbox{
+    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+            Layer                       Details
+            ========================================================
+            Conv2d                  kernel size=(7, 3)
+                                    stride=(1, 1)
+                                    padding=(3, 1)
+            ReLU
+            Dropout                 probability=0.5
+            LSTMCell                hidden size=800
+                                    input size=20
+            Linear                  in_features=20
+                                    out_features=@($\mathcal{C}$)@
+                                    bias=True
+            Softmax                 drum type probabilities
+        \end{lstlisting}}
+\end{center}
+
+\textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Size of 400x200x50.
+\begin{center}
+\vbox{
+    \begin{lstlisting}[caption=FC-DVD]
+            Layer                       Details
+            ========================================================
+            Linear                      in_features=400
+                                        out_features=20 
+                                        bias=True
+            PReLU                       
+            Linear                      in_features=20
+                                        out_features=10 
+                                        bias=True
+            PReLU
+            Linear                      in_features=10
+                                        out_features=4
+                                        bias=True
+            PReLU
+            Linear                      in_features=4
+                                        out_features=@($\mathcal{C}$)@
+                                        bias=True
+            Softmax                     drum type probabilities
+                        
+        \end{lstlisting}}
+\end{center}
+\subsubsection{Creating An Ear}
 The parameters are hand-picked and un-tuned. As discussed in Section~\ref{surveys}, higher accuracy rates in these models do not translate to higher agreeableness with humans. leading us to believe that model accuracy on test data alone cannot be relied upon when the domain of sounds 
 being categorized is switched from original percussion samples to virtual synth sounds.
 
