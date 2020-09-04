@@ -80,25 +80,25 @@ Dropout Rate & Random zeroing of activations between layers to prevent over-fitt
 
 Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and audio-transformers and used hyper-parameter optimization to extract promising sets of values~\ref{table:hyper_params}. 
 
-The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
+The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. The batchsize, $\mathcal{B}$, was set to 64 for training and 4 for testing. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
 
 \begin{table}[h]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
-Conv2d-1 & [-1, 8, 30, 20] &   208 & Encoder's input \newline
+Conv2d-1 & [$\mathcal{B}$, 8, 30, 20] &   208 & Encoder's input \newline
 Num. Channels:8\newline
 kernel:5x5\newline                  
 stride:1\newline    
 padding:2 \\ \hline
-ReLU-2 & [-1, 8, 30, 20] &   0 & \\  \hline
-MaxPool2d-3 & [-1, 8, 15, 10] & 0 &  kernel:5x5 \newline
+ReLU-2 & [$\mathcal{B}$, 8, 30, 20] &   0 & \\  \hline
+MaxPool2d-3 & [$\mathcal{B}$, 8, 15, 10] & 0 &  kernel:5x5 \newline
 stride:2 \\ \hline
-Dropout-4 & [-1, 8, 15, 10] & 0 &  \\ \hline
-Linear-5 & [-1, 8] & 9,608 & Encoder's output \\ \hline
-Linear-6 & [-1, 256] & 2,304 & Decoder's Input \\ \hline
-Dropout-7 & [-1, 256] & 0 &  \\ \hline
-Linear-8 & [-1, 600 ] &  154,200& Decoder's output\\ \hline
+Dropout-4 & [$\mathcal{B}$, 8, 15, 10] & 0 &  \\ \hline
+Linear-5 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
+Linear-6 & [$\mathcal{B}$, 256] & 2,304 & Decoder's Input \\ \hline
+Dropout-7 & [$\mathcal{B}$, 256] & 0 &  \\ \hline
+Linear-8 & [$\mathcal{B}$, 600 ] &  154,200& Decoder's output\\ \hline
 \end{tabular}
 \caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size. Total number of parameters is 166,320. }
 \label{table:CNNAUTOENCODER}
@@ -108,12 +108,12 @@ Linear-8 & [-1, 600 ] &  154,200& Decoder's output\\ \hline
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
-Linear-1 & [-1, 128]  & 76,928 & Encoder's input \\ \hline
-Dropout-2 & [-1, 128] & 0 &  \\ \hline
-Linear-3 & [-1, 8] & 9,608 & Encoder's output \\ \hline
-Linear-4 & [-1, 128] & 2,304 & Decoder's Input \\ \hline
-Dropout-5 & [-1, 128]  & 0 &  \\ \hline
-Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
+Linear-1 & [$\mathcal{B}$, 128]  & 76,928 & Encoder's input \\ \hline
+Dropout-2 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
+Linear-3 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
+Linear-4 & [$\mathcal{B}$, 128] & 2,304 & Decoder's Input \\ \hline
+Dropout-5 & [$\mathcal{B}$, 128]  & 0 &  \\ \hline
+Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
 \end{tabular}
 \caption{Fully connected model with only 1 hidden dimension for encoder and decoder. Designed assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 156,512.}
 \label{table:FC1_AUTOENCODER}
@@ -124,16 +124,16 @@ Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
-Linear-1 & [-1, 128]  & 76,928 & Encoder's input \\ \hline
-Dropout-2 & [-1, 128] & 0 &  \\ \hline
-Linear-3 & [-1, 32]  & 4,128 & \\ \hline
-Dropout-4 & [-1, 128] & 0 &  \\ \hline
-Linear-5 & [-1, 8] & 9,608 & Encoder's output \\ \hline
-Linear-4 & [-1, 32] & 2,304 & Decoder's Input \\ \hline
-Dropout-5 & [-1, 32]  & 0 &  \\ \hline
-Linear-4 & [-1, 128] & 2,304 & \\ \hline
-Dropout-5 & [-1, 128]  & 0 &  \\ \hline
-Linear-6  & [-1, 600 ] &  77,400 &Decoder's output\\ \hline
+Linear-1 & [$\mathcal{B}$, 128]  & 76,928 & Encoder's input \\ \hline
+Dropout-2 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
+Linear-3 & [$\mathcal{B}$, 32]  & 4,128 & \\ \hline
+Dropout-4 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
+Linear-5 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
+Linear-4 & [$\mathcal{B}$, 32] & 2,304 & Decoder's Input \\ \hline
+Dropout-5 & [$\mathcal{B}$, 32]  & 0 &  \\ \hline
+Linear-4 & [$\mathcal{B}$, 128] & 2,304 & \\ \hline
+Dropout-5 & [$\mathcal{B}$, 128]  & 0 &  \\ \hline
+Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
 \end{tabular}
 \caption{Fully connected model with 2 hidden dimensions for encoder and decoder. Designed assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 163,232.}
 \label{table:FC2_AUTOENCODER}
