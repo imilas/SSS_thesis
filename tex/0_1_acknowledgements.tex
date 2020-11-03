@@ -1,0 +1,17 @@
+% Allow relative paths in included subfiles that are compiled separately
+% See https://tex.stackexchange.com/questions/153312/
+\providecommand{\main}{..}
+\documentclass[\main/thesis.tex]{subfiles}
+
+\begin{document}
+
+% environment for acknowledgements.
+\begin{acknowledgements} 
+
+A summary of this thesis has been published in \enquote{Proceedings of the 2020 AI Music Creativity Conference, 2020} under the title \enquote{Make your own audience: virtual listeners can filter generated drum programs}.\\\\
+Large portions of this work will be submitted to the \enquote{Journal of Creative Music Systems}.\\\\
+A number of SVG icons created by Becris, Pixel Perfect and Freepik were used in our figures.\\\\ 
+
+\end{acknowledgements}
+
+\end{document}
