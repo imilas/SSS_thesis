@@ -56,11 +56,11 @@ As briefly discussed in Section~\ref{sec:computer_make_sound}, sound can take on
 In this context, \textit{sampling rate}, is an important feature of digital sound, referring to the number of samples per second of audio (measured in Hertz, or Hz). Sampling rate is not the only important factor when recording audio as it is important to record the samples with not just speed, but also precision. Assuming perfect sensors, precision is the range of possible values we can assign to each sample. It is determined by bit depth: the number of bits we have to represent the values of each sample.  Today, standard quality audio often refers to sampling rates of 44.1 kHz and 48 kHz and bit depth of 16 (that's $2^{16}$ values), while \enquote{high quality} audio indicates an increase in bit rate or bit depth~\cite{reiss2016meta}. Although subject to diminishing returns, high quality audio may be preferable to most musicians and audio-engineers; In a meta-analysis of digital sound perception, Reiss found a small but statistically significant portion of people are able to discriminate the effect of standard and high quality audio with no prior training, and a dramatically higher detection rate after extensive training~\cite{reiss2016meta}. 
 
 
-\begin{figure}[h]
+\begin{figure}[tbp]
 
 \centering
 \includegraphics[width=1\linewidth,angle =-90 ]{images/periodic_function_decimation.png}
-\caption{Reconstruction of a periodic, continuous wave at three different sampling levels. Higher sampling rates result in higher reconstruction accuracy. } % AH: this is linear interpolation many sound cards will convert the last signal back into the original wave just fine
+\caption{Reconstruction of signals from discrete points may result in loss of data with inadequate sampling rates. Consider the case when multiple signals with varying frequencies are overlapped.} 
 \label{fig_sampling_rate}
 \end{figure}
 
