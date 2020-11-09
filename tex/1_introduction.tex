@@ -11,10 +11,13 @@
 \chapter{Introduction}
 
  
-\section{What is Our Goal?}
-Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are not easy or cheap to find. New drum sounds can be obtained via live recordings of drums, layering existing drum sounds and often lengthy hacking of sound engineering techniques. The goal here is to create a new, virtual source of novel drum sounds. We approach this goal by creating systems capable of generating drum synthesizer programs, and measuring the success rate of these systems by listening to the sound outputs. 
-\section{Our Findings}
- Based on our analysis of the sound outputs, we found that the majority of sounds produced from our system are suitable substitutes for drum sounds. Among these percussive sounds, we found a moderate to high degree of agreement between the  automatically assigned drum labels and blinded, manual hearing tests.
+\section{Our Goals and Findings}
+Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are not easy or cheap to find. New drum sounds can be obtained via live recordings of drums, layering existing drum sounds and often lengthy hacking of sound engineering techniques. The goal here is to create a new, virtual source of novel drum sounds, where most of the outputs are suitable substitutes for organic drums. In addition, given that a sound is percussive, we require the accurate categorization of drum-types.
+
+We created systems capable of generating drum synthesizer programs, and measured the success rate by listening to the sound outputs. The survey of our best generative system showed that only 8\% of the sounds were deemed not percussive by both reviewers, and 30\% by at least one. With regards to agreement between manual and automatically assigned labels to drum sounds, our measurements showed Fleiss kappa scores of 0.3 or higher, indicating a moderate agreement~\footnote{These kappa scores nearly doubled when non-percussive sounds were removed from the survey}.
+
+
+% These results indicate that the majority of sounds produced from our system are suitable substitutes for drum sounds. Among these percussive sounds, we found a moderate to high degree of agreement between the  automatically assigned drum labels and blinded, manual hearing tests.
 % \subsection{Drums and Percussion}
 % Drums are a subcategory of percussive instruments. Almost any object which is struck to produce noise can be referred to as a drum~\cite{latham2002oxford}. Under strict definitions, the terms can be used interchangeably~\cite{latham2002oxford}. We adapt this strict definition as our work is not concerned the delineation between the two overlapping concepts, but with creation of synthetic sounds which can be used by digital sound artists as replacements for organic drums or percussion. We often use the terms \enquote{drum} and \enquote{percussion} interchangeably.
 
