@@ -10,12 +10,15 @@
 
 \begin{document}
 \chapter{Representing Sound}
-We are interested in extracting generalizable, domain agnostic features to train our virtual ear models. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
+A second of digital sound at our desired sample rate exists as an array of 48000 numbers. Our choice of feature extraction from digital sound is a foundational step towards the implementation of the \textit{virtual ear}. While smaller representations can reduce computation costs significantly, important features may be lost in the transformation. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
     \item By using Fourier Transformations \item By using autoencoders to further condense the Fourier transformations. 
 \end{enumerate}
 
 \section{Fourier Transforms}
-In this work we rely on derivatives of the fast Fourier transform (FFT), and by extension, short-time Fourier transforms (STFT) for feature extraction. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when temporal changes in frequency bins are of interest; This can be done by the application of FFT\footnote{more accurately, discrete Fourier transforms} to a sliding time-window on the signal to create a vector for each time step. This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step).
+In this work we rely on derivatives of the fast Fourier transform (FFT), and by extension, short-time Fourier transforms (STFT) for feature extraction. Various works have demonstrated effective reconstruction of signals given their short-time Fourier transforms~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,huzaifah2017comparison}. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when temporal changes in frequency bins are of interest; This can be done by the application of FFT\footnote{more accurately, discrete Fourier transforms} to a sliding time-window on the signal to create a vector for each time step. This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step). 
+
+
+
 \begin{figure}
 \centering
 \textbf{Visual Representation of Raw Features}\par\medskip
@@ -28,15 +31,16 @@ In this work we rely on derivatives of the fast Fourier transform (FFT), and by 
 \label{fig:stackspectrums}
 \end{figure}
 
-Various works have demonstrated effective reconstruction of signals given their STFT~\cite{nawab1983signal,griffin1984signal}. For our purpose, if the original signal can be faithfully reconstructed from its STFT, analysis of the STFT may be relied on as source of fundamental features necessary for audible signal categorization. In the interest of keeping the feature space small and fundamental, other methods of feature extraction such as Spectral-Centroids~\cite{schubert2004spectral} and Zero-Crossing Rates~\cite{gouyon2000use} are not utilized.
 
-Using only the STFT of signals as source of feature extraction we defined 3 transformation functions which we believe to capture important, unique attributes of percussive sounds.  These functions were applied at training time to 1 second audio samples before being sent to a classifier; transforming a signal into a set of features which we hope can capture the necessary information for our categorization task. 
+% In the interest of keeping the feature space small and fundamental, other methods of feature extraction such as Spectral-Centroids~\cite{schubert2004spectral} and Zero-Crossing Rates~\cite{gouyon2000use} are not utilized.
+
+To transform a signal into a set of features, 3 transformation functions can be applied at training time to 1 second audio samples before being sent to a classifier.
 
 
 \begin{enumerate}
 \item Envelope Transformation: The goal of this feature is to capture the changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively, and with values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector $v_i$. This vector is then normalized to the range of 0 to 1. The information contained in this vector is similar to that of a Root-Mean-Square measurement.
-\item Frequency Transformation: A static, normalized snap-shot of the the frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis. Another important distinction is that since capturing an adequate frequency resolution is important for this transformation, we utilized shorter hop-sizes and wider windows. A Mel Scale transformation was also applied in hopes that the captured features better represent human perception of frequencies. 
-\item Spectrum Transformation: This function is simply a Mel Scaled STFT with its values normalized from 0-1. Since this features is a 2D matrix rather than a vector it captures more information about our signal but requires heavier, more complex computational methods to be utilized. 
+\item Frequency Transformation: A static, normalized snap-shot of the  frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis.
+\item Spectrum Transformation: Mel Scaled STFT with its values normalized from 0-1. Since this features is a 2D matrix rather than a vector it captures more information about our signal.
 \end{enumerate}
 
 
@@ -44,13 +48,9 @@ Using only the STFT of signals as source of feature extraction we defined 3 tran
 % http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
 % http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
 % 
-Like many other categorization tasks, we seek features that capture critical information about our data in the most compact format possible. Feature extraction is a form of dimensionality reduction. While manual definition of the desired features can yield results, we also trained various autoencoder networks to encode our spectral features without supervision. 
+Autoencoders are a method of dimensionality reduction with deep neural networks~\cite{hinton1994autoencoders,hinton2006reducing}. As an alternative method of sound representation, autoencoder networks were used to encode spectrogram features without supervision. Autoencoders are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector. 
 
-As discussed previously in Section \ref{bg:NN}, many variations and applications of deep autoencoder networks have been proposed since Hinton et al. demonstrated effective dimensionality reduction via deep autoencoder networks \cite{hinton1994autoencoders,hinton2006reducing}. Particularly relevant are recent works by Aouameur et al. and Ramires et al. which influence the output of generative neural networks used for the synthesis of percussive sounds by inputting the low dimensional representation of desired traits \cite{aouameur2019neural,ramires2020neural}. 
-
-We designed a number of autoencoder networks for the purpose of extracting features from our dataset of drum samples. Autoencoders are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound into a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector, in other words, a feature extractor. 
-
-We kept our autoencoder designs relatively simple, all with approximately 150,000 parameters. Important to mention is that reported loss values of the model do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. Also important is that we do not give any examples of synthetic noise to the encoders, and only train on organic drums. We hope that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
+The autoencoder designs were kept relatively simple, all with approximately 150,000 parameters. Important to mention is that reported loss values of the models do not reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. These small networks train quickly without the need for much data. Here, we did not give any examples of synthetic noise to the encoders, and only train on organic drums. We hypothesize that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
 \begin{table}[h!]
 
 \begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
@@ -74,11 +74,11 @@ Dropout Rate & Random zeroing of activations between layers to prevent over-fitt
 \subsection{Architecture and Hyper-Parameter Optimization}
 % could do multi-objective pareto front stuff
 
-Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist us with the construction of our model, we defined a number of possible choices for the architecture of our model and audio-transformers and used hyper-parameter optimization to extract promising sets of values~\ref{table:hyper_params}. 
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist with the construction of the model, a number of possible choices for the architecture and the transformation function were defined (see table~\ref{table:hyper_params}). These choices were then used in hyper-parameter optimization to extract promising sets of values. 
 
 The list of possible choices for the selected hyper-parameters can be found in table~\ref{table:hyper_params}. The batchsize, $\mathcal{B}$, was set to 64 for training and 4 for testing. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected; If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
 
-\begin{table}[h]
+\begin{table}[]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
@@ -100,7 +100,7 @@ Linear-8 & [$\mathcal{B}$, 600 ] &  154,200& Decoder's output\\ \hline
 \label{table:CNNAUTOENCODER}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Param Num & Details  \\ \hline
@@ -115,7 +115,7 @@ Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
 \label{table:FC1_AUTOENCODER}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[]
 
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
@@ -145,7 +145,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \label{chap3:bestvalues}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[]
 \centering
 \textbf{Loss Value per Epoch for Top 10 Trials}
 \includegraphics[width=12cm,height=6.5cm]{images/chapter_3/loss_per_training.pdf}
@@ -154,7 +154,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \end{figure}
 
 
-\begin{figure}[t]
+\begin{figure}[]
 \begin{center}
     \textbf{Hyper-Parameters' Loss Correlation}
     \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter_3/slice_plot.pdf}}
@@ -163,7 +163,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
     \end{center}
 
 \end{figure}
-\begin{figure}[h!]
+\begin{figure}[]
 \begin{center}
     \textbf{ Parallel Coordinates of Hyper-Parameter Sets and Loss}
     \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter_3/parallel_coord.pdf}}
@@ -172,10 +172,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
     \end{center}
    
 \end{figure}
-
-We depict the correlation of parameter values with trial results in figures~\ref{fig:slicegraph} and~\ref{fig:parallel_coord}. We extract a more concrete measurement of hyper-parameter influence using Hutter et al.'s fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph. This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, the slice-graph depicts CNN models as having the best and worst results while FC models are reliably average; Making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
-
-\begin{figure}[t!]
+\begin{figure}[]
 \centering
 \textbf{Estimated Parameter Importance}
 \includegraphics[width=14cm,height=7cm]{images/chapter_3/ParameterImportances_final.pdf}
@@ -183,8 +180,12 @@ We depict the correlation of parameter values with trial results in figures~\ref
 \label{chap3:param_importance}
 \end{figure}
 
-\subsection{Possible Explanation for Embedding Ear's Effectiveness}
-How well does our best autoencoder work? What happens if we create a feedback loop where a decoded spectrograms are fed through the network again? 
+We depict the correlation of parameter values with trial results in figures~\ref{fig:slicegraph} and~\ref{fig:parallel_coord}. We extract a more concrete measurement of hyper-parameter influence using Hutter et al.'s fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph. This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, the slice-graph depicts CNN models as having the best and worst results while FC models are reliably average; Making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
+
+
+\subsection{Exploring Recursive Recreations}
+What happens if we create a feedback loop where a decoded spectrograms are fed through the network again? 
+We recursively run the autoencoder on new sounds and display the results in figure~\ref{fig:recreations}. The results are displayed for 1, 2, 10 and 100 recursions. Spectrograms belonging to percussive groups retain their unique characteristics for many iterations, while details in most synthetic noise spectrograms are quickly dissipated. A major point of concern here is that recursively recreated synthetic noise spectrograms tend to take on drum characteristics. This is possibly prompted by our encoder only having been exposed to drums sounds prior.  Yet it is possible that the \enquote{confusion} demonstrated by the encoder after the initial reconstruction leads to embedding of familiar sounds being distinguishable from those unseen. 
 \begin{figure}[h!]
 \centering
 \textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
@@ -204,7 +205,7 @@ How well does our best autoencoder work? What happens if we create a feedback lo
 \label{fig:recreations}
 \end{figure}
 
-We recursively run the autoencoder on new sounds and display the results in figure~\ref{fig:recreations}. The results are displayed for 1, 2, 10 and 100 recursions. Spectrograms belonging to percussive groups retain their unique characteristics for a few time steps, while details in most synthetic noise spectrograms are quickly dissipated. A major point of concern here is that recursively recreated synthetic noise spectrograms tend to take on drum characteristics. This is possibly prompted by our encoder only having been exposed to drums sounds prior.  Yet it is possible that the \enquote{confusion} demonstrated by the encoder after the initial reconstruction leads to embedding of familiar sounds being distinguishable from those unseen. If correct, this approach may have beneficial implications in addressing the aforementioned OSR problem.  
+
 
 
 \subsection{Feature Extraction}
