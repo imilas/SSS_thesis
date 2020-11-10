@@ -15,9 +15,9 @@
 
 
 \section{What Are We Doing Again?}
-Our goal is to create a system for the generation of novel drum sounds. So far, we've discussed what tools to pick for virtual synthesis, and how to represent digital sounds in a smaller, more \enquote{learn-able} format. In this chapter, we will discuss the two main components of our system: The \textit{virtual synthesizer} and the \textit{virtual ear}. A quick outline of our generative pipeline is this: The virtual synthesizer will rapidly generate random programs and the corresponding sounds. As the virtual synthesizer creates sounds based on these programs, the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. In case of search, other algorithms can create programs for the synthesizer and receive the rating/categorization assigned by the virtual ear. A visual representation of our pipeline is illustrated in  figure~\ref{fig:pipeline_outline}.
+Our goal is to create a system for the generation of novel drum sounds. So far, we've discussed what tools to pick for virtual synthesis, and how to represent digital sounds in a smaller, more \enquote{learn-able} format. In this chapter, we will discuss the two main components of our system: The \textit{virtual synthesizer} and the \textit{virtual ear}. A quick outline of our generative pipeline is this: The virtual synthesizer will rapidly generate random programs and the corresponding sounds. As the virtual synthesizer creates sounds based on these programs, the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. 
 
-In this chapter we discuss the implementations of the two major components of our project. In Section~\ref{vs} we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. In section~\ref{sec:ear}, we discuss the implementation of the virtual ear, its task being the separation of percussive sounds from non-percussive sounds.
+A visual representation of this pipeline is illustrated in  figure~\ref{fig:pipeline_outline}.In Section~\ref{vs} we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. In section~\ref{sec:ear}, we discuss the implementation of the virtual ear, its task being the separation of percussive sounds from non-percussive sounds.
 
 
  \begin{figure}[t!]
@@ -26,7 +26,7 @@ In this chapter we discuss the implementations of the two major components of ou
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_4/pipeline.pdf}}}
     \end{center}
-    \caption{A blueprint of our desired pipeline which allows each component to be implemented in a number of ways. Our implementation of this workflow also allows for easy parallelization when needed.
+    \caption{A blueprint of our desired pipeline which allows each component to be implemented in a number of ways. The implementation of this workflow also allows for easy parallelization when needed.
     }
 \label{fig:pipeline_outline}
 \end{figure}
@@ -34,7 +34,7 @@ In this chapter we discuss the implementations of the two major components of ou
 
 \section{Virtual Synthesizer}
 \label{vs}
- To create sounds, we need digital synthesizers capable of rapidly receiving or creating programs and rendering the corresponding sound offline. We use classical DSP to build our synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. Our implementation of a synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
+ To create sounds, we need digital synthesizers capable of rapidly receiving or creating programs and rendering the corresponding sound offline. We use classical DSP to build the synthesizer, which allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. We made extensive use of Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries. The virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of required parameters for each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the output of its submodules. The synthesizer can have any number of submodules. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to presets and submodules for a VST).  
 
  \begin{figure}[htbp]
     \begin{center}
@@ -57,9 +57,9 @@ In this chapter we discuss the implementations of the two major components of ou
     }
 \label{fig:synth_modules}
 \end{figure}
-Our virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
+ Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned to these parameters. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The sonic output of the virtual synthesizer is the normalized addition of the sonic output of its submodules. Our implementation of a synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
-As we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample within our database. Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time (but the entire sound must fit within the second, that is, a 0.5 second sound cannot begin playing after 0.5 seconds within rendering time frame). If the synthesizer has a stack size of more than 1 the audio signals from each submodule are overlapped and the total amplitude is normalized.
+As we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample in MixedDB. Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time (but the entire sound must fit within the second, that is, a 0.5 second sound cannot begin playing after 0.5 seconds within rendering time frame). If the synthesizer has a stack size of more than 1 the audio signals from each submodule are overlapped and the total amplitude is normalized.
 
 \begin{table}[t!]
 \centering
@@ -100,7 +100,7 @@ Each submodule is a monophonic synthesizer. That is, each submodule can play one
 \label{chap3:synth_deterministic}
 It is crucial that the same set of synthesizer parameters result in identical, or near identical sounds. Our synthesizer modules are capable of producing random waves, or \enquote{noise}. This type of sound will vary each time it is produced. Manual listening does not show sonic variation between multiple creation of the same set of parameters, but how does this affect our ear models?
 
-We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set 10 times using the LSTM-DVN model. This model measures the probability of a sound belong to the drum/percussion category, and will be discussed in more detail in Section~\ref{TPE_models}. Put simply, we are creating the sonic output of the same parameter set multiple times and measuring its effect on one of our models. We repeat this experiment for stack sizes of 2 and 8 and show the results in figure~\ref{fig:synth_deterministic}.
+We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set 10 times using the CNN-DVN model. This model measures the probability of a sound belong to the drum/percussion category, and will be discussed in more detail in Section~\ref{TPE_models}. Put simply, we are creating the sonic output of the same parameter set multiple times and measuring its effect on one of our models. We repeat this experiment for stack sizes of 2 and 8 and show the results in figure~\ref{fig:synth_deterministic}.
 
 \begin{figure}[htbp!]
 \begin{center}
@@ -121,7 +121,7 @@ We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set
     }}
 \end{center}
 
-\caption{Repeated evaluation of signals from identical paramter-sets shows little variation in scores. Multiple renditions of the same parameter-set vary if the parameter-set calls for generation of 1 or more random wave-shapes. We do not believe these variations to be significant.}
+\caption{Repeated evaluation of signals from identical paramter-sets shows little to no variation in scores. Multiple renditions of the same parameter-set vary if the parameter-set calls for generation of 1 or more random wave-shapes.}
 \label{fig:synth_deterministic}
 \end{figure}
 
@@ -130,9 +130,13 @@ We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set
 \label{sec:ear}
 What we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for our task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. In this work we are mainly focused on generation of novel percussive sounds, therefore, what we require from the ear is to give us probabilities of an audio sample belonging to various categories. Our synthesizer outputs are close to deterministic for all programs, therefore evaluations of the ear would allow us to associate scores of the sound with the parameter values (or program) that generated it.
 
-We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot anticipate what these novel drums will sound like. All we know is that the accepted sounds are synthesizer noises which the synthetic ear has determined to be similar to drum-sounds. 
+We are not looking for the perfect imitation of organic drums using a synthesizer. We seek to imitate drums using a synthesizer and even \textbf{prefer} for its generations to retain novel, unusual characteristics. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot precisely anticipate what novel drums will sound like. All we know is that the accepted sounds are synthesizer noises which the synthetic ear has determined to be similar to drum-sounds. 
 
-Figure~\ref{fig:ven_data} highlights a critical problems with this approach. we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples of what percussive instruments sound like is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making. It likely includes a number of sounds which to our ears could be used as drums. During the hearing test, the virtual ear continually receives synthesizer noises ($\mathcal{H}$) for classification. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$. It is critical to ensure that the change in learning domains---particularly with the case of positive examples of percussive instruments---does not interfere with transformation of knowledge from the training of the ear to the hearing test. To maximize the transference of knowledge from one domain to another, we seek to learn from agnostic feature sets that capture fundamental characteristics of the data points. 
+
+
+% we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples of what percussive instruments sound like is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making. It likely includes a number of sounds which to our ears could be used as drums. During the hearing test, the virtual ear continually receives synthesizer noises ($\mathcal{H}$) for classification. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$.
+
+Figure~\ref{fig:ven_data} highlights a critical problems with this approach. The change in learning domains---particularly with the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test.  \\
 \begin{figure}[]
     \begin{center}
     \textbf{Data Overview}
@@ -142,13 +146,11 @@ Figure~\ref{fig:ven_data} highlights a critical problems with this approach. we 
     \caption{ An illustration of the discrepancy between the sounds we use to train our classifiers and the type of sounds the classifier is expected to classify. $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. The inclusion of sounds in this group may vary from person to person. Our positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. For $\mathcal{T^{-}}$, we can generate any number of random samples. $\mathcal{H}$ is a series of sounds sent to the ear for classification.}
 \label{fig:ven_data}
 \end{figure}
- With our dataset of labeled drum sounds, discussed in Section~\ref{sec:data}, we implemented several well performing algorithms for categorizing unlabeled drum sounds, given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum \textquotedblright recognizing ear is that the set of sounds that are not percussive is infinite. In this project we treat the variety of sounds created by the virtual synthesizer as an infinite set and seek to represent the \enquote{not drum} set with as few samples as possible.
+ With our dataset of labeled drum sounds, discussed in Section~\ref{sec:data}, we implemented several well performing algorithms for categorizing unlabeled drum sounds, given that we know they are drum sounds. However, a major hurdle towards the implementation of a \textquotedblleft drum from non-drum\textquotedblright recognizer is that the set of sounds that are not percussive is infinite. Drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone.
 
- 
-In our case, drum groups are an example of closed sets, since we believe that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone. We hypothesize that a major subtask in the implementation of our virtual ear falls outside the traditional categorization problem and within the \enquote{Open Set Recognition} (OSR) domain~\cite{geng2020recent,mundt2019open}. 
+Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. \\
 
-Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works toward the implementations of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}.  
- Once a sound is generated and passed onto the ear, we expect the virtual ear to facilitate our actions in response to two important questions: 
+ Having considered these caveats, once a sound is generated and passed onto the ear, we expect the virtual ear to make decisions in response to two important questions: 
 \emph{
 \begin{quote}
 \text{Decision.1 Could the sound be used as a drum?}\label{Decision.1}
@@ -156,13 +158,10 @@ Traditional classification tasks often make the assumption the data points used 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}\label{Decision.2}
 \end{quote}
     }
+\decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. We use Figure~\ref{fig:ven_data} to highlight a number of caveats with our training approach. If the sound is deemed percussive, the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. 
+To maximize the transference of knowledge gained from training the classifiers to evaluation of programs, we need to extract concise feature sets that capture fundamental characteristics of the data points.
 
-\hypref{Decision.1} requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used in training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). Much easier to answer is \hypref{Decision.2}, where we found satisfying results with a variety of different approaches. We attribute the relative ease of \hypref{Decision.2} relative to~\hypref{Decision.1} to be reflective of the OSR problem. 
-
-Our goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. We approached this problem by the implementation of various feature extraction methods as well as various models which use these features towards a solution for ~\hypref{Decision.2} and~\hypref{Decision.1}.
-
-
-We cover the implementation of these virtual ear models in two sections: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of ~\hypref{Decision.2} and~\hypref{Decision.1}. The features utilized by these models are manually defined. mixed ear models use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
+Our goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. How we characterize this description is critical as it allows novel sounds to be accepted as part of the drum group despite their anomalies. In the previous chapter, we discussed 2 different approaches to feature extraction. This leads to two different implementation of a virtual ear: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of \decfirst~and \decsecond. The features utilized by these models are manually defined. MEMs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
 
 \subsection{Two Phased Ears}
@@ -184,7 +183,7 @@ Using the features and transformation described in the previous chapter as input
 
 
 \subsubsection{DVN Models}
-\textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for~\decfirst. With size of 10x5x10. \\
+\textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on our test data for~\decfirst. 
 \begin{center}
 \vbox{
     \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
@@ -209,7 +208,7 @@ Using the features and transformation described in the previous chapter as input
                         
         \end{lstlisting}}
 \end{center}
-\textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on our test set. Its structure is the combination of a CNN with 2 output channels and kernel size $(7,3)$; Followed by an LSTM model of hidden size 800 and a fully connected layer of size 20x2.\\
+\textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on our test set. 
 \begin{center}
 \vbox{
     \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
@@ -230,10 +229,10 @@ Using the features and transformation described in the previous chapter as input
 \end{center}
 
 \subsubsection{DVD Models}
-\textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Size of 50x10x2x6.\\
+\textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. 
 \begin{center}
 \vbox{
-    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+    \begin{lstlisting}[caption=Sequential Layers for E+F-DVD]
             Layer                       Details
             ========================================================
             Linear                      in_features = 10+50 
@@ -255,19 +254,23 @@ Using the features and transformation described in the previous chapter as input
         \end{lstlisting}}
 \end{center}
 
-\textbf{CNN-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. A combination of a CNN model with output channel size of 4, kernel of size of 5, another CNN model with output channel size of 8 and kernel of size 3. Followed by a fully connected network of shape 100x20x6.\\ (WRONG ARCHITECTURE IN CODE)
+\textbf{CNN-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2.   {\color{red}double check architecture}
 \begin{center}
 \vbox{
     \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
             Layer                       Details
             ========================================================
-            Conv2d                  kernel size=(7, 3)
+            Conv2d                  kernel size=(4, 5)
                                     stride=(1, 1)
                                     padding=(3, 1)
             ReLU
             Dropout                 probability=0.5
-            LSTMCell                hidden size=800
-                                    input size=20
+            Conv2d                  kernel size=(8, 3)
+                                    stride=(1, 1)
+                                    padding=(3, 1)
+            Linear                  in_features=100
+                                    out_features=@($\mathcal{C}$)@
+                                    bias=True
             Linear                  in_features=20
                                     out_features=@($\mathcal{C}$)@
                                     bias=True
@@ -275,7 +278,7 @@ Using the features and transformation described in the previous chapter as input
         \end{lstlisting}}
 \end{center}
 
-\textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Size of 400x200x50.
+\textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. 
 \begin{center}
 \vbox{
     \begin{lstlisting}[caption=FC-DVD]
@@ -301,9 +304,7 @@ Using the features and transformation described in the previous chapter as input
         \end{lstlisting}}
 \end{center}
 \subsubsection{Creating An Ear}
-As discussed in Section~\ref{surveys}, higher accuracy rates in these models do not translate to higher agreeableness with humans. Model accuracy on test data alone cannot be relied upon when the domain of sounds that are categorized is switched from original percussion samples to virtual synth sounds.
-
-These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus. 
+These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus.  
 
 With our models showing high accuracy on testing data, we combine models in order to make decisions sequentially. For \decfirst~we only determine sounds as percussive if both FC-DVN and CNN-LSTM have determined it as such with over 90\% confidence. For the majority of our random generations that is not the case, but if a randomly generated sound has passed this phase, our three categorizers assign their categorizations to this sound. The fourth method of categorization, \enquote{averaged-cat}, is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category.  These categorizers have a moderate degree of agree-ability as seen in section ~\ref{surveys}, but often the decision is not unanimous.
 
@@ -322,11 +323,11 @@ With our models showing high accuracy on testing data, we combine models in orde
 \label{fig:TPE_design}
 \end{figure}
 \label{chap3:mixed_ear_models}
-As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each sound group to predict its type. This differs from two-phased ears as we are simultaneously categorizing a new sound's drum type or putting it in the \enquote{synthetic noise} category. We call this task drum vs drum vs not-drum, or \enquote{DvDvN}. We also tackle the Drum vs Not-Drum problem using our embedding features.
+In Section~\ref{section:embedded_feats}, we discussed embedded features and visualized their potential using t-SNE. As t-SNE results are not classifiers in of themselves, we create a model which uses encoded versions of each sound group to predict its type. This differs from two-phased ears as we are simultaneously categorizing a new sound's drum type or putting it in the \enquote{synthetic noise} category. We call this task drum vs drum vs not-drum, or \enquote{DvDvN}. We also tackle \decfirst~using embedded features, although DvN MEM models are not used in the final pipelines, as we can make both decisions simultaniously.
 
-As discussed in Section \label{fig:embedding_FE}, manual t-SNE inspections highlighted the disregard for envelope shapes as a major source of failure. We compare the performance of our models before and after the addition of envelope features (a vector of size 10) to the feature space. 
+We mentioned previously that manual t-SNE inspections highlighted the disregard for envelope shapes as a major source of failure. We compare the performance of our models before and after the addition of envelope features (a vector of size 10) to the feature space. 
 
-We reuse the model trained on  MixedDB as our embedding feature extractor. We use a combination of RadarDB, FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares, synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. We also exclude samples longer than 1 second, to exclude potentially mislabeled data. Our final training database for mixed ear models is described in table~\ref{db:memDB}.
+We reuse the model trained on  MixedDB as our embedding feature extractor. We use a combination of RadarDB, FreeDB and NoiseDB for training. We only focus on clap,hat,kick,snares and synthetic noise groups for measuring effectiveness to prevent class overlaps as much as possible. We also exclude samples longer than 1 second, to reduce potentially mislabeled data. Our final training database for mixed ear models is described in Table~\ref{db:memDB}.
 \begin{table}[htbp]
 \centering
 \begin{tabular}{|l|l|l|l|l|l|}
@@ -339,7 +340,7 @@ We reuse the model trained on  MixedDB as our embedding feature extractor. We us
 \end{table}
 
 \subsubsection{Model Selection}
-Using our encoding and envelope features to represent audio, five classification models were trained for the task of categorizing the five different sound groups. For hyper-parameter optimization, the models were trained using 5-fold cross validation and 80/20 train-to-test ratio. The F-Score result of each cross-validation is the unweighted average F-Score of all groups. For inter-model comparisons, the procedure is the same except 10-fold cross validations are used. Our models were derived from scikit-learn's implementations of these classifiers~\cite{pedregosa2011scikit}. Before inter-model comparisons, we conducted a grid-search for each model on at least one of its possibly decisive hyper-parameters. The classifiers and other notable specifications are presented in table~\ref{table:mem_model_selection}. We introduced class weights where possible to mitigate the effects of an imbalanced dataset~\cite{provost2000machine,chawla2004special}. When utilized, the weight for each class $c$  is calculated as:
+Using our encoding and envelope features to represent audio, five classification models were trained for the task of categorizing the five different sound groups. For hyper-parameter optimization, the models were trained using 5-fold cross validation and 80/20 train-to-test ratio. The F-Score result of each cross-validation is the unweighted average F-Score of all groups. For inter-model comparisons, the procedure is the same except 10-fold cross validations are used. Our models were derived from scikit-learn's implementations of these classifiers~\cite{pedregosa2011scikit}. Before inter-model comparisons, we conducted a grid-search for each model on at least one of its possibly decisive hyper-parameters. The classifiers and other notable specifications are presented in Table~\ref{table:mem_model_selection}. We introduced class weights where possible to mitigate the effects of an imbalanced dataset~\cite{provost2000machine,chawla2004special}. When utilized, the weight for each class $c$  is calculated as:
 
 \begin{subequations}
     \begin{align*}
