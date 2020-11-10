@@ -82,7 +82,7 @@ Envelopes can be mathematically described and used to shape signals. A common ap
 % We often do not have access to the time-variant systems which create sounds. If we have access to a recording of their outputs (i.e digital sound), we can make approximations about their characteristics. 
 Spectrograms are graphs used to depict the duration and amplitude of frequencies present in a sound. To create spectrograms, sound must be decomposed into a set of simpler functions. A common method for the breakdown of complex, time-variant functions is the fourier transformation and its variations. One such method is the discrete fourier transformation (DFT) and its inverse, which can convert digital sound from its time domain representation (sequence of samples) to its frequency domain representation (sets of frequency ranges and their amplitude) and vice versa.\\\\
 
-[spectrogram figures]
+% [spectrogram figures]
 
 % https://en.wikipedia.org/wiki/Frequency_domain#/media/File:Fourier_transform_time_and_frequency_domains_(small).gif
 
@@ -117,12 +117,9 @@ Synthesizers are engines of synthesis that make use of one or more of these tech
 In our work, we require our synthesizer to be simple and efficient, as we would like to deploy as many instances as possible (e.g when searching for particular sounds). We also value replicability as we would like to save and re-use synthesizer programs which we found interesting. Another requirement is tractability as we would like modify parameters of a program with various levels of intensity and contrast the audition results.
 
 Having considered our requirements, we opted to mainly utilize \enquote{additive} and \enquote{subtractive} synthesis, umbrella terms for some of the most simple and common methods of digital synthesis~\cite{mitchell2009basicsynthChap1}. 
-In additive synthesis, sounds are built as a sum of signals; Where signals are outputs of periodic oscillators.  In subtractive synthesis, segments of a complex signal are removed until a desired sound is reached, often by a chain of one or more \textit{digital filters}. It is not uncommon for percussive sounds to have noisy, chaotic high frequency content during their short attack envelope followed by harmonic low/medium frequency content~\cite{lakatos2000common}. We hypothesize that additive synthesis will be an appropriate when precisely tuned oscillators are needed, and subtractive synthesis can be utilized for sculpting white noise to recreate chaotic, noisy segments of the spectrum. 
+In additive synthesis, sounds are built as a sum of signals; Where signals are outputs of oscillators (periodic wave generators).  In subtractive synthesis, segments of a complex signal are removed until a desired sound is reached, often by a chain of one or more \textit{digital filters}. Digital \textit{low-pass filters} remove or reduce the amplitude of signals with frequencies lower than a given \textit{cutoff}, while \textit{high-pass} filters filter out higher than threshold frequencies. It is not uncommon for percussive sounds to have noisy, chaotic high frequency content during their short attack envelope followed by harmonic low/medium frequency content~\cite{lakatos2000common}. We hypothesize that additive synthesis will be an appropriate when precisely tuned oscillators are needed, and subtractive synthesis can be utilized for sculpting white noise to recreate chaotic, noisy segments of the spectrum. 
 
 
-\subsection{Filters, Oscillators ...}
-[quick overview of filters and oscillators]
-[will use spectrums to describe these]
 
 % \subsection{Analog Synthesizer}
 % Talk about analog synthesis briefly, so the word synthesizer feels less abstract...
