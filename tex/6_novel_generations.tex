@@ -6,7 +6,38 @@
 
 \begin{document}
 
-\chapter{Pipelines for Novel Drum Generation}
+\chapter{Results}
+
+
+
+\subsection{Is the Virtual Synthesizer Deterministic?}
+\label{section:synth_deterministic}
+It is crucial that the same set of synthesizer parameters result in identical, or near identical sounds. Our synthesizer modules are capable of producing random waves, or \enquote{noise}. This type of sound will vary each time it is produced. Manual listening does not show sonic variation between multiple creation of the same set of parameters, but how does this affect the ear models?
+
+We create 50 parameter sets for stack sizes of 1 and evaluate each parameter set 10 times using the CNN-DVN model. This model measures the probability of a sound belong to the drum/percussion category, and will be discussed in more detail in Section~\ref{TPE_models}. Put simply, we are creating the sonic output of the same parameter set multiple times and measuring its effect on one of our models. We repeat this experiment for stack sizes of 2 and 8 and show the results in figure~\ref{fig:synth_deterministic}.
+
+\begin{figure}[htbp!]
+\begin{center}
+    \textbf{ Variation in Repeated Evaluations of Parameters }\par\medskip
+    \makebox[\textwidth]{
+    \subfloat[1 Stack]{ \includegraphics[width=17cm,height=5.67cm]{images/chapter_3/eval_stability_stacksize1.pdf}
+
+    }}
+
+    \makebox[\textwidth]{
+    \subfloat[2 Stacks]{ \includegraphics[width=17cm,height=5.67cm]{images/chapter_3/eval_stability_stacksize2.pdf}
+
+    }}
+    
+    \makebox[\textwidth]{
+    \subfloat[8 Stacks]{ \includegraphics[width=17cm,height=5.67cm]{images/chapter_3/eval_stability_stacksize8.pdf}
+
+    }}
+\end{center}
+
+\caption{Repeated evaluation of signals from identical paramter-sets shows little to no variation in scores. Multiple renditions of the same parameter-set vary if the parameter-set calls for generation of 1 or more random wave-shapes.}
+\label{fig:synth_deterministic}
+\end{figure}
 
 \label{gens}
 \label{surveys}
