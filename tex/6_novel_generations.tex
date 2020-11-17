@@ -11,7 +11,7 @@
 
 \label{gens}
 \label{surveys}
-\section{How Surveys Are Conducted}
+\section{How and Why Surveys are Conducted}
  In the previous chapter, we discussed the \emph{virtual synthesizer}, which generates 1 second long sounds (or sonic noise) based on its parameters as well as an ideal \emph{virtual ear}, along with two implementation attempts. Putting these components together, we conceptualized a generative pipeline for creation of novel drum sounds, shown in figure~\ref{fig:pipeline_outline}.
  
 The surveys here are mainly designed to measure the performance of the virtual ear in separation of drum-like noise from other sounds. If a small subset of synthetic noise can stand in for percussive sounds, then the ideal synthetic ear will be able to separate the desired sounds from noise with high recall and precision (see ~\ref{fig:ven_data}. Low recall will cause a slow-down of the pipeline, as a larger number of random sounds need to be generated and evaluated, and increase the loss of novel, percussive sounds. Low precision will make manual cleanup of generated samples necessary and arduous. 
