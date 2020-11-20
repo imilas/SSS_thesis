@@ -7,13 +7,14 @@
 
 
 \begin{document}
+\Chapter{Implementation Preamble}
 
-\chapter{Datasets Details and Downloads}
+\section{Datasets Details and Downloads}
 \label{appendix:datasets}
-\section{Download Instructions}
+\subsection{Download Instructions}
 FreeDB, survey data, and randomly generated sounds can be downloaded from: \url{https://zenodo.org/record/3994999}\\
 RadarDB requires lengthy downloads and processing. The script for its automated creation can be found under the \enquote{getting\_data} directory of our project code: \footnote{\url{https://github.com/imilas/Synths_Stacks_Search}}
-\section{Details}
+\subsection{Details}
 Our data sources are a large set of 2 second or shorter drum samples aggregated from personal libraries, free drum kits from the sample-swap project \footnote{https://sampleswap.org/} which we organized into 5 groups, and a large set of drum sounds aggregated from royalty free sources such as music radar \footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. We also created a database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers. Specifications about our datasets can be found in tables~\ref{db:self},~\ref{db:radar},~\ref{db:sampleswap} and~\ref{db:noise}. We have made our dataset of free-drum sounds available for download. The scripts used to download and process royalty free samples are also made available. 
 
 We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks.
