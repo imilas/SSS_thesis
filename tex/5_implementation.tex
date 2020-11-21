@@ -20,24 +20,18 @@ Our goal is to create a system for the generation of novel drum sounds. So far, 
 A visual representation of this pipeline is given in  figure~\ref{fig:pipeline_outline}. In Section~\ref{vs}, we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. In section~\ref{sec:ear}, the implementation of the virtual ear is discussed.
 
 
- \begin{figure}[t!]
+\section{Virtual Synthesizer}
+\label{vs}
+ \begin{figure}[h!]
     \begin{center}
     \textbf{Pipeline Design}
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_4/pipeline.pdf}}}
     \end{center}
-    \caption{Components can be implemented in a number of ways. The implementation allows for easy parallelization when needed. Virtual synthesizer rapidly generates random programs and the corresponding sounds, while the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. 
+    \caption{An implementation which allows for easy parallelization when needed. Virtual synthesizer rapidly generates random programs and the corresponding sounds, while the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. 
     }
 \label{fig:pipeline_outline}
 \end{figure}
-
-
-\section{Virtual Synthesizer}
-\label{vs}
-% In our work, we require our synthesizer to be simple and efficient, as we would like to deploy as many instances as possible (e.g when searching for particular sounds). We also value replicability as we would like to save and re-use synthesizer programs which we found interesting. Another requirement is tractability as we would like modify parameters of a program with various levels of intensity and contrast the audition results.
-
-% Having considered our requirements, we opted to mainly utilize \enquote{additive} and \enquote{subtractive} synthesis, umbrella terms for some of the most simple and common methods of digital synthesis~\cite{mitchell2009basicsynthChap1}. 
-% In additive synthesis, sounds are built as a sum of signals; Where signals are outputs of oscillators (periodic wave generators).  In subtractive synthesis, segments of a complex signal are removed until a desired sound is reached, often by a chain of one or more \textit{digital filters}. Digital \textit{low-pass filters} remove or reduce the amplitude of signals with frequencies lower than a given \textit{cutoff}, while \textit{high-pass} filters filter out higher than threshold frequencies. It is not uncommon for percussive sounds to have noisy, chaotic high frequency content during their short attack envelope followed by harmonic low/medium frequency content~\cite{lakatos2000common}. We hypothesize that additive synthesis will be an appropriate when precisely tuned oscillators are needed, and subtractive synthesis can be utilized for sculpting white noise to recreate chaotic, noisy segments of the spectrum.
 
  To create sounds, we make use of digital synthesizers capable of rapidly receiving or creating programs, as well as rendering the corresponding sound offline. Classical DSP allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries were extensively used for their DSP functionalities. The virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters for each submodule is highlighted in Table~\ref{table:submodule_params}.
 
@@ -100,6 +94,14 @@ v_{norm} = \dfrac{v}{A + D + S + R}
 
 Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound.  To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
 
+\subsection{Why DSP over ANN Synthesizers?}
+ Rather than using neural networks for sound synthesis, we generate programs for a virtual synthesizer which mainly utilizes additive and subtractive techniques. Our decision is based on the following factors:
+\begin{enumerate}[label=(\roman*)]
+    \item \textit{Novelty and Creativity}: The goal here is to work with the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics~\cite{collins2007loop}. 
+    \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterruptible weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
+    \item \textit{Speed of Rendering}: Neural network synthesis is costly; Sub 24 khz sample rates are common in most relevant works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
+    \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount of rendering time for each time-step~\cite{yamamoto2020parallel}. With our virtual synthesizer, the added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
+\end{enumerate}
 \section{The Ear}
 \label{sec:ear}
 What we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for this task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. What is required from the ear is to give probabilities of an audio sample belonging to various categories. Evaluations of the ear would allow us to associate scores with a sound as well as the program that generated it. 

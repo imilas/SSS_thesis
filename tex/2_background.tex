@@ -113,6 +113,8 @@ Various sound synthesis techniques have been developed via the treatment of soun
 
 Synthesizers are engines of synthesis that make use of one or more of these techniques for sound generation. Selection of the appropriate synthesis methods depends not only on the expectations from a single end product, but also the features of the synthesizer itself. Whether in goal oriented tasks such as text-to-speech or in creative endeavors such as ambient-noise generation, it is often desirable to work with systems that are quick, adaptable and tractable. For example, one might desire a text-to-speech system where slight changes to input parameters can introduces slight changes to the speech patterns, utterances, voices etc. This ability to quickly modify and audition sounds becomes a necessity when the synthesizer is being used as a creative instrument of itself, rather than an emulator for existing instruments and sounds. 
 
+Particularly common methods of digital sound generation are \enquote{additive} and \enquote{subtractive} synthesis, umbrella terms for some of the most simple and common methods of digital synthesis~\cite{mitchell2009basicsynthChap1}. 
+In additive synthesis, sounds are built as a sum of signals; Where signals are outputs of oscillators (periodic wave generators).  In subtractive synthesis, segments of a complex signal are removed until a desired sound is reached, often by a chain of one or more \textit{digital filters}. Digital \textit{low-pass filters} remove or reduce the amplitude of signals with frequencies lower than a given \textit{cutoff}, while \textit{high-pass} filters filter out higher than threshold frequencies. It is not uncommon for percussive sounds to have noisy, chaotic high frequency content during their short attack envelope followed by harmonic low/medium frequency content~\cite{lakatos2000common}.
 
 
 % \subsection{Analog Synthesizer}
@@ -137,24 +139,18 @@ Since their emergence in the 1950's, research on ANNs has gone through several e
 Generative neural networks (GNNs) are utilized for the completion of a sequences of values; Often by taking an incomplete sequence as input and outputting the most likely value for the next step. WaveNet is considered a seminal breakthrough in the usage ANNs for sound synthesis~\cite{oord2016wavenet}. Surpassing state of the art speech synthesis techniques, which create outputs with the the combination of previously recorded audio snippets~\cite{schwarz2007corpus}. When trained on a large corpus of audio samples, GNNs such WaveNet can learn the \enquote{predictive distribution for each
 audio sample conditioned on all previous ones}~\cite{oord2016wavenet}. Once this distribution is learned, it can be used to create sounds 1 sample at a time, a slow process, as Mathews predicted~\cite{mathews1963digital}. \\
 % Parallel WaveGAN has only 1.44 M parameters and can generate 24 kHz speech waveform 28.68 times faster than real-time on a single GPU environment. Perceptual listening test results verify that our proposed method achieves 4.16 mean opinion score within a Transformer-based text-to-speech framework, which is comparative to the best distillation-based Parallel WaveNet system.
-\section{Our Synthesis Method}
- Rather than directly using neural networks for sound synthesis, we generate programs for this virtual synthesizer. Our decision is based on the following factors:
-\begin{enumerate}[label=(\roman*)]
-    \item \textit{Novelty and Creativity}: The goal here is to work with the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics~\cite{collins2007loop}. 
-    \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterruptible weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
-    \item \textit{Speed of Rendering}: Neural network synthesis is costly; Sub 24 khz sample rates are common in most relevant works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
-    \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount of rendering time for each time-step~\cite{yamamoto2020parallel}. With our virtual synthesizer, the added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
-\end{enumerate}
 
-\section{Goal Oriented Novel Sound Generation}
 
-\label{related}
-\subsection{Tool Selection}
-We define \enquote{goal oriented novel sound generation} as any work that seeks to implement a system that is capable of generating novel sounds with a desired characteristic. Based on our review of relevant works, we believe that \enquote{goal oriented audio generation} necessitates two essential components: A tool-set for the analysis of sound and a tool-set for creation of sound. As a result, we base our work around learning of the distinguishing features of various sound groups (i.e different types of drums) and using the learned features for generation of sound. In Section~\ref{sec_methodology} we introduced these components as the virtual ear and virtual synthesizer. 
+% \section{Goal Oriented Novel Sound Generation}
 
- Thus far we have discussed various techniques at our disposal for the implementation of a virtual ear and synthesizers, all with their contextual strengths and weaknesses. In the upcoming Sections, we will thoroughly discuss our implementations and the subsequent results. Here, we will review a variety of works which fall under our definition of \enquote{goal oriented novel sound generation}. Particularly, we are interested in a discussion of goals, chosen methods for the feature extraction, and chosen methods of sound synthesis. 
+
+% \subsection{Tool Selection}
+% We define \enquote{goal oriented novel sound generation} as any work that seeks to implement a system that is capable of generating novel sounds with a desired characteristic. Based on our review of relevant works, we believe that \enquote{goal oriented audio generation} necessitates two essential components: A tool-set for the analysis of sound and a tool-set for creation of sound. As a result, we base our work around learning of the distinguishing features of various sound groups (i.e different types of drums) and using the learned features for generation of sound. In Section~\ref{sec_methodology} we introduced these components as the virtual ear and virtual synthesizer. 
+
+%  Thus far we have discussed various techniques at our disposal for the implementation of a virtual ear and synthesizers. In the upcoming Sections, we will discuss the implementations and the subsequent results. Here, we will review a variety of works which fall under our definition of \enquote{goal oriented novel sound generation}. Particularly, we are interested in a discussion of goals, chosen methods for the feature extraction, and chosen methods of sound synthesis. 
 
 \subsection{Related Works}
+\label{related}
 ANN or DSP approaches can be taken to the implementation of a virtual ear and a virtual synthesizer. The development of ANN frameworks has led to works which have utilized ANNs for both components. Also common are works which have leveraged a mixture of both approaches, commonly by utilization of ANNs for the virtual ear and DSP methods for synthesis.
 
 \begin{center}
