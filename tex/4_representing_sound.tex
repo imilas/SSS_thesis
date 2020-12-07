@@ -41,7 +41,7 @@ To transform a signal into a set of features, 3 transformation functions can be 
 \begin{enumerate}
 \item Envelope Transformation: The goal of this feature is to capture the changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively, and with values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector $v_i$. This vector is then normalized to the range of 0 to 1. The information contained in this vector is similar to that of a Root-Mean-Square measurement.
 \item Frequency Transformation: A static, normalized snap-shot of the  frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis.
-\item Spectrum Transformation: Mel Scaled STFT with its values normalized from 0-1. Since this features is a 2D matrix rather than a vector it captures more information about our signal.
+\item Spectrum Transformation: STFT with its values normalized from 0-1. Since this features is a 2D matrix rather than a vector it captures more information about our signal. This spectrogram is \enquote{mel-scaled}\cite{stevens1940relation} to better represent human perception of audio frequencies.
 \end{enumerate}
 
 
@@ -178,34 +178,34 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \centering
 \textbf{Estimated Parameter Importance}
 \includegraphics[width=14cm,height=7cm]{images/chapter_3/ParameterImportances_final.pdf}
-\caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration. We attribute the contrast between the results here and those in figure~\ref{fig:slicegraph} and~\ref{fig:parallel_coord} to the irregular rate of sampling from the hyper-parameter space.}
+\caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration. We attribute the contrast between the results here and those in Figure~\ref{fig:slicegraph} and~\ref{fig:parallel_coord} to the irregular rate of sampling from the hyper-parameter space.}
 \label{chap3:param_importance}
 \end{figure}
 
-We depict the correlation of parameter values with trial results in figures~\ref{fig:slicegraph} and~\ref{fig:parallel_coord}. We extract a more concrete measurement of hyper-parameter influence using Hutter et al.'s fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph. This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, the slice-graph depicts CNN models as having the best and worst results while FC models are reliably average; Making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
+We depict the correlation of parameter values with trial results in figures~\ref{fig:slicegraph} and~\ref{fig:parallel_coord}. We extract a more concrete measurement of hyper-parameter influence using Hutter et al.'s fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in Figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with Figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph (Figure~\ref{fig:slicegraph}). This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, Figure~\ref{fig:slicegraph} depicts CNN models as having the best and worst results while FC models are reliably average; Making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
 
 
-\subsection{Exploring Recursive Recreations}
-What happens if we create a feedback loop where a decoded spectrograms are fed through the network again? 
-We recursively run the autoencoder on new sounds and display the results in figure~\ref{fig:recreations}. The results are displayed for 1, 2, 10 and 100 recursions. Spectrograms belonging to percussive groups retain their unique characteristics for many iterations, while details in most synthetic noise spectrograms are quickly dissipated. A major point of concern here is that recursively recreated synthetic noise spectrograms tend to take on drum characteristics. This is possibly prompted by our encoder only having been exposed to drums sounds prior.  Yet it is possible that the \enquote{confusion} demonstrated by the encoder after the initial reconstruction leads to embedding of familiar sounds being distinguishable from those unseen. 
-\begin{figure}[h!]
-\centering
-\textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
-\makebox[\linewidth][c]{%
-\begin{subfigure}[b]{.6\textwidth}
-\centering
-\includegraphics[width=.95\textwidth]{images/chapter_3/Drums_reacreation.pdf}
-% \caption{a test subfigure}
-\end{subfigure}%
-\begin{subfigure}[b]{.6\textwidth}
-\centering
-\includegraphics[width=.95\textwidth]{images/chapter_3/Synth Noise_reacreation.pdf}
-% \caption{a test subfigure}
-\end{subfigure}%
-}\\
-\caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The first row depicts the unaltered spectrograms. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum spectrograms retain their original form better than synthetic noise.}
-\label{fig:recreations}
-\end{figure}
+% \subsection{Exploring Recursive Recreations}
+% To gain some insight into the embedding mechanism, we create a  feedback loop where a decoded spectrograms are fed through the network again.
+% We recursively run the autoencoder on new sounds and display the results in Figure~\ref{fig:recreations}. The results are displayed for 1, 2, 10 and 100 recursions. Spectrograms belonging to percussive groups retain their unique characteristics for many iterations, while details in most synthetic noise spectrograms are quickly dissipated. A major point of concern here is that recursively recreated synthetic noise spectrograms tend to take on drum characteristics. This is possibly prompted by our encoder only having been exposed to drums sounds prior.  Yet it is possible that the \enquote{confusion} demonstrated by the encoder after the initial reconstruction leads to embedding of familiar sounds being distinguishable from those unseen. 
+% \begin{figure}[h!]
+% \centering
+% \textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
+% \makebox[\linewidth][c]{%
+% \begin{subfigure}[b]{.6\textwidth}
+% \centering
+% \includegraphics[width=.95\textwidth]{images/chapter_3/Drums_reacreation.pdf}
+% % \caption{a test subfigure}
+% \end{subfigure}%
+% \begin{subfigure}[b]{.6\textwidth}
+% \centering
+% \includegraphics[width=.95\textwidth]{images/chapter_3/Synth Noise_reacreation.pdf}
+% % \caption{a test subfigure}
+% \end{subfigure}%
+% }\\
+% \caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The first row depicts the unaltered spectrograms. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum spectrograms retain their original form better than synthetic noise.}
+% \label{fig:recreations}
+% \end{figure}
 
 
 
