@@ -1,3 +1,8 @@
+* thesis final edits:
+    - Add spectrogram example
+    - fix that dvn CNN table
+    - 
+
 * Abram feedback:
     - You need a lot more prior work.
     - You need to explain a lot more.
