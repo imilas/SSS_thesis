@@ -37,12 +37,12 @@ A visual representation of this pipeline is given in  Figure~\ref{fig:pipeline_o
 \begin{enumerate}[label=(\roman*)]
     \item \textit{Novelty and Creativity}: The goal here is to work with the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics~\cite{collins2007loop}. 
     \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterruptible weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
-    \item \textit{Speed of Rendering}: Neural network synthesis is costly; Sub 24 khz sample rates are common in most relevant works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
+    \item \textit{Speed of Rendering}: Neural network synthesis is costly. Sub 24 khz sample rates are common in most relevant works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
     \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount of rendering time for each time-step~\cite{yamamoto2020parallel}. With our virtual synthesizer, the added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
 \end{enumerate}
 
 \subsection{Virtual Synthesizer Implementation}
- To create sounds, we make use of digital synthesizers capable of rapidly receiving or creating programs, as well as rendering the corresponding sound offline. Classical DSP allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries were extensively used for their DSP functionalities. The virtual synthesizer contains a set of one or more submodules. Each submodule is a self-contained noise making unit and creates signals by taking the steps depicted in Figure~\ref{fig:submodule}. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned. The set of parameters for each submodule is highlighted in Table~\ref{table:submodule_params}.
+ To create sounds, we make use of digital synthesizers capable of rapidly receiving or creating programs, as well as rendering the corresponding sound offline. Classical DSP allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries were extensively used for their DSP functionalities. The virtual synthesizer contains a set of one or more submodules.
 
  \begin{figure}[htbp]
     \begin{center}
@@ -65,9 +65,9 @@ A visual representation of this pipeline is given in  Figure~\ref{fig:pipeline_o
     }
 \label{fig:synth_modules}
 \end{figure}
- Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned to these parameters. The set of parameters available to each submodule is highlighted in Table~\ref{table:submodule_params}. The output of the virtual synthesizer is the normalized addition of the output of its submodules. The synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in Table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
+ Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned to these parameters. The output of the virtual synthesizer is the normalized addition of the output of its submodules. The synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in Table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
-Since we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample in MixedDB (around 0.4 seconds). Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time\footnote{The entire sound must fit within the second, for example, a 0.3 second sound cannot begin playing past 0.7 seconds within the rendering time frame}. If the synthesizer has a stack size of more than 1, the audio signals from each submodule are overlapped and the total amplitude is normalized.
+Since we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample in MixedDB (around 0.4 seconds). Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time\footnote{The entire sound must fit within the second, for example, a 0.3 second sound cannot begin playing past 0.7 seconds into the rendering time frame}. If the synthesizer has a stack size of more than 1, the audio signals from each submodule are overlapped and the total amplitude is normalized.
 
 \begin{table}[t!]
 \centering
@@ -90,7 +90,7 @@ LP filter Cutoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
-\caption{Synthesizer submodule Parameters. Despite the simplicity of the parameters and efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
+\caption{Synthesizer submodule parameters. Despite the simplicity of the parameters and efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
 \label{table:submodule_params}
 \end{table}
 The ADSR parameters shape the entire amplitude of the signal. Each submodule creates its signal at full amplitude then shapes it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
@@ -109,7 +109,7 @@ Each submodule is a monophonic synthesizer. That is, each submodule can play one
 What we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for this task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. What is required from the ear is to give probabilities of an audio sample belonging to various categories. Evaluations of the ear would allow us to associate scores with a sound as well as the program that generated it. 
 % The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot precisely anticipate what novel drums will sound like. 
 
-Figure~\ref{fig:ven_data} highlights a critical problems with this approach. The change in learning domains---particularly with the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot precisely anticipate what novel drums will sound like. 
+Figure~\ref{fig:ven_data} highlights critical problems with this approach. The change in learning domains---particularly with the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot precisely anticipate what novel drums will sound like. 
 
 
 % we denote $\mathcal{N}$ as the set of percussive sounds a synthesizer is capable of making. $\mathcal{T^{+}}$, our positive examples of what percussive instruments sound like is a set of sound extracted from material drums. $\mathcal{T^{-}}$, is a small subset of an infinite set which is meant to represent all noises which the synthesizer is capable of making. It likely includes a number of sounds which to our ears could be used as drums. During the hearing test, the virtual ear continually receives synthesizer noises ($\mathcal{H}$) for classification. The performance of the ear is measured by its precision and recall in finding the overlap between $\mathcal{H}$ and $\mathcal{N}$.
@@ -166,7 +166,7 @@ Using the features and transformation described in the previous chapter as input
 \textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on the test data for~\decfirst. 
 \begin{center}
 \vbox{
-    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+    \begin{lstlisting}[caption=Sequential Layers for FC-DVN]
             Layer                       Details
             ========================================================
             Linear                      in_features=400 
@@ -191,7 +191,7 @@ Using the features and transformation described in the previous chapter as input
 \textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on the test set. 
 \begin{center}
 \vbox{
-    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-DVN]
             Layer                       Details
             ========================================================
             Conv2d                  kernel size = (7, 3)
@@ -234,34 +234,31 @@ Using the features and transformation described in the previous chapter as input
         \end{lstlisting}}
 \end{center}
 
-\textbf{CNN-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2.   {\color{red}double check architecture}
+\textbf{CNN-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2.  
+%  {\color{red}double check architecture}
 \begin{center}
 \vbox{
-    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-dvn]
+    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-DVD]
             Layer                       Details
             ========================================================
-            Conv2d                  kernel size=(4, 5)
-                                    stride=(1, 1)
-                                    padding=(3, 1)
+            Conv2d                  kernel size = (7, 3)
+                                    stride = (1, 1)
+                                    padding = (3, 1)
             ReLU
-            Dropout                 probability=0.5
-            Conv2d                  kernel size=(8, 3)
-                                    stride=(1, 1)
-                                    padding=(3, 1)
-            Linear                  in_features=100
-                                    out_features=@($\mathcal{C}$)@
+            Dropout                 probability = 0.5
+            LSTMCell                hidden size = 800
+                                    input size = @($\mathcal{F}$)@
+            Linear                  in_features = @($\mathcal{F}$)@
+                                    out_features = 2
                                     bias=True
-            Linear                  in_features=20
-                                    out_features=@($\mathcal{C}$)@
-                                    bias=True
-            Softmax                 drum type probabilities
-        \end{lstlisting}}
+            Softmax                 DVD probabilities
+\end{lstlisting}}
 \end{center}
 
 \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. 
 \begin{center}
 \vbox{
-    \begin{lstlisting}[caption=FC-DVD]
+    \begin{lstlisting}[caption=Sequential Layers for FC-DVD]]
             Layer                       Details
             ========================================================
             Linear                      in_features=400
@@ -286,7 +283,7 @@ Using the features and transformation described in the previous chapter as input
 \subsubsection{Finalzing TPEs}
 These models can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus.  
 
-With the models showing high accuracy on testing data, they can be combined in order to make decisions sequentially. For \decfirst~we only determine sounds as percussive if both FC-DVN and CNN-LSTM have categorized it as such with over 90\% confidence. For the majority of random generations that is not the case, but if a randomly generated sound has passed this phase, the three categorizers assign their categorizations to this sound.  These categorizers have a moderate degree of agree-ability as seen in Section ~\ref{surveys}, but often the decision is not unanimous.
+With the models showing high accuracy on testing data, they can be combined in order to make decisions sequentially. For \decfirst~we only determine sounds as percussive if both FC-DVN and CNN-LSTM have categorized it as such with over 90\% confidence. For the majority of random generations, that is not the case, but if a randomly generated sound has passed this phase, the three categorizers assign their categorizations to this sound.  These categorizers have a moderate degree of agree-ability as seen in Section~\ref{surveys}, but often the decision is not unanimous.
 
 % The fourth method of categorization, \enquote{averaged-cat}, is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category.
 
@@ -392,13 +389,13 @@ After grouping all drums together, the model selection is repeated. A repeat the
 \end{center}
 
 
-\caption{F-Scores and confusion matrix of ExtraTrees model for both DvDvN and drum vs not-drum categorization.}
+\caption{F-Scores and confusion matrix of ExtraTrees model for both DvDvN and DvN categorization.}
 \label{fig:conf_f1_dvn}
 \end{figure}
 
-Based on these reports, having multiple options for drum categorization does not noticeably influence the models accuracy in \decfirst. However, the DvDvN models's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9). Therefore, the DvDvN implementation is used as it makes the DvN model redundant.
+Based on these reports, having multiple options for drum categorization does not noticeably influence the models accuracy in \decfirst. However, the DvDvN models' slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9). Therefore, the DvDvN implementation is used as it makes the DvN model redundant.
 
-The finalized MEM is created by combining the encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming novel generations Section, we will present the results of a two person survey where the accuracy of the different models is analyzed given over 500 synthetic noise sounds categorized as drums. 
+The finalized MEM is created by combining the encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming \enquote{Novel Generations} Chapter, we will present the results of a two person survey where the accuracy of the different models is analyzed given over 500 synthetic noise sounds categorized as drums. 
 
 
 
