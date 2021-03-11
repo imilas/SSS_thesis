@@ -42,6 +42,7 @@ A visual representation of this pipeline is given in  Figure~\ref{fig:pipeline_o
 \end{enumerate}
 
 \subsection{Virtual Synthesizer Implementation}
+\label{virtual_synth_implementation}
  To create sounds, we make use of digital synthesizers capable of rapidly receiving or creating programs, as well as rendering the corresponding sound offline. Classical DSP allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries were extensively used for their DSP functionalities. The virtual synthesizer contains a set of one or more submodules.
 
  \begin{figure}[htbp]
