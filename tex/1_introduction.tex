@@ -96,6 +96,20 @@ In the long term, wish to leverage AI technologies, heuristic search, and DSP me
 
 % The goal here was to create an unsupervised system that generates discrete sounds which are suitable substitutes for one-shot recordings of organic drums. In addition, given that a sound is percussive, we require the accurate categorization of drum-types. These definitions can be subjective and/or context dependent: \enquote{suitable substitute} varies by producer and type of music, and we can only define \enquote{one-shot recordings of organic drums} via examples. These definitions necessitate that the agreement between the outputs of the system and surveyed individuals is measured in a blinded way. 
 
+Can you please provide a paragraph on this? It can have a line each on - ECG  pre-processing and cleaning, description of classes and number of instances per class, feature extraction (tsfresh, number of features...), learning method (XGBoost, objective function, hyperparameters..) and evaluation (data splits, reporting metrics, ROC/AUPRC graphs...).
+
+Our dataset contains approximately 1.68 million multi-labeled ECGs. The label percentages are as follows:
+Afib secondary: 13.9%
+Afib primary: 3.0%
+Stemi primary diagnosis: 5.1%
+Stemi secondary diagnosis: 0.8%
+Not Afib or Stemi: 77.2%
+
+We have taken two approaches to classification, by using static features extracted through tsFresh, and by deep learning of raw signals. Static feature extraction builds on our previous work which highlighted the top 100 (from our pool of approximately 20,000 static features) most effective features for the physionet 2020 ECG label challenge. By using these top 100 features for 2-way classification of Afib and Stemi in our dataset of ECGs, we trained an XGboost random forest model on 80% of the dataset. This model achieved the AUC score of 0.76 for Afib diagnosis, and 0.8 for Stemi on the 20% of ECG samples that had not been seen by the models during training. Bespoke feature selection and hyper-parameter optimization may lead to improvements.
+
+Our approach to deep learning is in the early stages. EGSs are pre-processed by application of a filter with a bandwidth of 3 - 45 Hz followed by normalization of each individual lead signal. We will further experiment with the ordering and parameters of the pre-processing step. We are experimenting with different architectures, and we have identified a promising, deep 1D-convolutional architecture which achieved the score 0.6 and 0.81 for Afib and Stemi diagnosis respectively while being trained for a short duration on less than 1% of the data (testing was done on 5000 unseen ECG samples). We are in the very early stages of experimentation, and expect much better results with further training and optimization.
+
+Later on we will combine our two approaches in an ensemble model, as the combination of static features and deeplearning models is common in state of the art works. 
 
 
 \end{document}
