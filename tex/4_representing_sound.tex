@@ -9,7 +9,7 @@
 
 
 \begin{document}
-\chapter{Virtual Ear}
+\chapter{Virtual Listening}
 \label{chap:represent_sound}
 Before we move on to the generation and analysis of sound, it is important to establish how sound will be represented in this project. Raw digital sound can be difficult to analyze as a single second of digital sound at our desired sample rate exists as an array of 48000 numbers. The choice of feature extraction from digital sound is a foundational step towards the implementation of the \textit{virtual ear}. While smaller representations can reduce computation costs significantly, important features may be lost in the transformation. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
     \item By using features extracted from Fourier Transformations of sounds \item By using features extracted from autoencoders which condense the Fourier transformations. 

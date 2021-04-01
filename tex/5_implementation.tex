@@ -10,17 +10,9 @@
 
 
 \begin{document}
-\chapter{Making Noise, Hearing Drums}
-\label{implementation}
-
-
-\section{What Are We Doing Again?}
-Our goal is to create a system for the generation of novel drum sounds. So far, we've discussed what tools to pick for virtual synthesis, and how to represent digital sounds in a smaller, more \enquote{learn-able} format. In this chapter, we will discuss the two main components of  system: The \textit{virtual synthesizer} and the \textit{virtual ear}.
-
-A visual representation of this pipeline is given in  Figure~\ref{fig:pipeline_outline}. In Section~\ref{vs}, we discuss the implementation of a virtual synthesizer which can create a wide variety of noise. In section~\ref{sec:ear}, the implementation of the virtual ear is discussed.
-
-
-\section{Virtual Synthesizer}
+\chapter{Virtual Synthesizer}
+\section{Why Do We Need a Virtual Synthesizer?}
+Our goal is to create a virtual system for the generation of novel drum sounds. We conceptualized a pipeline where a programmable virtual synthesizer rapidly creates audio based on random parameters, and a virtual ear accepts or rejects the sounds based on its training. This plan is visualized in  Figure~\ref{fig:pipeline_outline}. In this chapter, we describe our implementation of a programmable synthesizer of sounds, its parameters, and the reasoning behind our engineering choices. In the subsequent chapters, we discuss the implementation of the virtual ear and the approach taken to combining and testing the two virtual components. 
 \label{vs}
  \begin{figure}[h!]
     \begin{center}
@@ -32,8 +24,8 @@ A visual representation of this pipeline is given in  Figure~\ref{fig:pipeline_o
     }
 \label{fig:pipeline_outline}
 \end{figure}
-\subsection{Why DSP over ANN Synthesizers?}
- Rather than using neural networks for sound synthesis, we generate programs for a virtual synthesizer which mainly utilizes additive and subtractive techniques. Our decision is based on the following factors:
+\section{Why DSP over ANN Synthesizers?}
+ As discussed in previous Section~\ref{related}, the majority of state of the art works tackling the problem of unsupervised audio generation utilize neural networks for synthesis of audio. Here, rather than using neural networks for sound synthesis, we generate programs for a virtual synthesizer which mainly utilizes additive and subtractive techniques. Our decision is based on the following factors:
 \begin{enumerate}[label=(\roman*)]
     \item \textit{Novelty and Creativity}: The goal here is to work with the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics~\cite{collins2007loop}. 
     \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterruptible weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
@@ -41,7 +33,7 @@ A visual representation of this pipeline is given in  Figure~\ref{fig:pipeline_o
     \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount of rendering time for each time-step~\cite{yamamoto2020parallel}. With our virtual synthesizer, the added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
 \end{enumerate}
 
-\subsection{Virtual Synthesizer Implementation}
+\section{Virtual Synthesizer Implementation}
 \label{virtual_synth_implementation}
  To create sounds, we make use of digital synthesizers capable of rapidly receiving or creating programs, as well as rendering the corresponding sound offline. Classical DSP allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries were extensively used for their DSP functionalities. The virtual synthesizer contains a set of one or more submodules.
 
@@ -104,6 +96,8 @@ v_{norm} = \dfrac{v}{A + D + S + R}
 
 Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound.  To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
 
+\subsection{How Will The Synthesizer Be Used?}
+We use this synthesizer as our source of noise generation. A stack number can be picked randomly, and for each submodule in the stack, the parameter space can be randomly sampled. This gives us a randomly generated~\textit{program}, which is then given to the synthesizer for rendering. These randomly generated sounds can then be listened to in order to find interesting sounds. The goal is to automate the listening procedure for rapid generation of desirable sounds, which are drums in the scope of this project. In the next section, we will discuss the virtual ear, which can automatically listen to the outputs of this synthesizer and separate percussive sounds from non-percussive sounds. 
 
 \section{The Ear}
 \label{sec:ear}
@@ -128,6 +122,255 @@ Figure~\ref{fig:ven_data} highlights critical problems with this approach. The c
  With the datasets of labeled drum sounds, discussed in Section~\ref{sec:datasets}, we implemented several algorithms for categorizing unlabeled drum sounds, given that they are drum sounds. However, a major hurdle towards the implementation of a \enquote{drum from non-drum} recognizer is that the set of sounds that are not percussive is infinite. Drum groups are an example of closed sets, since it is reasonable that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone.
 
 Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. \\
+\section{Virtual Listening}
+\label{chap:represent_sound}
+Before we move on to the generation and analysis of sound, it is important to establish how sound will be represented in this project. Raw digital sound can be difficult to analyze as a single second of digital sound at our desired sample rate exists as an array of 48000 numbers. The choice of feature extraction from digital sound is a foundational step towards the implementation of the \textit{virtual ear}. While smaller representations can reduce computation costs significantly, important features may be lost in the transformation. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
+    \item By using features extracted from Fourier Transformations of sounds \item By using features extracted from autoencoders which condense the Fourier transformations. 
+\end{enumerate}
+\section{Fourier Transforms}
+\label{sec:fourier_transforms}
+In this work we rely on derivatives of the fast Fourier transform (FFT), and by extension, short-time Fourier transforms (STFT) for feature extraction. Various works have demonstrated effective reconstruction of signals given their short-time Fourier transforms~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,huzaifah2017comparison}. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when temporal changes in frequency bins are of interest; this can be done by the application of FFT\footnote{more accurately, discrete Fourier transforms} to a sliding time-window on the signal to create a vector for each time step. This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step). 
+
+
+
+\begin{figure}
+\centering
+\textbf{Visual Representation of Raw Features}\par\medskip
+    \subcaptionbox{Recorded hat sample}{    \includegraphics[width=1\columnwidth]{images/ff1.pdf}
+    }
+    \subcaptionbox{Randomly generated audio with percussive qualities, resembling a tight snare}{\includegraphics[width=1\columnwidth]{images/ff2.pdf}}
+    \subcaptionbox{A randomly generated noise with a percussive envelop but non-percussive frequency features (modulated pitch)}
+    { \includegraphics[width=1\columnwidth]{images/ff3.pdf}}
+\caption{Graphed representation of features extracted for 3 different samples. Sample $a$ is a recorded hat from our database. sample $b$ is an example of randomly generated noise with percussive qualities that we found suitably similar to a snare sound. Sample $c$ is an example of a randomly generated noise where the spectrum features are necessary for proper classification.}
+\label{fig:stackspectrums}
+\end{figure}
+
+
+% In the interest of keeping the feature space small and fundamental, other methods of feature extraction such as Spectral-Centroids~\cite{schubert2004spectral} and Zero-Crossing Rates~\cite{gouyon2000use} are not utilized.
+
+To transform a signal into a set of features, 3 transformation functions can be applied at training time to 1 second audio samples before being sent to a classifier.
+
+
+\begin{enumerate}
+\item Envelope Transformation: The goal of this feature is to capture the changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively, and with values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector $v_i$. This vector is then normalized to the range of 0 to 1. The information contained in this vector is similar to that of an RMS measurement.
+\item Frequency Transformation: A static, normalized snap-shot of the  frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis.
+\item Spectrum Transformation: STFT with its values normalized from 0-1. Since this feature is a 2D matrix rather than a vector, it captures more information about our signal. This spectrogram is \enquote{mel-scaled}\cite{stevens1940relation} to better represent human perception of audio frequencies.
+\end{enumerate}
+\section{Embedded FFT Features}
+\label{section:embedded_feats}
+% http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
+% http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
+% 
+Autoencoders are a method of dimensionality reduction with deep neural networks~\cite{hinton1994autoencoders,hinton2006reducing}. As an alternative method of sound representation, autoencoder networks were used to encode spectrogram features without supervision. Autoencoders are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound onto a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector. 
+
+The autoencoder designs were kept relatively simple, all with approximately 150,000 parameters. Important to mention is that reported loss values of the models do not necessarily reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. These small networks train quickly without the need for much data. Here, we did not give any examples of synthetic noise to the encoders, and only train on organic drums. We hypothesize that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. We then use these latent expressions to train a support vector machine (SVM) model.
+\begin{table}[h!]
+
+\begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
+\hline
+Hyper-Param. & Description  & Values & Distribution\\ \hline
+Model Type      &   Affects encoder's first hidden layer & CNN,FC & Categorical \\  \hline
+Optimizer       & Updates network's weights based on loss & Adam,SGD & Categorical  \\  \hline
+Hidden Layers   & Extra hidden layer for the Encoder & True,False & Categorical \\  \hline
+Time Steps & Temporal granularity of the spectrogram. Affects FFT windowing. & 10,20 & Categorical  \\ \hline
+Learning Rate   &    Optimizer's learning rate  & $1^{-4}$ ... $1^{-1}$ & Uniform      \\ \hline
+Frequency Bins & Number of spectrogram frequency bins & 10, 30,60 & Categorical \\ \hline
+
+Regularization  &  L2 regularization parameter. Penalizes large weights to prevent overfitting & 1^{-6}~...~1^{-1} & Uniform\\ \hline
+Latent Size & Size of bottle neck layer or number encoded features & 8,16,64 & Categorical              \\ \hline
+Dropout Rate & Random zeroing of activations between layers to prevent over-fitting & 0,0.5,0.1 & Categorical\\  \hline
+\end{tabular}
+\caption{The Hyper-Paramter space in which the optimization was conducted.}
+\label{table:hyper_params}
+\end{table}
+
+\subsection{Architecture and Hyper-Parameter Optimization}
+% could do multi-objective pareto front stuff
+
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g., number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist with the construction of the model, a number of possible choices for the architecture and the transformation function were defined (see Table~\ref{table:hyper_params}). These choices were then used in hyper-parameter optimization to extract promising sets of values. 
+
+The list of possible choices for the hyper-parameters can be found in Table~\ref{table:hyper_params}. The batchsize $\mathcal{B}$, was set to 64 for training and 4 for testing. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected. If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in Tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
+
+\begin{table}[]
+\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Conv2d-1 & [$\mathcal{B}$, 8, 30, 20] &   208 & Encoder's input \newline
+Num. Channels:8\newline
+kernel:5x5\newline                  
+stride:1\newline    
+padding:2 \\ \hline
+ReLU-2 & [$\mathcal{B}$, 8, 30, 20] &   0 & \\  \hline
+MaxPool2d-3 & [$\mathcal{B}$, 8, 15, 10] & 0 &  kernel:5x5 \newline
+stride:2 \\ \hline
+Dropout-4 & [$\mathcal{B}$, 8, 15, 10] & 0 &  \\ \hline
+Linear-5 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
+Linear-6 & [$\mathcal{B}$, 256] & 2,304 & Decoder's Input \\ \hline
+Dropout-7 & [$\mathcal{B}$, 256] & 0 &  \\ \hline
+Linear-8 & [$\mathcal{B}$, 600 ] &  154,200& Decoder's output\\ \hline
+\end{tabular}
+\caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size. Total number of parameters is 166,320. }
+\label{table:CNNAUTOENCODER}
+\end{table}
+
+\begin{table}[]
+\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Linear-1 & [$\mathcal{B}$, 128]  & 76,928 & Encoder's input \\ \hline
+Dropout-2 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
+Linear-3 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
+Linear-4 & [$\mathcal{B}$, 128] & 2,304 & Decoder's Input \\ \hline
+Dropout-5 & [$\mathcal{B}$, 128]  & 0 &  \\ \hline
+Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
+\end{tabular}
+\caption{Fully connected model with only 1 hidden dimension for encoder and decoder. Design assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 156,512.}
+\label{table:FC1_AUTOENCODER}
+\end{table}
+
+\begin{table}[]
+
+\begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Linear-1 & [$\mathcal{B}$, 128]  & 76,928 & Encoder's input \\ \hline
+Dropout-2 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
+Linear-3 & [$\mathcal{B}$, 32]  & 4,128 & \\ \hline
+Dropout-4 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
+Linear-5 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
+Linear-4 & [$\mathcal{B}$, 32] & 2,304 & Decoder's Input \\ \hline
+Dropout-5 & [$\mathcal{B}$, 32]  & 0 &  \\ \hline
+Linear-4 & [$\mathcal{B}$, 128] & 2,304 & \\ \hline
+Dropout-5 & [$\mathcal{B}$, 128]  & 0 &  \\ \hline
+Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
+\end{tabular}
+\caption{Fully connected model with 2 hidden dimensions for encoder and decoder. Design assumes latent size of 8. 30 and 20 are the assumed frequency-bins and step-size values. Total number of parameters is 163,232.}
+\label{table:FC2_AUTOENCODER}
+\end{table}
+
+
+Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Here, the test data-set is all sounds from MixedDB. Each trial consisted of 20 epochs of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epochs where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space \cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
+\begin{figure}[htbp]
+\centering
+\textbf{Tracing the Best Loss Values}
+\includegraphics[width=12cm,height=7cm]{images/chapter_3/Optimization_History.pdf}
+\caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
+\label{chap3:bestvalues}
+\end{figure}
+
+\begin{figure}[]
+\centering
+\textbf{Loss Value per Epoch for Top 10 Trials}
+\includegraphics[width=12cm,height=6.5cm]{images/chapter_3/loss_per_training.pdf}
+\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. The learning curves tend to flatten quickly. Therefore, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. }
+\label{chap3:top10}
+\end{figure}
+
+
+\begin{figure}[]
+\begin{center}
+    \textbf{Hyper-Parameters' Loss Correlation}
+    \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter_3/slice_plot.pdf}}
+      \caption{Sliced plot depicting the correlation between hyper-parameters and loss values. The color-scale shows the number of times each parameter has been used in a trial. Our sampling algorithm aims to utilize spaces with higher potential more often. }
+    \label{fig:slicegraph}
+    \end{center}
+
+\end{figure}
+% \begin{figure}[]
+% \begin{center}
+%     \textbf{ Parallel Coordinates of Hyper-Parameter Sets and Loss}
+%     \makebox[\textwidth]{\includegraphics[width=0.9\paperwidth]{images/chapter_3/parallel_coord.pdf}}
+%       \caption{Not sure if worth keeping. Paths connect hyper-parameters in a set. Path's are colored based on loss value.}
+%       \label{fig:parallel_coord}
+%     \end{center}
+   
+% \end{figure}
+
+\begin{figure}[]
+\centering
+\textbf{Estimated Parameter Importance}
+\includegraphics[width=14cm,height=7cm]{images/chapter_3/ParameterImportances_final.pdf}
+\caption{The parameters' estimated importance in determining the outcome of trials. Specifications of the spectrogram seem to affect the outcome more so than the model's configuration. We attribute the contrast between the results here and those in Figure~\ref{fig:slicegraph} to the irregular rate of sampling from the hyper-parameter space.}
+\label{chap3:param_importance}
+\end{figure}
+
+We depict the correlation of parameter values with trial results in Figures~\ref{fig:slicegraph}. We extract a more concrete measurement of hyper-parameter influence using the fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in Figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with Figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph (Figure~\ref{fig:slicegraph}). This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, Figure~\ref{fig:slicegraph} depicts CNN models as having the best and worst results while FC models are reliably average; making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
+
+
+% \subsection{Exploring Recursive Recreations}
+% To gain some insight into the embedding mechanism, we create a  feedback loop where a decoded spectrograms are fed through the network again.
+% We recursively run the autoencoder on new sounds and display the results in Figure~\ref{fig:recreations}. The results are displayed for 1, 2, 10 and 100 recursions. Spectrograms belonging to percussive groups retain their unique characteristics for many iterations, while details in most synthetic noise spectrograms are quickly dissipated. A major point of concern here is that recursively recreated synthetic noise spectrograms tend to take on drum characteristics. This is possibly prompted by our encoder only having been exposed to drums sounds prior.  Yet it is possible that the \enquote{confusion} demonstrated by the encoder after the initial reconstruction leads to embedding of familiar sounds being distinguishable from those unseen. 
+% \begin{figure}[h!]
+% \centering
+% \textbf{Recursive Recreation of Drums and Synthetic Noise}\par\medskip
+% \makebox[\linewidth][c]{%
+% \begin{subfigure}[b]{.6\textwidth}
+% \centering
+% \includegraphics[width=.95\textwidth]{images/chapter_3/Drums_reacreation.pdf}
+% % \caption{a test subfigure}
+% \end{subfigure}%
+% \begin{subfigure}[b]{.6\textwidth}
+% \centering
+% \includegraphics[width=.95\textwidth]{images/chapter_3/Synth Noise_reacreation.pdf}
+% % \caption{a test subfigure}
+% \end{subfigure}%
+% }\\
+% \caption{We concatenate 6 spectrograms for drum and synthetic noise groups. We recursively encode and decode these spectrograms and display the results. The first row depicts the unaltered spectrograms. We display the results after 1, 2, 10 and 100 recursive recreations. We see that drum spectrograms retain their original form better than synthetic noise.}
+% \label{fig:recreations}
+% \end{figure}
+
+
+
+
+\subsection{Feature Extraction}
+\label{fig:embedding_FE}
+\begin{table}[htbp!]
+\centering
+\begin{tabular}{|p{6cm}|p{6cm}|}
+\hline
+Hyper-Param. & Value  \\ \hline
+Model Type      &  CNN  \\ \hline
+Optimizer       & Adam  \\ \hline
+Hidden Layers   & 1  \\\hline
+Learning Rate   &  0.001145\\ \hline
+Frequency Bins & 30 \\ \hline
+Time Steps & 20 \\ \hline
+Latent Size & 64 \\ \hline
+Regularization & 3.25^{-6}\\ \hline
+Dropout Rate & 0.5 \\ \hline
+\end{tabular}
+\caption{Top performing hyper-parameter set}
+\label{table:best_params}
+\end{table}
+\begin{figure}[h!]
+\centering
+\textbf{2 Dimensional Projection of Latent Variables}\par\medskip
+ \includegraphics[width=0.90\linewidth]{images/chapter_3/t-SNE_2d.pdf}
+\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples.}
+\label{fig:2d_tsne}
+\end{figure}
+
+\begin{figure}[htbp!]
+\centering
+\textbf{3D t-SNE Projection}\par\medskip
+\mbox{\subfloat[]{\label{subfig:1} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam0.pdf}}}}
+
+\mbox{\subfloat[]{\label{subfig:2} \fbox{\includegraphics[width=14cm,height=6.8cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam3.pdf}}}}
+
+\fbox{\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam1.pdf}}}
+\mbox{\subfloat[]{\label{subfig:2} \includegraphics[width=5cm,height=5cm]{images/chapter_3/3d_t-SNE_symdrum_type_cam2.pdf}}}}
+\caption{Our feature projections and interactive graphs can also be done in 3D}
+\label{fig:3d_tsne}
+\end{figure}
+To better understand the delineation potential of the encoded features,  we trained an autoencoder with our top performing hyper-parameter set, shown in Table~\ref{table:best_params}. We used 80\% of MixedDB to train the model for 200 epochs. Using this model, we encoded the remaining 20\% and approximately 1000 randomly selected sounds from NoiseDB into 64 dimensions. These 64-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. 
+
+In the upcoming Section~\ref{sec:decisions}, we will thoroughly discuss the expectations of an effective virtual ear. In summary, if the embeddings are useful in helping the virtual ear with separation of drums from not-drums as well as categorization of drum types, we expect the projection of drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
+
+To test this, we implemented interactive graphs identical to those depicted in Figure~\ref{fig:2d_tsne} and~\ref{fig:3d_tsne}. These graphs allow for interactions such as playing the samples (by hovering the cursor on-top) and movement of the scene camera for a closer look at clusters.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
+\section{What To Do With These Features}
+In this chapter, we discussed to methods of feature extraction for audio. The FFT features can represent various aspects of sound which we think may be helpful to a virtual ear. Using autoencoders, FFT features can be further condensed into small embedded spaces. These embedded spaces are harder to understand and explain, but their 2-dimensional projections indicate that they contain vital information about the different drum and non-drum sound types in our databases. 
+
+Having sanity checked the sound representation methods, the next chapter covers the the implementation of random sound generators (or the \enquote{virtual synthesizers}). The features discussed here can be used to train classifiers which can separate desirable from undesirable sounds. Section~\ref{TPE_models} covers the implementation of classifiers which directly use the FFT features and Section~\ref{chap3:mixed_ear_models} covers the use of embeddings to train virtual ear models. 
 
 \section{Ear Decisions}
 \label{sec:decisions}
@@ -429,4 +672,7 @@ The finalized MEM is created by combining the encoder with the ExtraTrees classi
 % \caption{Repeated evaluation of signals from identical paramter-sets shows little variation in scores. Multiple renditions of the same parameter-set vary if the parameter-set calls for generation of 1 or more random wave-shapes..}
 % \label{fig:synth_deterministic}
 % \end{figure}
+
+
+
 \end{document}
