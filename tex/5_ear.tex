@@ -10,98 +10,11 @@
 
 
 \begin{document}
-\chapter{Virtual Synthesizer}
-\section{Why Do We Need a Virtual Synthesizer?}
-Our goal is to create a virtual system for the generation of novel drum sounds. We conceptualized a pipeline where a programmable virtual synthesizer rapidly creates audio based on random parameters, and a virtual ear accepts or rejects the sounds based on its training. This plan is visualized in  Figure~\ref{fig:pipeline_outline}. In this chapter, we describe our implementation of a programmable synthesizer of sounds, its parameters, and the reasoning behind our engineering choices. In the subsequent chapters, we discuss the implementation of the virtual ear and the approach taken to combining and testing the two virtual components. 
-\label{vs}
- \begin{figure}[h!]
-    \begin{center}
-    \textbf{Pipeline Design}
-    \makebox[\textwidth]{
-    \fbox{\includegraphics[width=1.1\linewidth]{images/chapter_4/pipeline.pdf}}}
-    \end{center}
-    \caption{An implementation which allows for easy parallelization when needed. Virtual synthesizer rapidly generates random programs and the corresponding sounds, while the virtual ear will listen to the sounds and determine if they should be categorized as drums and if so, which category of drum do they belong to. 
-    }
-\label{fig:pipeline_outline}
-\end{figure}
-\section{Why DSP over ANN Synthesizers?}
- As discussed in previous Section~\ref{related}, the majority of state of the art works tackling the problem of unsupervised audio generation utilize neural networks for synthesis of audio. Here, rather than using neural networks for sound synthesis, we generate programs for a virtual synthesizer which mainly utilizes additive and subtractive techniques. Our decision is based on the following factors:
-\begin{enumerate}[label=(\roman*)]
-    \item \textit{Novelty and Creativity}: The goal here is to work with the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics~\cite{collins2007loop}. 
-    \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterruptible weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
-    \item \textit{Speed of Rendering}: Neural network synthesis is costly. Sub 24 khz sample rates are common in most relevant works~\cite{yamamoto2020parallel,oord2017parallel,aouameur2019neural,ramires2020neural}. This is far below CD quality sampling rates~\cite{reiss2016meta}. At our fixed sampling rate of 48 khz, synthesizers with 8 submodules can create and save 1 second sounds to hard-disk with an average rendering time of 50 milliseconds\footnote{Using a single process on a Macbook Air 2012 and Ubuntu 18.04}. 
-    \item \textit{Flexibility and Scaling}: Probabilistic audio generation is often done sequentially. State of the art, parallel wave generation with GANs requires a fixed amount of rendering time for each time-step~\cite{yamamoto2020parallel}. With our virtual synthesizer, the added footprint of increasing the length of rendered sounds or higher sampling rates is relatively minuscule.  
-\end{enumerate}
 
-\section{Virtual Synthesizer Implementation}
-\label{virtual_synth_implementation}
- To create sounds, we make use of digital synthesizers capable of rapidly receiving or creating programs, as well as rendering the corresponding sound offline. Classical DSP allows for quick, offline, and parallel generation of audio signals without the usage of GPUs. Pippi\footnote{https://github.com/luvsound/pippi} and SciPy~\cite{jones2001scipy} libraries were extensively used for their DSP functionalities. The virtual synthesizer contains a set of one or more submodules.
-
- \begin{figure}[htbp]
-    \begin{center}
-    % \textbf{Synthesizer SubModule }
-    \makebox[\textwidth]{
-    \fbox{\includegraphics[width=1\linewidth]{images/chapter_3/synthesizer_block.pdf}}}
-    \end{center}
-    \caption{High level representation of pre-rendering steps for each submodule. Each Synthesizer contains 1 or more submodules. Synthesizer programs set the number of these submodules and their parameters.
-    }
-\label{fig:submodule}
-\end{figure}
-
- \begin{figure}[htbp]
-    \begin{center}
-    % \textbf{Synthesizer SubModule }
-    \makebox[\textwidth]{
-    \fbox{\includegraphics[width=1\linewidth]{images/chapter_3/synthesizer_all_blocks.pdf}}}
-    \end{center}
-    \caption{The output of the virtual synthesizer is the normalized addition of the output of its submodules. A synthesizer can have any number of submodules. 
-    }
-\label{fig:synth_modules}
-\end{figure}
- Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned to these parameters. The output of the virtual synthesizer is the normalized addition of the output of its submodules. The synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in Table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
-
-Since we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample in MixedDB (around 0.4 seconds). Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time\footnote{The entire sound must fit within the second, for example, a 0.3 second sound cannot begin playing past 0.7 seconds into the rendering time frame}. If the synthesizer has a stack size of more than 1, the audio signals from each submodule are overlapped and the total amplitude is normalized.
-
-\begin{table}[t!]
-\centering
-\resizebox{\columnwidth}{!}{\begin{tabular}{ |c|c|c| } 
-\hline
-Parameters & Value Range & notes and constraints\\
-\hline \hline
-Attack & 0-3 & A-D-S-R values relative\\
-Decay & 0-3 & relative to A-S-R\\
-Sustain & 0-3 & relative to A-D-R\\
-Release & 0-3 & relative to A-D-S\\
-OSC type & sine,square,saw & tone type\\
-IsNoise & boolean & whether to \newline use OSC type to generate noise\\
-Length & 0-1 second & - \\
-StartTime & 0-1 second & Length+Start$<$1\\
-Amplitude & 0.1-1 & 1 = max amplitude\\
-Pitches(notes) & list of pitches &  range of C0(16.35hz) to B9 \\
-HP filter Cutoff & 0-20000hz & -\\
-LP filter Cutoff & 20000-HP & never lower than HP cutoff\\
-Filter Order & 4,8,16 & butterworth filter order \\
-\hline
-\end{tabular}}
-\caption{Synthesizer submodule parameters. Despite the simplicity of the parameters and efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
-\label{table:submodule_params}
-\end{table}
-The ADSR parameters shape the entire amplitude of the signal. Each submodule creates its signal at full amplitude then shapes it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
-Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ set is normalized such that:
-\begin{align*}
-\text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
-v_{norm} = \dfrac{v}{A + D + S + R}
-\end{align*}
- The OSC type will determine the wave-shape of the signal. This parameter is limited to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the wave type will be routed through a noise-cloud. 
-
-Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound.  To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
-
-\subsection{How Will The Synthesizer Be Used?}
-We use this synthesizer as our source of noise generation. A stack number can be picked randomly, and for each submodule in the stack, the parameter space can be randomly sampled. This gives us a randomly generated~\textit{program}, which is then given to the synthesizer for rendering. These randomly generated sounds can then be listened to in order to find interesting sounds. The goal is to automate the listening procedure for rapid generation of desirable sounds, which are drums in the scope of this project. In the next section, we will discuss the virtual ear, which can automatically listen to the outputs of this synthesizer and separate percussive sounds from non-percussive sounds. 
-
-\section{The Ear}
+\chapter{The Virtual Ear}
+\section{Why Do We Need A Virtual Ear?}
 \label{sec:ear}
-What we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal ear for this task will be capable of receiving a piece of audio and giving it a score (or a list of scores) based on how well it satisfies certain criteria. What is required from the ear is to give probabilities of an audio sample belonging to various categories. Evaluations of the ear would allow us to associate scores with a sound as well as the program that generated it. 
+ The virtual synthesizer, capable of producing a wide variety of random sounds, was introduced in the previous chapter. What is needed now is a tool which can automatically separate the sounds which resemble percussion from those which do not. Here, what we refer to as an \enquote{ear} is any method of scoring and classifying audio (e.g machine listening) \cite{malkin2006machine,rowe1992interactive}. The ideal virtual ear will be capable of receiving a piece of audio and scoring it based on how well it satisfies certain criteria. In the scope of this project, the virtual ear must separate drums from non-drums, and categorize the type of drums.
 % The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot precisely anticipate what novel drums will sound like. 
 
 Figure~\ref{fig:ven_data} highlights critical problems with this approach. The change in learning domains---particularly with the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test. The task assigned to the virtual ear is the rare acceptance of drum-like sounds and the inevitable rejection of most \enquote{noise} outputs from the virtual synthesizer. By definition, we cannot precisely anticipate what novel drums will sound like. 
@@ -122,12 +35,14 @@ Figure~\ref{fig:ven_data} highlights critical problems with this approach. The c
  With the datasets of labeled drum sounds, discussed in Section~\ref{sec:datasets}, we implemented several algorithms for categorizing unlabeled drum sounds, given that they are drum sounds. However, a major hurdle towards the implementation of a \enquote{drum from non-drum} recognizer is that the set of sounds that are not percussive is infinite. Drum groups are an example of closed sets, since it is reasonable that a sufficiently large sample pack can effectively describe common drum categories. However, effective representation of all possible non-drum sounds is not attainable via examples alone.
 
 Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. \\
-\section{Virtual Listening}
+\section{Representing Sound}
 \label{chap:represent_sound}
-Before we move on to the generation and analysis of sound, it is important to establish how sound will be represented in this project. Raw digital sound can be difficult to analyze as a single second of digital sound at our desired sample rate exists as an array of 48000 numbers. The choice of feature extraction from digital sound is a foundational step towards the implementation of the \textit{virtual ear}. While smaller representations can reduce computation costs significantly, important features may be lost in the transformation. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
+We are looking to implement machine learning models capable of analyzing sounds. Machine learning algorithms learn from observing data, which in the scope of this project is audio signals. Therefore, it is important to establish how digital sound will be transformed before an algorithm attempts to learn from it. 
+
+Raw digital sound can be difficult to analyze as a single second of digital sound at our desired sample rate exists as an array of 48000 numbers. The choice of feature extraction from digital sound is a foundational step towards the implementation of the \textit{virtual ear}. While smaller representations can reduce computation costs significantly, important features may be lost in the transformation. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
     \item By using features extracted from Fourier Transformations of sounds \item By using features extracted from autoencoders which condense the Fourier transformations. 
 \end{enumerate}
-\section{Fourier Transforms}
+\subsection{Fourier Transforms}
 \label{sec:fourier_transforms}
 In this work we rely on derivatives of the fast Fourier transform (FFT), and by extension, short-time Fourier transforms (STFT) for feature extraction. Various works have demonstrated effective reconstruction of signals given their short-time Fourier transforms~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,huzaifah2017comparison}. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when temporal changes in frequency bins are of interest; this can be done by the application of FFT\footnote{more accurately, discrete Fourier transforms} to a sliding time-window on the signal to create a vector for each time step. This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step). 
 
@@ -371,7 +286,6 @@ To test this, we implemented interactive graphs identical to those depicted in F
 In this chapter, we discussed to methods of feature extraction for audio. The FFT features can represent various aspects of sound which we think may be helpful to a virtual ear. Using autoencoders, FFT features can be further condensed into small embedded spaces. These embedded spaces are harder to understand and explain, but their 2-dimensional projections indicate that they contain vital information about the different drum and non-drum sound types in our databases. 
 
 Having sanity checked the sound representation methods, the next chapter covers the the implementation of random sound generators (or the \enquote{virtual synthesizers}). The features discussed here can be used to train classifiers which can separate desirable from undesirable sounds. Section~\ref{TPE_models} covers the implementation of classifiers which directly use the FFT features and Section~\ref{chap3:mixed_ear_models} covers the use of embeddings to train virtual ear models. 
-
 \section{Ear Decisions}
 \label{sec:decisions}
  Having considered the caveats and requirements, once a sound is generated and passed onto the ear, we expect the virtual ear to make decisions in response to two important questions: 
@@ -601,9 +515,9 @@ Using embeddings and envelope features to represent audio, five classification m
     \end{center}
 \end{figure}
 
-We're also interested in how these models perform on the binary DvN task (i.e \decfirst).
+We are also interested in how these models perform on the binary DvN task (i.e \decfirst).
 After grouping all drums together, the model selection is repeated. A repeat the hyper-parameter optimization step did not highlight any necessary changes except for a reduction in the number of neighbors for the K-Neighbor model (from 30 to 5). As shown in in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}, the addition of envelope features had a positive effect on performance for all mdoels, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks. We train the top models on \%80 of the database and use the remaining \%20 to create the confusion matrices and the F-Scores shown in Figure~\ref{fig:conf_f1_dvn}.
-\begin{figure}[h!]   
+\begin{figure}[htbp]   
     \begin{center}
         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_dvn.pdf}}
@@ -613,7 +527,7 @@ After grouping all drums together, the model selection is repeated. A repeat the
 \end{figure}
 
 
-\begin{figure}[htbp!]
+\begin{figure}[htbp]
 \begin{center}
     \textbf{ Classification Report for DvDvN and DvN  }\par\medskip
     \makebox[\textwidth]{
@@ -639,10 +553,13 @@ After grouping all drums together, the model selection is repeated. A repeat the
 
 Based on these reports, having multiple options for drum categorization does not noticeably influence the models accuracy in \decfirst. However, the DvDvN models' slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9). Therefore, the DvDvN implementation is used as it makes the DvN model redundant.
 
-The finalized MEM is created by combining the encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. In the upcoming \enquote{Novel Generations} Chapter, we will present the results of a two person survey where the accuracy of the different models is analyzed given over 500 synthetic noise sounds categorized as drums. 
+The finalized MEM is created by combining the encoder with the ExtraTrees classifier. As sounds are generated with the virtual synthesizer, the encoding and envelope features will be extracted using the encoder and sent to the ExtraTrees DvDvN classifier. 
 
 
+\section{How Will The Ear Be Used?}
+With the virtual synthesizer in place, we required a virtual ear: a tool capable of automatic separation of drums from non-drums and categorization of drum sounds. We took two different approaches to implementing such a tool. This gave us two types of virtual ears: TPE Ears, which make the two decisions sequentially, and MEM ears which makes these decisions simultaneously. With the virtual synthesizer and ears in place, the generative system which was highlighted in Figure~\ref{fig:pipeline_outline} can finally be tested.
 
+We implemented two generative systems, one utilizing the TPE ear, and the other for the MEM ear. In the next chapter, we will present the results of a blinded, two person survey where the outputs of each system are analyzed via manual listening. 
 
 % \section{Is the Virtual Synthesizer Deterministic?}
 % \label{section:synth_deterministic}
