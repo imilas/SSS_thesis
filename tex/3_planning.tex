@@ -11,19 +11,27 @@
 \chapter{Datasets}
 \label{sec:datasets}
 \section{Why is Data Needed?}
-This project requires a \textit{virtual synthesizer} capable of producing sounds with a variety of characteristics (as long as a fraction of these sounds can be suitable replacements for percussion). On the other-hand, \textit{virtual ear} has a more concrete task: the separation of drum-like sounds from other synthesizer outputs. Rather than manually defining the characteristics which distinguish percussive sounds from all other types, we train the virtual ear by example. To this end, we gathered 3 databases of percussive sounds, and use supervised machine learning methods to create our virtual ear model. The upcoming Chapters~\ref{chap:represent_sound} and~\ref{implementation} will cover how these datasets are transformed and used for training.
+This project requires a \textit{virtual synthesizer} capable of producing sounds with a variety of characteristics (as long as a fraction of these sounds can be suitable replacements for percussion). On the other-hand, \textit{virtual ear} has a more concrete task: the separation of drum-like sounds from other synthesizer outputs. Rather than manually defining the characteristics which distinguish percussive sounds from all other types, we use supervised machine learning to train the virtual ear by example. To this end, we gathered 3 databases of percussive sounds, and use supervised machine learning methods to create our virtual ear model. The upcoming Chapters~\ref{chap:represent_sound} and~\ref{implementation} will cover how these datasets are transformed and used for training.
 
 
 \section{Details}
-MixedDB is a large set of 2 second or shorter drum samples aggregated from personal libraries. FreeDB is our curated dataset of free drum kits from the sample-swap project\footnote{https://sampleswap.org/}. RadarDB is a set of drum sounds aggregated from royalty free sources such as music radar\footnote{https://www.musicradar.com/}. We put together 3 databases of drums using these sources. NoiseDB is our database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers (synthesizer stacks will be discussed in the upcoming Section~\ref{virtual_synth_implementation}). We prioritize making generalizable tools which can learn from and produce a variety of different sounds. We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks. Further details about the categories and quantity of drums samples in these datasets is shown in Table~\ref{table:all_db}
+We curated 3 different datasets of drums, as well as a dataset of randomly generated synthesizer sounds.  The breakdown of samples in each dataset is given in Table~\ref{table:all_db}. Below is a summary of how each dataset was curated, and the steps to reproduce it, if possible. 
+\subsection{FreeDB}
+FreeDB is our curated dataset of free drum kits from the sample-swap project\footnote{https://sampleswap.org/}. This project contains  a large number of sounds and drum kits. We manually selected the sub-directories within the sample-swap datasets which contained drum sounds, and grouped drum sounds which did not belong to \enquote{Kick}, \enquote{Snare}, \enquote{Clap}, \enquote{Hat} into the group \enquote{Other}. This dataset is copyright free and is available at: \url{https://zenodo.org/record/3994999}. 
+\subsection{RadarDB}
+RadarDB is a set of drum sounds aggregated from royalty free sources such as music radar\footnote{https://www.musicradar.com/}. We cannot directly share this dataset as it is not copyright free, however, the script for its automated creation can be found under the \enquote{getting\_data} directory of the project: \url{https://github.com/imilas/Synths_Stacks_Search}. Be aware that nearly 50GBs of compressed audio files will be downloaded, extracted, and filtered to create RadarDB. 
 
+\subsection{MixedDB}
+MixedDB is a large set of 2 second or shorter drum samples aggregated from personal libraries. We cannot share this dataset as it contains copyrighted material. 
+\subsection{NoiseDB}
+NoiseDB is our database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers (synthesizer stacks will be discussed in the upcoming Section~\ref{virtual_synth_implementation}). This dataset is used as a source of~\enquote{negative examples}, i.e, sounds which we want to reject.
 
-\section{Downloads}
-\label{appendix:datasets}
-\subsection{Download Instructions}
-FreeDB, the survey data used in Section~\ref{surveys}, and randomly generated sounds can be downloaded from: \url{https://zenodo.org/record/3994999}\\\\
-RadarDB requires lengthy downloads and processing. The script for its automated creation can be found under the \enquote{getting\_data} directory of the project:\\
-\url{https://github.com/imilas/Synths_Stacks_Search} 
+\section{How The Datasets Will Be Used}
+ We utilize these databases depending on the task at hand. At times, we merged or purged drum groups to simplify tasks. As stated earlier, in Section~\ref{sec:ear}, we discuss how supervised machine learning algorithms trained learn to categorize drums from non-drums using the datasets discussed here as examples. 
+ 
+% \section{Download Instructions}
+% \label{appendix:datasets}
+% FreeDB, the survey data used in Section~\ref{surveys}, and randomly generated sounds can be downloaded from: \url{https://zenodo.org/record/3994999}\\\\
 
 
 
