@@ -12,7 +12,7 @@
 
 
 \section{Our Goals}
-Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are not easy or cheap to find. New drum sounds can be obtained via live recordings of drums, layering existing drum sounds, and lengthy hacking of sound engineering techniques. The goal here is to create a virtual source of novel drum sounds, where most of the outputs are suitable substitutes for organic drums. In addition, given that a sound is percussive, we require the accurate categorization of drum-types.
+Digital recordings of novel, one-shot\footnote{A single hit on the drum that captures its capabilities} drum sounds are not easy or cheap to find. New drum sounds can be obtained via live recordings of drums, layering existing drum sounds, and meticulous combination of sound engineering techniques. The goal here is to create a virtual source of novel drum sounds, where most of the outputs are suitable substitutes for organic drums. In addition, given that a sound is percussive, we require the accurate categorization of drum-types.
 
 
 
@@ -66,7 +66,7 @@ We want to virtually create novel drum sounds. We need a generative source that 
 % In our work, we find simple features such as frequency content (high pitch vs low pitch), length, and envelope (change in loudness, how fast the sounds reaches its maximum loudness and fades away) to be powerful for the categorization of drum sounds. We will discuss our algorithms for extraction of these and other features in Chapter~\ref{implementation}. We will also discuss how these extracted features were used to train models that can automatically categorize new sounds.  
 \section{What Is Our Methodology?}
 \label{sec_methodology}
-We conceptualized a general pipeline for approximation of sounds: A virual synthesizer is randomly programmed, while a virtual ear rapidly evaluates and assigns a score to the sound outputs, this score is used for the separation of undesired outputs from desired ones. This approach assumes that a fraction of the randomly generated sounds can be substituted for percussion and that the virtual ear will assign higher evaluation scores to this subset. While only random search was used in this work, our implementation allows for the future integration of heuristic search algorithms such that the parameters of the synthesizer can be selected based on the previously observed evaluations. Considering these requirements, we found the proper implementation of 2 major components to be crucial:
+We conceptualized a general pipeline for approximation of sounds: a virtual synthesizer is randomly programmed, while a virtual ear rapidly evaluates and assigns a score to the sound outputs, this score is used for the separation of undesired outputs from desired ones. This approach assumes that a fraction of the randomly generated sounds can be substituted for percussion and that the virtual ear will assign higher evaluation scores to this subset. While only random search was used in this work, our implementation allows for the future integration of heuristic search algorithms such that the parameters of the synthesizer can be selected based on the previously observed evaluations. Considering these requirements, we found the proper implementation of 2 major components to be crucial:
 
 \begin{itemize}
     \item \textit{Virtual Synthesizer}: A flexible, deter\-min\-istic, and tract\-able gener\-ator which can create audio. 
@@ -83,7 +83,7 @@ While the main focus of this project is the generation of novel percussive sound
 
 
 \section{Thesis Statement and Contributions}
-In the long term, wish to leverage AI technologies, heuristic search, and DSP methods for the synthesis of novel audio. The work here is motivated by the idea of finding new, convenient methods for the expansion of a music producer's library of sounds. As a starting point, the central thesis of this work is that a virtual ear, capable of the separation of drum sounds from non-drum sounds, can guide the automatic programming of independently designed virtual synthesizers for the creation of new digital drum sounds. The principal contributions of this dissertation are:
+In the long term, we wish to leverage AI technologies, heuristic search, and DSP methods for the synthesis of novel audio. The work here is motivated by the idea of finding new, convenient methods for the expansion of a music producer's library of sounds. As a starting point, the central thesis of this work is that a virtual ear, capable of the separation of drum sounds from non-drum sounds, can guide the automatic programming of independently designed virtual synthesizers for the creation of new digital drum sounds. The principal contributions of this dissertation are:
 \begin{itemize}
   \item We introduce a framework for rapid, high quality sound generation with virtual synthesizers using simple digital signal processing techniques. 
   \item We train several machine learning models capable of categorization of drum sounds from non-drum sounds as well as categorization of drum sounds. We measure and verify the accuracy of these models using organic drum sounds. 
@@ -96,20 +96,6 @@ In the long term, wish to leverage AI technologies, heuristic search, and DSP me
 
 % The goal here was to create an unsupervised system that generates discrete sounds which are suitable substitutes for one-shot recordings of organic drums. In addition, given that a sound is percussive, we require the accurate categorization of drum-types. These definitions can be subjective and/or context dependent: \enquote{suitable substitute} varies by producer and type of music, and we can only define \enquote{one-shot recordings of organic drums} via examples. These definitions necessitate that the agreement between the outputs of the system and surveyed individuals is measured in a blinded way. 
 
-Can you please provide a paragraph on this? It can have a line each on - ECG  pre-processing and cleaning, description of classes and number of instances per class, feature extraction (tsfresh, number of features...), learning method (XGBoost, objective function, hyperparameters..) and evaluation (data splits, reporting metrics, ROC/AUPRC graphs...).
-
-Our dataset contains approximately 1.68 million multi-labeled ECGs. The label percentages are as follows:
-Afib secondary: 13.9%
-Afib primary: 3.0%
-Stemi primary diagnosis: 5.1%
-Stemi secondary diagnosis: 0.8%
-Not Afib or Stemi: 77.2%
-
-We have taken two approaches to classification, by using static features extracted through tsFresh, and by deep learning of raw signals. Static feature extraction builds on our previous work which highlighted the top 100 (from our pool of approximately 20,000 static features) most effective features for the physionet 2020 ECG label challenge. By using these top 100 features for 2-way classification of Afib and Stemi in our dataset of ECGs, we trained an XGboost random forest model on 80% of the dataset. This model achieved the AUC score of 0.76 for Afib diagnosis, and 0.8 for Stemi on the 20% of ECG samples that had not been seen by the models during training. Bespoke feature selection and hyper-parameter optimization may lead to improvements.
-
-Our approach to deep learning is in the early stages. EGSs are pre-processed by application of a filter with a bandwidth of 3 - 45 Hz followed by normalization of each individual lead signal. We will further experiment with the ordering and parameters of the pre-processing step. We are experimenting with different architectures, and we have identified a promising, deep 1D-convolutional architecture which achieved the score 0.6 and 0.81 for Afib and Stemi diagnosis respectively while being trained for a short duration on less than 1% of the data (testing was done on 5000 unseen ECG samples). We are in the very early stages of experimentation, and expect much better results with further training and optimization.
-
-Later on we will combine our two approaches in an ensemble model, as the combination of static features and deeplearning models is common in state of the art works. 
 
 
 \end{document}

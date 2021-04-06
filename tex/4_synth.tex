@@ -11,7 +11,7 @@
 \begin{document}
 \chapter{Virtual Synthesizer}
 \section{Why Do We Need a Virtual Synthesizer?}
-Our goal is to create a virtual system for the generation of novel drum sounds. We conceptualized a pipeline where a programmable virtual synthesizer rapidly creates audio based on random parameters, and a virtual ear accepts or rejects the sounds based on its training. This plan is visualized in  Figure~\ref{fig:pipeline_outline}. In this chapter, we describe our implementation of a programmable synthesizer of sounds, its parameters, and the reasoning behind our engineering choices. In the subsequent chapters, we discuss the implementation of the virtual ear and the approach taken to combining and testing the two virtual components. 
+Our goal is to create a virtual system for the generation of novel drum sounds. We conceptualized a pipeline where a programmable virtual synthesizer rapidly creates audio based on random parameters, and a virtual ear accepts or rejects the sounds based on its training. This plan is visualized in  Figure~\ref{fig:pipeline_outline}. In this chapter, we describe the implementation of a programmable synthesizer of sounds, its parameters, and the reasoning behind our engineering choices. In the subsequent chapters, we discuss the implementation of the virtual ear and the approach taken to combining and testing the two virtual components. 
 \label{vs}
  \begin{figure}[h!]
     \begin{center}
@@ -42,7 +42,7 @@ Our goal is to create a virtual system for the generation of novel drum sounds. 
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1\linewidth]{images/chapter_3/synthesizer_block.pdf}}}
     \end{center}
-    \caption{High level representation of pre-rendering steps for each submodule. Each Synthesizer contains 1 or more submodules. Synthesizer programs set the number of these submodules and their parameters.
+    \caption{High level representation of a submodule. Each Synthesizer contains 1 or more submodules. Synthesizer programs set the number of these submodules and their parameters.
     }
 \label{fig:submodule}
 \end{figure}
@@ -57,10 +57,9 @@ Our goal is to create a virtual system for the generation of novel drum sounds. 
     }
 \label{fig:synth_modules}
 \end{figure}
- Each submodule is a self-contained noise making unit. Submodules have identical sets of parameters, but widely different outputs can be achieved depending on the values assigned to these parameters. The output of the virtual synthesizer is the normalized addition of the output of its submodules. The synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in Table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
+ Each submodule is a self-contained noise making unit. Submodules have identical structures, but widely different outputs can be achieved depending on the values assigned to their parameters. The output of the virtual synthesizer is the normalized addition of the output of its submodules. As shown in Figure~\ref{fig:synth_modules}, each submodule creates a sound independently, and the results are added and normalized to create the final output. The synthesizer can have any number of submodules. The parameters that dictate the output signal of each submodule as well as the range of values each parameter can take are shown in Table~\ref{table:submodule_params}. We call the number of submodules in each virtual synthesizer the \textit{stack size}. We call the sets of parameter values that characterize a synthesizer's submodules a \textit{program} (analogous to a preset for a VST).  
 
-Since we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample in MixedDB (around 0.4 seconds). Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time\footnote{The entire sound must fit within the second, for example, a 0.3 second sound cannot begin playing past 0.7 seconds into the rendering time frame}. If the synthesizer has a stack size of more than 1, the audio signals from each submodule are overlapped and the total amplitude is normalized.
-
+Since we are interested in short, one-shot percussive sounds, each virtual synthesizer program will generate a 1 second piece of audio. This 1 second limit is over twice the length of the average one-shot drum sample in MixedDB (around 0.4 seconds). Each submodule can make an audio signal with the length of 0.1-1 second, and play it at any point within the 1 second rendering time\footnote{The entire sound must fit within the second, for example, a 0.3 second sound cannot begin playing past 0.7 seconds into the rendering time frame}.
 \begin{table}[t!]
 \centering
 \resizebox{\columnwidth}{!}{\begin{tabular}{ |c|c|c| } 
@@ -85,13 +84,14 @@ Filter Order & 4,8,16 & butterworth filter order \\
 \caption{Synthesizer submodule parameters. Despite the simplicity of the parameters and efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
 \label{table:submodule_params}
 \end{table}
-The ADSR parameters shape the entire amplitude of the signal. Each submodule creates its signal at full amplitude then shapes it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
+
+In Section~\ref{sec:adsr}, we discussed sound envelopes and ADSR parameters, which are used in sound synthesis for modulating the loudness of sounds overtime. Here, each submodule creates its signal at full amplitude before shaping it according to its internal ADSR parameter. Prior to being applied to the signal, each of these parameters is assigned an integer value in the range of 0-3, and normalized relative to the others such that \[ A_{norm} + D_{norm} + S_{norm} + R_{norm} = 1 \] \\ 
 Where each value $v_{norm}$ in the $\{A_{norm}, D_{norm},S_{norm},R_{norm}\} $ set is normalized such that:
 \begin{align*}
 \text{for each $v$ $\epsilon$ \{A,D,S,R\}} \\
 v_{norm} = \dfrac{v}{A + D + S + R}
 \end{align*}
- The OSC type will determine the wave-shape of the signal. This parameter is limited to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost (relative to the addition of thousands of sine waves at various frequencies). If the IsNoise boolean is set to true, the OSC type parameter loses importance as the wave type will be routed through a noise-cloud. 
+ The OSC type will determine the wave-shape of the signal. This parameter is limited to three fundamental wave forms: sine waves, square waves and saw waves. We also allow the creation of noise signals, which can imitate timbral characteristics of higher pitched drum samples at a very low computation cost, compared to the addition of thousands of sine waves at various frequencies. If the IsNoise boolean is set to true, the OSC type parameter loses importance as the wave type will be routed through a noise-cloud. 
 
 Each submodule is a monophonic synthesizer. That is, each submodule can play one note (or frequency) at a time. However, quick changes in pitch can occur in drum sound.  To mimic such sounds, synthesizer submodules may slide between 4 different pitches in the 1 second time frame. Each pitch value is a midi note with a frequency and length value. Each submodule accepts a list of 5 consecutive possible pitch values. The submodule will play each note in the list consecutively after normalizing the length values. The pitch notes are played in a portmanteau fashion such that there is no audible gap. This normalization of length values is similar to that of the ADSR values. 
 
