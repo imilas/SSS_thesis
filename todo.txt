@@ -1,31 +1,10 @@
-* thesis final edits:
-    - Add spectrogram example
-    - fix that dvn CNN table
-    - 
-
-* Abram feedback:
-    - You need a lot more prior work.
-    - You need to explain a lot more.
-    - You need to consider what people don't know.
-    - The motivation needs to be more clear and verbose
-    - Probably we have to evaluate the curated collection
-    - You should talk about instruments you can make with this.
-    - Can you cluster the results so we can get a soundfont of an instrument?
-* To learn:
-    - look up physical synthesis
-
-
-* Add prior work:
-    - [x] Gather prior work
-    - [x] Write more  about prior work
-
-* Write results of genetic search
-    -[x] Change synth params
-    -[x] Write evolution loop
-    -[x] Write mutation functions
-    -[ ] Measure time for stacks sizes 1-2-4
-    -[ ] write results in paper
-
-* Do bandit search
-* MSE is probably a bad loss functions, but what's the alternative?
-
+- chapter 1: 
+    - modify thesis statement
+- chapter 4:
+    - Add noiseDB to zenodo
+- chapter 5:
+    - beginning of chapter: Which is for extra information that is for   what the subject is doing
+    - change figure to "possibly" mislabled positives
+    - Convert tables to latex
+- 
+    
