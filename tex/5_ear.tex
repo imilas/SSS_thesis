@@ -451,12 +451,6 @@ Using the features and transformation described in the previous section as input
                         
         \end{lstlisting}}
 \end{center}
-\subsubsection{How To Use TPEs}
-TPEs can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus.  
-
-With the models showing high accuracy on testing data, they can be combined in order to make decisions sequentially. For \decfirst~we only determine sounds as percussive if both FC-DVN and CNN-LSTM have categorized it as such with over 90\% confidence. For the majority of random generations, that is not the case, but if a randomly generated sound has passed this phase, the three categorizers assign their categorizations to this sound.  These categorizers have a moderate degree of agree-ability as seen in Section~\ref{surveys}, but often the decision is not unanimous.
-
-% The fourth method of categorization, \enquote{averaged-cat}, is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category.
 
 
 
@@ -474,9 +468,9 @@ With the models showing high accuracy on testing data, they can be combined in o
 
 Unlike TPEs which make their decisions in two steps, mixed ear models (MEMs) simultaneously categorize a new sound's drum type or put it in the \enquote{synthetic noise} category. We call this task drum vs drum vs not-drum, or \enquote{DvDvN}.
 
-As mentioned previously, manual t-SNE inspections highlighted a disregard for envelope shapes as a major source of failure. Because of this, the feature set used to train MEMs contains envelope and embedded features. The performance of the models before and after the addition of envelope features (a vector of size 10) to the feature space is shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}.
+Manual t-SNE inspections discussed in Section~\ref{fig:embedding_FE} highlighted a disregard for envelope shapes as a major source of failure. Because of this, the feature set used to train MEMs contains envelope and embedded features. The performance of the models before and after the addition of envelope features (a vector of size 10) to the feature space is shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}.
 
-The autoencoder model trained on MixedDB is used as an embedding feature extractor. RadarDB, FreeDB and NoiseDB are combined for training/test data. To prevent class overlaps as much as possible, only claps, hats, kicks, snares and synthetic noise groups are used for measuring model effectiveness. Samples longer than 1 second are excluded in order to reduce potentially mislabeled data. This combined dataset is described in Section~\ref{db:memDB}
+The autoencoder model trained on MixedDB is used as an embedding feature extractor. RadarDB, FreeDB and NoiseDB are combined for training/test data. To prevent class overlaps as much as possible, only claps, hats, kicks, snares and synthetic noise groups are used for measuring model effectiveness. Samples longer than 1 second are excluded in order to reduce potentially mislabeled data. This combined dataset was described in Section~\ref{db:memDB}
 
 
 \subsubsection{Model Selection}
@@ -521,7 +515,7 @@ Using embeddings and envelope features to represent audio, five classification m
     \end{center}
 \end{figure}
 
-To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Looking the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forest models trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}.
+To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}.
 
 \begin{figure}[htbp]   
     \begin{center}
@@ -557,14 +551,36 @@ To see how these models perform on the binary DvN task (i.e \decfirst), the perf
 \label{fig:conf_f1_dvn}
 \end{figure}
 
-To create the confusion matrices and the F-Scores shown in Figure~\ref{fig:conf_f1_dvn}, the extra-trees model was trained on 80\% of the database, and tested with the remaining 20\%. Based on these reports, having multiple options for drum categorization does not noticeably influence the models accuracy in \decfirst. The DvDvN model's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9). Going forward, the DvDvN implementation is used as it makes the DvN model redundant. The finalized MEM is created by combining the encoder with the ExtraTrees DvDvN classifier .
+To create the confusion matrices and the F-Scores shown in Figure~\ref{fig:conf_f1_dvn}, the extra-trees model was trained on 80\% of the database, and tested with the remaining 20\%. Based on these reports, having multiple options for drum categorization does not noticeably influence the models accuracy in \decfirst. The DvDvN model's slightly smaller false negative rate for synthetic noise (11 vs 13 false negatives) is countered by a slightly higher rate of categorizing drums as synthetic noise (12 vs 9). Going forward, the DvDvN implementation is used as it makes the DvN model redundant. The finalized MEM used in the subsequent chapters is created by combining the autoencoder model with the ExtraTrees DvDvN classifier. 
 
 % the addition of envelope features had a positive effect on performance for all models, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks.
 
 \section{How Will TPEs and MEMs Be Used?}
-With the virtual synthesizer in place, we required a virtual ear: a tool capable of automatic separation of drums from non-drums and categorization of drum sounds. We took two different approaches to implementing such a tool. This gave us two types of virtual ears: TPE Ears, which make the two decisions sequentially, and MEM ears which makes these decisions simultaneously. With the virtual synthesizer and ears in place, the generative system which was highlighted in Figure~\ref{fig:pipeline_outline} can finally be put together and tested.
+With the virtual synthesizer in place, we required a virtual ear: a tool capable of automatic separation of drums from non-drums and categorization of drum sounds.  We took two different approaches to implementing such a tool, which gave us two types of virtual ears: TPE Ears, which make the two decisions sequentially, and MEM ears which makes these decisions simultaneously. The distinguishing characteristic of TPEs and MEMs is the type of feature set that they use for learning. TPEs use envelope and spectrogram features derived using Fourier transformations, while MEMs use encoded spectrogram features, which is a much smaller set of features, yet achieve similar classification performance.  
 
-We implemented two generative systems, one utilizing the TPE ear, and the other for the MEM ear. In the next chapter, we will present the results of a blinded, two person survey where the outputs of each system are analyzed via manual listening. 
+ Based on results shown in this chapter, TPEs and MEMs appear to have high categorization accuracy in our testing data. But without manual hearing tests, we cannot know whether the synthesizer sounds that are deemed percussive by the virtual ears resemble organic drum sounds or simply have characteristics that the virtual ears were not familiar with, leading to mistakes. This is due to the infinite variety of sounds that are not percussive (i.e, the OSR problem), which makes such training tasks difficult. 
+ 
+In the next chapter we first discuss how TPEs and MEMs are used to implement generative systems capable of outputting percussive sounds and how the outputs of these systems were manually tested in order to measure their success in creation of drum sounds. We also discuss how this success hinges on the virtual ear's ability in separation drums from non-drums as well as accurate categorization of drums. 
+
+ 
+% With the models showing high accuracy on testing data, they are combined in order to make decisions sequentially. The final implementations are manually tested, and the results are discussed in the Chapter~\ref{surveys}. \decfirst~we only determine sounds as percussive if both FC-DVN and CNN-LSTM have categorized it as such with over 90\% confidence. For \decsecond, the agreement between human listeners and each drum-vs-drum is measured.
+
+% For the majority of random generations, that is not the case, but if a randomly generated sound has passed this phase, the three categorizers assign their categorizations to this sound.  These categorizers have a moderate degree of agree-ability as seen in Section~\ref{surveys}, but often the decision is not unanimous.
+% TPEs can be combined and weighted in various ways and the confidence thresholds can be modified in order to implement \enquote{virtual ears} with different properties. A glaring issue in the current implementation is the treatment of softmax outputs as a reasonable measure of a model's confidence. As a result, some models may have unwarranted higher confidence in their scores, skewing attempts at finding a consensus.  
+
+
+
+% The fourth method of categorization, \enquote{averaged-cat}, is implemented by taking the sum of the softmax outputs of all three categorizers, using it to determine the category.
+
+
+
+
+% \subsubsection{How TPEs Are Used}
+
+% With the models showing high accuracy on testing data, they are combined in order to make decisions sequentially. The final implementations are manually tested, and the results are discussed in the Chapter~\ref{surveys}. \decfirst~we only determine sounds as percussive if both FC-DVN and CNN-LSTM have categorized it as such with over 90\% confidence. For \decsecond, the agreement between human listeners and each drum-vs-drum is measured.
+
+% For the majority of random generations, that is not the case, but if a randomly generated sound has passed this phase, the three categorizers assign their categorizations to this sound.  These categorizers have a moderate degree of agree-ability as seen in Section~\ref{surveys}, but often the decision is not unanimous.
+
 
 % \section{Is the Virtual Synthesizer Deterministic?}
 % \label{section:synth_deterministic}
