@@ -333,51 +333,86 @@ Using the features and transformation described in the previous section as input
  Multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~are combined to make decisions sequentially. For \decfirst, all drums in RadarDB and FreeDB and 6000 examples of virtual synthesizer noise are used. For \decsecond, we combined the two databases and merge toms into kicks and rims/shakers into \enquote{other}. 80\% of this dataset were used for training, and the remaining 20\% of sounds for testing. 98\% accuracy in \decfirst~and 82\% accuracy in~\decsecond~were achieved with the best models. The loss function and optimizer are Categorical Cross-Entropy and Adam respectively. Training continued until no reduction in loss and accuracy is observed for 10 epochs. These accuracy numbers are weak as we did not account for category sizes or cross validate.  
 
 
+
 \subsubsection{DVN Models}
 \textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on the test data for~\decfirst. 
-\begin{center}
-\vbox{
-    \begin{lstlisting}[caption=Sequential Layers for FC-DVN]
-            Layer                       Details
-            ========================================================
-            Linear                      in_features=400 
-                                        out_features=20 
-                                        bias=True
-            PReLU                       
-            Linear                      in_features=20
-                                        out_features=10 
-                                        bias=True
-            PReLU
-            Linear                      in_features=10
-                                        out_features=4
-                                        bias=True
-            PReLU
-            Linear                      in_features=4
-                                        out_features=2
-                                        bias=True
-            Softmax                     DVN probabilities
+\begin{table}[h!]
+\centering
+\begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape &  Details  \\ \hline
+Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ \hline
+PReLU & [$\mathcal{B}$, 400] &  \\ \hline
+Linear-2 & [$\mathcal{B}$, 20] & \\ \hline
+PReLU & [$\mathcal{B}$, 20] &  \\ \hline 
+Linear-3 & [$\mathcal{B}$, 10] &  \newline \\ \hline
+Linear-3 & [$\mathcal{B}$, 4] &  \\ \hline 
+Softmax & [$\mathcal{B}$, size(DvN)] &  DvN Probabilities\\ \hline
+\end{tabular}
+\caption{Sequential Layers for FC-DVN}
+\end{table}
+% \begin{center}
+% \vbox{
+%     \begin{lstlisting}[caption=Sequential Layers for FC-DVN]
+%             Layer                       Details
+%             ========================================================
+%             Linear                      in_features=400 
+%                                         out_features=20 
+%                                         bias=True
+%             PReLU                       
+%             Linear                      in_features=20
+%                                         out_features=10 
+%                                         bias=True
+%             PReLU
+%             Linear                      in_features=10
+%                                         out_features=4
+%                                         bias=True
+%             PReLU
+%             Linear                      in_features=4
+%                                         out_features=2
+%                                         bias=True
+%             Softmax                     DVN probabilities
                         
-        \end{lstlisting}}
-\end{center}
-\textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on the test set. 
-\begin{center}
-\vbox{
-    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-DVN]
-            Layer                       Details
-            ========================================================
-            Conv2d                  kernel size = (7, 3)
-                                    stride = (1, 1)
-                                    padding = (3, 1)
-            ReLU
-            Dropout                 probability = 0.5
-            LSTMCell                hidden size = 800
-                                    input size = @($\mathcal{F}$)@
-            Linear                  in_features = @($\mathcal{F}$)@
-                                    out_features = 2
-                                    bias=True
-            Softmax                 DVN probabilities
-\end{lstlisting}}
-\end{center}
+%         \end{lstlisting}}
+% \end{center}
+
+
+\textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on the test set.
+\begin{table}[]
+\begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape & Details  \\ \hline
+Conv2d-1 & [$\mathcal{B}$, 8, 30, 20]  &
+kernel:7x3\newline                  
+stride:1\newline    
+padding:3x1 \\ \hline
+ReLU-2 & [$\mathcal{B}$, 8, 30, 20] & \\  \hline
+Dropout-4 & [$\mathcal{B}$, 8, 15, 10] &  \\ \hline
+LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
+Linear-1 & [$\mathcal{B}$, 2] &  \\ \hline 
+Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
+\end{tabular}
+\caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size. Total number of parameters is 166,320. }
+\label{table:CNNAUTOENCODER}
+\end{table}
+% \begin{center}
+% \vbox{
+%     \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-DVN]
+%             Layer                       Details
+%             ========================================================
+%             Conv2d                  kernel size = (7, 3)
+%                                     stride = (1, 1)
+%                                     padding = (3, 1)
+%             ReLU
+%             Dropout                 probability = 0.5
+%             LSTMCell                hidden size = 800
+%                                     input size = @($\mathcal{F}$)@
+%             Linear                  in_features = @($\mathcal{F}$)@
+%                                     out_features = 2
+%                                     bias=True
+%             Softmax                 DVN probabilities
+% \end{lstlisting}}
+% \end{center}
 
 \subsubsection{DVD Models}
 \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. 
