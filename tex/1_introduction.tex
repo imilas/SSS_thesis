@@ -81,13 +81,14 @@ While the main focus of this project is the generation of novel percussive sound
 
 
 \section{Thesis Statement and Contributions}
-  The central thesis of this work is that new drum sounds can be created and organized into drum kits for music producers virtually, by random and rapid programming of virtual synthesizers and use of virtual listeners for distinguishing synthesizer sounds resembling drums from non-drums. We seek to implement a system of virtual sound generation where 50\% or more of the sounds generated resemble drum sounds, verified with manual listening.\\
+\label{sec:thesis_statement}
+ The focus of this work is the creation of new audio samples for use by music producers. We propose a virtual approach to creation of digital drum-kits, by random and rapid programming of virtual synthesizers and use of virtual listeners for extraction and organization of synthesizer sounds resembling drums. We seek to implement a system of virtual sound generation where the majority of sounds generated can be used in digital music compositions as a replacement for organic recordings of at least one type of percussive instrument.\\
   
   The principal contributions of this dissertation are:
 \begin{itemize}
   \item We introduce a framework for rapid, high quality sound generation with virtual synthesizers using simple digital signal processing techniques. 
+  \item For training of virtual listener models, we curated a dataset of free percussive sounds which is made available to future researchers. 
   \item We train several machine learning models which can distinguish drum sounds from non-drum sounds and categorize the type of drum sounds. We measure and verify the accuracy of these models using organic drum sounds. 
-  \item To train our machine learning models, we curated a dataset of free percussive sounds which is made available to future researchers. 
   \item We combine our methods of synthesis and sound categorization to create systems capable of automatic generation of drum sounds of various categories and create synthesizer programs which can be further modified by sound engineers.
   \item We demonstrate the viability of our approach for the creation of digital percussive sounds by conducting manual hearing tests. Based on our blinded hearing tests, most of the outputs of our generative system of sounds are suitable replacements for drums of various categories. 
 \end{itemize}

@@ -335,10 +335,11 @@ Using the features and transformation described in the previous section as input
 
 
 \subsubsection{DVN Models}
-\textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on the test data for~\decfirst. 
+\textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on the test data for~\decfirst. \begin{center}
 \begin{table}[h!]
 \centering
 \begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+
 \hline
 Layer-\# & Out Shape &  Details  \\ \hline
 Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ \hline
@@ -351,34 +352,11 @@ Softmax & [$\mathcal{B}$, size(DvN)] &  DvN Probabilities\\ \hline
 \end{tabular}
 \caption{Sequential Layers for FC-DVN}
 \end{table}
-% \begin{center}
-% \vbox{
-%     \begin{lstlisting}[caption=Sequential Layers for FC-DVN]
-%             Layer                       Details
-%             ========================================================
-%             Linear                      in_features=400 
-%                                         out_features=20 
-%                                         bias=True
-%             PReLU                       
-%             Linear                      in_features=20
-%                                         out_features=10 
-%                                         bias=True
-%             PReLU
-%             Linear                      in_features=10
-%                                         out_features=4
-%                                         bias=True
-%             PReLU
-%             Linear                      in_features=4
-%                                         out_features=2
-%                                         bias=True
-%             Softmax                     DVN probabilities
-                        
-%         \end{lstlisting}}
-% \end{center}
-
-
+\end{center}
 \textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on the test set.
-\begin{table}[]
+\begin{center}
+\begin{table}[tbp]
+\centering
 \begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
 \hline
 Layer-\# & Out Shape & Details  \\ \hline
@@ -392,106 +370,77 @@ LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
 Linear-1 & [$\mathcal{B}$, 2] &  \\ \hline 
 Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 \end{tabular}
-\caption{CNN model design with latent size of 8. 30 and 20 are the assumed frequency bins and step size. Total number of parameters is 166,320. }
+\caption{Sequential Layers for CNNLSTM-DVN }
 \label{table:CNNAUTOENCODER}
 \end{table}
-% \begin{center}
-% \vbox{
-%     \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-DVN]
-%             Layer                       Details
-%             ========================================================
-%             Conv2d                  kernel size = (7, 3)
-%                                     stride = (1, 1)
-%                                     padding = (3, 1)
-%             ReLU
-%             Dropout                 probability = 0.5
-%             LSTMCell                hidden size = 800
-%                                     input size = @($\mathcal{F}$)@
-%             Linear                  in_features = @($\mathcal{F}$)@
-%                                     out_features = 2
-%                                     bias=True
-%             Softmax                 DVN probabilities
-% \end{lstlisting}}
-% \end{center}
+\end{center}
 
 \subsubsection{DVD Models}
 \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. 
 \begin{center}
-\vbox{
-    \begin{lstlisting}[caption=Sequential Layers for E+F-DVD]
-            Layer                       Details
-            ========================================================
-            Linear                      in_features = 10+50 
-                                        out_features = 30
-                                        bias = True
-            PReLU                       
-            Linear                      in_features = 30
-                                        out_features = 10
-                                        bias = True
-            PReLU                       
-            Linear                      in_features = 10
-                                        out_features = 10
-                                        bias = True
-            PReLU     
-            Linear                      in_features = 10
-                                        out_features = @($\mathcal{C}$)@
-                                        bias = True
-            Softmax                     drum type probabilities
-        \end{lstlisting}}
+\begin{table}[tbp]
+\centering
+\begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+\hline
+Layer-\# & Out Shape &  Details  \\ \hline
+Linear-1 & [$\mathcal{B}$, 60] &   10 Envelope + 50 Encoded Features \\ \hline
+PReLU & [$\mathcal{B}$, 60] &  \\ \hline
+Linear-2 & [$\mathcal{B}$, 30] & \\ \hline
+PReLU & [$\mathcal{B}$, 30] &  \\ \hline 
+Linear-3 & [$\mathcal{B}$, 10] &  \newline \\ \hline
+Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline 
+Softmax & [$\mathcal{B}$, size(DvN)] &  DvD Probabilities\\ \hline
+\end{tabular}
+\caption{Sequential Layers for E+F-DVD}
+\end{table}
 \end{center}
-
-\textbf{CNN-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2.  
-%  {\color{red}double check architecture}
+\\
+\textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2.
 \begin{center}
-\vbox{
-    \begin{lstlisting}[caption=Sequential Layers for CNNLSTM-DVD]
-            Layer                       Details
-            ========================================================
-            Conv2d                  kernel size = (7, 3)
-                                    stride = (1, 1)
-                                    padding = (3, 1)
-            ReLU
-            Dropout                 probability = 0.5
-            LSTMCell                hidden size = 800
-                                    input size = @($\mathcal{F}$)@
-            Linear                  in_features = @($\mathcal{F}$)@
-                                    out_features = 2
-                                    bias=True
-            Softmax                 DVD probabilities
-\end{lstlisting}}
+    \begin{table}[tbp]
+    \centering
+    \begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
+    \hline
+    Layer-\# & Out Shape & Details  \\ \hline
+    Conv2d-1 & [$\mathcal{B}$, 8, 30, 20]  &
+    kernel:(7 , 3)\newline                  
+    stride:(1 , 1)\newline    
+    padding:(3 , 1) \\ \hline
+    ReLU-2 & [$\mathcal{B}$, 8, 30, 20] & \\  \hline
+    Dropout-4 & [$\mathcal{B}$, 8, 15, 10] &  \\ \hline
+    LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
+    Linear-1 & [$\mathcal{B}$, $\mathcal{C}$] &  \\ \hline 
+    Softmax & [$\mathcal{B}$, $\mathcal{C}$] &  DvD probabilities \\ \hline
+    \end{tabular}
+    \caption{Sequential Layers for CNNLSTM-DVN }
+    \label{table:CNNAUTOENCODER}
+    \end{table} 
 \end{center}
-
 \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. 
 \begin{center}
-\vbox{
-    \begin{lstlisting}[caption=Sequential Layers for FC-DVD]]
-            Layer                       Details
-            ========================================================
-            Linear                      in_features=400
-                                        out_features=20 
-                                        bias=True
-            PReLU                       
-            Linear                      in_features=20
-                                        out_features=10 
-                                        bias=True
-            PReLU
-            Linear                      in_features=10
-                                        out_features=4
-                                        bias=True
-            PReLU
-            Linear                      in_features=4
-                                        out_features=@($\mathcal{C}$)@
-                                        bias=True
-            Softmax                     drum type probabilities
-                        
-        \end{lstlisting}}
+    \begin{table}[tbp]
+    \centering
+    \begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+    \hline
+    Layer-\# & Out Shape &  Details  \\ \hline
+    Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ \hline
+    PReLU & [$\mathcal{B}$, 400] &  \\ \hline
+    Linear-2 & [$\mathcal{B}$, 20] & \\ \hline
+    PReLU & [$\mathcal{B}$, 20] &  \\ \hline 
+    Linear-3 & [$\mathcal{B}$, 10] &  \newline \\ \hline
+    Linear-3 & [$\mathcal{B}$, 4] &  \\ \hline 
+    Softmax & [$\mathcal{B}$, size(DvN)] &  DvN Probabilities\\ \hline
+    \end{tabular}
+    \caption{Sequential Layers for FC-DVN}
+    \end{table}
 \end{center}
+
 
 
 
 \subsection{Mixed Ear Models}
 \label{chap3:mixed_ear_models}
-\begin{figure}[t!]
+\begin{figure}[tbp]
     \begin{center}
     \textbf{MEM Design}
     \makebox[\textwidth]{
