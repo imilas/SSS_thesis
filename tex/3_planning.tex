@@ -24,7 +24,7 @@ RadarDB is a set of drum sounds aggregated from royalty free sources such as mus
 \subsection{MixedDB}
 MixedDB is a large set of 2 second or shorter drum samples aggregated from personal libraries. We cannot share this dataset as it contains copyrighted material. 
 \subsection{NoiseDB}
-NoiseDB is our database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers (synthesizer stacks will be discussed in the upcoming Section~\ref{virtual_synth_implementation}). 2000 sounds of each stack size were selected for a total of 6000 sounds.  This dataset is used as a source of~\enquote{negative examples}, i.e, sounds which we want to reject.
+NoiseDB is our database of synthetic noise from 1, 3, and 5 stacked virtual synthesizers (synthesizer stacks will be discussed in the upcoming Section~\ref{virtual_synth_implementation}). 2000 sounds of each stack size were selected for a total of 6000 sounds.  This dataset is used as a source of~\enquote{negative examples}, i.e, sounds which we generally want to reject, unless they are very similar to drum sounds.
 \subsection{FreeRadarDB}
 \label{db:memDB}
 A database put together by combination of radarDB, FreeDB and NoiseDB.

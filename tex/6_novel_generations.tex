@@ -7,7 +7,7 @@
 \begin{document}
 
 \chapter{Results}
-The proposed system for virtual drum generation proposed in Section~\ref{sec:thesis_statement} required the implementation of a virtual synthesizer and a virtual ear. The implementation and characteristics of these components were discussed in Chapters~\ref{virtual_synth_implementation} and~\ref{sec:ear} respectively. In this chapter, we discuss how the components are used to create generative systems of drum sounds. The labeled sounds created by the system are recorded on disk, allowing us to measure the success of this system by blinded, manual categorization of the outputs and calculating the level of agreement between categorical labels assigned by us and the labels assigned by the various ear models. 
+The proposed system for virtual drum generation proposed in Section~\ref{sec:thesis_statement} required the implementation of a virtual synthesizer and a virtual ear. The implementation and characteristics of these components were discussed in Chapters~\ref{chap:virt_synth} and~\ref{sec:ear} respectively. In this chapter, we discuss how the components are used to create generative systems of drum sounds. The labeled sounds created by the system are recorded on disk, allowing us to measure the success of this system by blinded, manual categorization of the outputs and calculating the level of agreement between categorical labels assigned by us and the labels assigned by the various ear models. 
 
 \newcommand{\decfirst}{\textit{Decision.1}}
 \newcommand{\decsecond}{\textit{Decision.2}}
@@ -72,7 +72,7 @@ Both reviewers categorized these samples without knowledge of other categorizati
     \begin{center}
     \textbf{Label Assignment Frequency For TPE Survey}
     \makebox[\textwidth]{
-    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_2p.pdf}}
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_2p_fixed.pdf}}
     \end{center}
     \caption{Frequency of assigned labels by persons vs the true number of labels (for TPEs)}
 \label{fig:freq-survey-2p}
@@ -86,13 +86,13 @@ Our main takeaways from the TPE survey are as follows:
     % \item With 6 categorization groups, responders had the same categorization in 47\% of cases.
     % \item Of 257 samples, the responders agreed with FC, CNNLSTM, and E+F respectively in 78, 76, and 46 of cases. 
     \item The survey brings into question the reliability of our DVN models, as 30\% of the generated samples were deemed not percussive by at least 1 reviewer and 8\% by both reviewers
-    \item The task of categorizing synthetic drums is difficult. Survey shows that the scale of agreement within persons as well as between persons and models is moderate at best, even after removal of \enquote{Bad} samples.  While the same models can easily achieve 98+ percent accuracy when tested on recorded drum samples. This may be a manifestation of the \enquote{open set recognition} problem. 
+    \item The task of categorizing synthetic drums is difficult. Survey shows that the scale of agreement within persons as well as between persons and models is moderate at best, even after removal of \enquote{Bad} samples.  While the same models can achieve over 98 percent accuracy when tested on recorded drum samples. This may be a manifestation of the \enquote{open set recognition} problem. 
     \item While there is much room for improvement, our pipeline can generate and categorize drums and percussive sounds with a promising degree of success. 
 \end{itemize}
 
  \section{Survey of Mixed Ear Model Performance}
   \subsection{Methodology and Dataset}
- Keeping the other components of the pipeline the same, the MEM is used as the virtual ear. With TPEs, the~\enquote{other} category is assigned when the sound is determined to be percussive in the first phase, but the second phase determines that the sound does not belong to any of the drum categories it is familiar with. MEMs either assign the sound to a drum category or determine that it is not a drum, therefore the MEM survey differs from the TPE survey in that the pipeline only creates the four drum categories, yet the \enquote{other} category can still be assigned by survey responders. This means that two out of six possible categories are only available to responders, and there is an inherent bias towards worse agreement scores compared to the last survey. 
+ Keeping the other components of the pipeline the same, the MEM is used as the virtual ear. With TPEs, the~\enquote{other} category is assigned when the sound is determined to be percussive in the first phase, but the second phase determines that the sound does not belong to any of the drum categories it is familiar with. MEMs either assign the sound to a drum category or determine that it is not a drum, therefore the MEM survey differs from the TPE survey in that the pipeline only creates the four drum categories, yet the \enquote{other} category can still be assigned by survey responders. This means that two out of six possible categories are only available to responders, which can cause an inherent bias towards worse agreement scores compared to the last survey. 
  \subsection{Survey Application and Results}
  \begin{table}[t]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
@@ -115,13 +115,13 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
     \begin{center}
     \textbf{Category Assignment Frequency For MEM Survey}
     \makebox[\textwidth]{
-    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_MME.pdf}}
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_mme_fixed.pdf}}
     \end{center}
     \caption{Frequency of assigned labels by persons vs the true number of labels (for MEMs)}
 \label{fig:freq-survey-2p}
 \end{figure} 
 
- As shown in Table~\ref{kappa_table_MEM}, before dropping the~\enquote{bad} outputs, there is mild to moderate agree-ability. By dropping~\enquote{bad} samples (therefore accounting for failures in~\decfirst), a dramatic increase in agree-ability score is seen in the results.  
+ As shown in Table~\ref{kappa_table_MEM}, before dropping the~\enquote{bad} outputs, there is mild to moderate agree-ability. By dropping~\enquote{bad} samples (therefore accounting for failures in~\decfirst), a dramatic increase in agree-ability score is seen in the results.  This highlights a the MEM model's weakness in the separation of drums from non-drums. 
 
 % Tables~\ref{kappa_table_TPE} and~\ref{kappa_table_MEM} depict the Agree-ability scores under different drop rules. The scores for the MEM pipeline are often lower, but we reiterate that this can be caused by having two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{Bad} and \enquote{other} samples. Here, both persons agree with each other and the MEM at a stronger rate than in the TPE pipeline, despite having similar number of samples (120 for MEM and 154 for TPE) and equal number of categories to choose from. These values are observed in the last rows of Tables~\ref{kappa_table_TPE} and~\ref{kappa_table_MEM}. 
 
@@ -131,12 +131,16 @@ Our main takeaways from the MEM survey are as follows:
 \begin{itemize}
 \item 50\% of sounds were deemed~\enquote{bad} by at least one survey taker, and 17\% by both.
 \item The improvement in kappa scores after reduction of~\enquote{bad} outputs show that similar to TPEs, mistakes in separation of drums in non-drums is a major point of failure. 
-\item Overall, these results show success in usage of spectrogram autoencoders as feature extractors for sounds, however open set recognition is a major weakness, despite the small size of the feature set.
+\item Overall, these results show success in usage of spectrogram autoencoders as feature extractors for sounds, however open set recognition is a major weakness. 
 \end{itemize}
 
 \section{Survey Conclusion}
-The results highlighted here are encouraging, as 50\% or more of the outputs from either pipelines is deemed percussive by both survey takers, and moderate to high agreement between human and virtual listeners is observed for both \decfirst~and~\decsecond. The various drop-rules highlight mistakes in \decfirst~as a major point of contention between human and virtual listeners for both TPEs and MEMs. This means that the separation of drums from not drums---a manifestation of the OSR problem---is a critical step towards the improvement of this project. However, as it stands, the approach taken in this work has enabled the generation of virtually synthesized drum sounds in an unsupervised manner, achieving the original goal of the project. 
+The results highlighted here are encouraging, as 50\% or more of the outputs from either pipelines is deemed percussive by both survey takers, and moderate to high agreement between human and virtual listeners is observed for both \decfirst~and~\decsecond. The various drop-rules highlight mistakes in \decfirst~as a major point of contention between human and virtual listeners for both TPEs and MEMs. This means that the separation of drums from not drums---a manifestation of the OSR problem---is a critical step towards the improvement of this project. However, as it stands, the approach taken in this work has enabled the generation of virtually synthesized drum sounds in an unsupervised manner, achieving the original goal of the project outlined in the thesis statement in Section~\ref{sec:thesis_statement}. 
 
+
+
+\section{Making Drum Kits}
+[In Progress]
 % \section{Genetic Search}
 % %  introduce genetic search and how it works for our project
 % % 3 graphs for 3 stack sizes trying to find a certain type of drum
