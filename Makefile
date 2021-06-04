@@ -1,9 +1,10 @@
-FILES = $(shell ls main.tex main.bib tex/*.tex)
+NAME=thesis
+FILES = $(shell ls ${NAME}.tex ${NAME}.bib tex/*.tex)
 
 build:
-	tectonic main.tex
+	tectonic ${NAME}.tex
 watch: build
-	inotifywait --quiet --monitor --event close_write --format %e $(FILES) | while read events; do tectonic main.tex; done
+	inotifywait --quiet --monitor --event close_write --format %e $(FILES) | while read events; do tectonic ${NAME}.tex; done
 clean:
-	rm -f main.aux main.lof main.lot main.out main.run.xml main.toc
-	rm main.pdf main.bcf || echo "Already clean"
+	rm -f ${NAME}.aux ${NAME}.lof ${NAME}.lot ${NAME}.out ${NAME}.run.xml ${NAME}.toc
+	rm ${NAME}.pdf ${NAME}.bcf || echo "Already clean"

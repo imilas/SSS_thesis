@@ -107,7 +107,7 @@ The output of the system given both inputs is the sum of the individual outputs,
 This concept has important implications digital audio creation and analysis. Simple tones can be combined to create complex sounds, and complex sounds can be broken down for easier analysis~\cite{lyons2004understandingChap1}. It also allows experiments with simple sine waves to remain relevant in complex sound domains~\cite{cook1999chap4}.
 
 % [graph of addition of two sine waves making a complex sine wave ]
-\\
+% \\
 
 Various sound synthesis techniques have been developed by treating sound as a sequence of values. Linear systems are commonly used in creation of musical tones, while non-linear systems are used for introduction of distortion and noise where needed. In their taxonomy of digital synthesis techniques, Smith defines four families of algorithms: algorithms that process and modulate existing sounds (e.g., granular synthesis, wavelets), spectral models that aim to create a particular spectrum of sound (e.g., additive, subtractive), physical models which emulate the physics of real instruments, and abstract models (e.g., wave shaping, Karplus-Strong), often used for adding harmonics or distortion to simple sound signals~\cite{smith1991viewpoints}. 
 
@@ -151,15 +151,23 @@ audio sample conditioned on all previous ones}~\cite{oord2016wavenet}. Once this
 
 \begin{center}
 \begin{table}[]
+% \resizebox{\linewidth}{!}{
+\begin{tabular}{||c c c c||} 
 \hline
- \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
-work & feature extraction & synthesis & specilization & \hline
-Oord et al.~\cite{oord2016wavenet} & CNN & CNN &Speech& \hline
-Yamamoto et a.l~\cite{yamamoto2020parallel} & GAN & GAN&Speech & \hline
-Aouameur et al.~\cite{aouameur2019neural} & Latent layer& Decoding of Latent Layers & Percussion & \hline
-Ramires et al.~\cite{ramires2020neural} & Latent layer & FeedForward Network & Percussion & \hline
-Yee-King et al.~\cite{yee2018automatic} & LSTM on Paremters & DSP & Synth Pads & \hline
-\end{tabular}}
+work & feature extraction & synthesis & specilization  \\
+	\hline
+Oord et al.~\cite{oord2016wavenet} & CNN & CNN &Speech \\ 
+	\hline
+Yamamoto et a.l~\cite{yamamoto2020parallel} & GAN & GAN&Speech  \\ 
+	\hline
+Aouameur et al.~\cite{aouameur2019neural} & Latent layer& Decoding of Latent Layers & Percussion  \\ 
+	\hline
+Ramires et al.~\cite{ramires2020neural} & Latent layer & FeedForward Network & Percussion  \\ 
+	\hline
+Yee-King et al.~\cite{yee2018automatic} & LSTM on Paremters & DSP & Synth Pads  \\ 
+	\hline
+\end{tabular}
+%}
 \caption{Quick reference for related works}
 \end{table}
 \end{center}
