@@ -146,7 +146,14 @@ Overall, the OSR problem is a major weakness in this project, particularly in th
 
 
 \section{Making Drum Kits}
-One possible method of using the system highlighted here is to create drum-tracks on the fly. We implemented a program (see Figure~\ref{fig:making_beats}) which perpetually listens for new outputs from the TPE system. Whenever a new drum is created, a drum track is generated using a drum-kit of the latest outputs. Using this program, we created and saved 1000 versions of the same drum-beat, which are available for download on Zenodo. Beyond improvements in the models themselves, these drum-beats highlights other important avenues for enhancement of the system. We believe that the expansion of the synthesizer parameters is needed to create larger variety of sounds. Another issue with usability is that stricter, more powerful drum vs non-drum classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible. This means that the introduction of an algorithm with intelligently modifies parameters in order to bypass the drum vs non-drum classifier will be a necessary step in the future. 
+One possible method of using the system highlighted here is to create drum-tracks on the fly. We implemented a program (shown below) which perpetually listens for new outputs from the TPE system. Whenever a new drum is created, a drum track is generated using a drum-kit of the latest outputs. Using this program, we created and saved nearly 1000 different versions of the same drum-beat, which are available for download on Zenodo\footnote{https://zenodo.org/record/5004327} Beyond improvements in the models themselves, these drum-beats highlight other important avenues for enhancement of the system. We believe that the expansion of the synthesizer parameters is needed to create larger variety of sounds. Another issue with usability is that stricter, more powerful drum vs non-drum classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible. In this case, 100,000 attempts were made at creating a drum, 985 of which were successful, leading to 985 different drum tracks. This means that the introduction of an algorithm with intelligently modifies parameters in order to bypass the drum vs non-drum classifier will be a necessary step in the future to create desired sounds more efficiently. 
 
+% \begin{lstlisting}[language=Python]
+% import TPE_System
+% drum_kit = {}
+
+% TPE_System.generate_drums(drum_kit)
+
+% \end{lstlisting}
 
 \end{document}
