@@ -221,7 +221,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \label{chap3:param_importance}
 \end{figure}
 
-We depict the correlation of parameter values with trial results in Figures~\ref{fig:slicegraph}. We extract a more concrete measurement of hyper-parameter influence using the fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in Figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with Figure~\ref{fig:slicegraph}, we notice several issues. Notably, the importance of 0 is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph (Figure~\ref{fig:slicegraph}). This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, Figure~\ref{fig:slicegraph} depicts CNN models as having the best and worst results while FC models are reliably average; making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
+We depict the correlation of parameter values with trial results in Figures~\ref{fig:slicegraph}. We extract a more concrete measurement of hyper-parameter influence using the fANOVA importance evaluator~\cite{hutter2014efficient}. We limit this analysis to 500 trials with 20 epochs. The results of this estimation are depicted in Figure~\ref{chap3:param_importance}. Contrasting the results of the fANOVA evaluator with Figure~\ref{fig:slicegraph}, we notice several issues. Notably, no importance is attributed to \enquote{Model Type} and \enquote{Optimizer} parameters, despite a visible difference depicted in the slice-graph (Figure~\ref{fig:slicegraph}). This may be due to the imbalanced sampling of the hyper-parameter space, prompted by our greedy search in place of random sampling. Another possible cause is the \enquote{averaging} of loss results regardless of variance: For example, Figure~\ref{fig:slicegraph} depicts CNN models as having the best and worst results while FC models are reliably average; making the fANOVA's 0 importance attribution logical, but not optimal when we are strictly looking for the best models. 
 
 
 % \subsection{Exploring Recursive Recreations}
@@ -502,7 +502,7 @@ Using embeddings and envelope features to represent audio, five classification m
     \begin{center}
     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_mme.pdf}}
-    \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the \%88-92 range. Envelope features improve classification accuracy for all models. }
+    \caption{Boxplots visualizing the F-Score results for each cross-validation. The individual scores, means, medians, standard-deviation and outliers are depicted. The differences are noticeable, yet means lie within the 88-92\% range. Envelope features improve classification accuracy for all models. }
     \label{fig:f1_allg_box}
     \end{center}
 \end{figure}

@@ -57,7 +57,7 @@ To assess the performance of each pipeline, we randomly create drum programs and
  Assigned \enquote{Bad} or \enquote{Other} By Either & 154 & 0.47 & 0.59 & 0.54 & 0.50 &  0.35 \\
  \hline
 \end{tabular}}
-\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficients to measure the degree of agreement between persons (HvH) and various TPE models: persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
+\caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficients to measure the degree of agreement between persons (HvH) and various TPEs: persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
 \end{table}
 
 %  We put a generative system together using a TPE ear. When using CPU, each loop could take up to 200 ms, however, each loop can be run on a simple process and multiprocessing can easily speed up generation time. Here, approximately 300 loops were necessary to create a drum sound, however, slight variations in recall and precision can change this number significantly. 
@@ -74,7 +74,7 @@ Both reviewers categorized these samples without knowledge of other categorizati
     \makebox[\textwidth]{
     \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_2p_fixed.pdf}}
     \end{center}
-    \caption{Frequency of assigned labels by persons vs the true number of labels (for TPEs)}
+    \caption{Frequency of assigned labels by persons versus the true number of labels (for TPEs)}
 \label{fig:freq-survey-2p}
 \end{figure}
 We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicates perfect agreement. Our kappa measurements shown in Table~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{Bad} by the authors, as samples that persons deem to be \enquote{Bad} should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{Bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed \enquote{Bad} by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
@@ -117,11 +117,11 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
     \makebox[\textwidth]{
     \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_mme_fixed.pdf}}
     \end{center}
-    \caption{Frequency of assigned labels by persons vs the true number of labels (for MEMs)}
+    \caption{Frequency of assigned labels by persons versus the true number of labels (for MEMs)}
 \label{fig:freq-survey-2p}
 \end{figure} 
 
- As shown in Table~\ref{kappa_table_MEM}, before dropping the~\enquote{bad} outputs, there is mild to moderate agree-ability. By dropping~\enquote{bad} samples (therefore accounting for failures in~\decfirst), a dramatic increase in agree-ability score is seen in the results.  This highlights a the MEM model's weakness in the separation of drums from non-drums. 
+ As shown in Table~\ref{kappa_table_MEM}, before dropping the~\enquote{bad} outputs, there is mild to moderate agree-ability. By dropping~\enquote{bad} samples (therefore accounting for failures in~\decfirst), a dramatic increase in agree-ability score is seen in the results.  This highlights a the MEM's weakness in the separation of drums from non-drums. 
 
 % Tables~\ref{kappa_table_TPE} and~\ref{kappa_table_MEM} depict the Agree-ability scores under different drop rules. The scores for the MEM pipeline are often lower, but we reiterate that this can be caused by having two out of six (rather than one out of six in the TPE pipeline) categories which are exclusive to survey responders. Supporting this hypothesis is the notable improvement in agree-ability observed after dropping all \enquote{Bad} and \enquote{other} samples. Here, both persons agree with each other and the MEM at a stronger rate than in the TPE pipeline, despite having similar number of samples (120 for MEM and 154 for TPE) and equal number of categories to choose from. These values are observed in the last rows of Tables~\ref{kappa_table_TPE} and~\ref{kappa_table_MEM}. 
 
@@ -135,15 +135,18 @@ Our main takeaways from the MEM survey are as follows:
 \end{itemize}
 
 \section{Survey Conclusion}
-The results highlighted here are encouraging, as 50\% or more of the outputs from either pipelines is deemed percussive by both survey takers, and moderate to high agreement between human and virtual listeners is observed for both \decfirst~and~\decsecond. The various drop-rules highlight mistakes in \decfirst~as a major point of contention between human and virtual listeners for both TPEs and MEMs. This means that the separation of drums from not drums---a manifestation of the OSR problem---is a critical step towards the improvement of this project. However, as it stands, the approach taken in this work has enabled the generation of virtually synthesized drum sounds in an unsupervised manner, achieving the original goal of the project outlined in the thesis statement in Section~\ref{sec:thesis_statement}. 
+The results highlighted here are encouraging, as 50\% or more of the outputs from either pipelines is deemed percussive by both survey takers, and moderate to high agreement between human and virtual listeners is observed for both \decfirst~and~\decsecond. A comparison of the survey results helps identify common weaknesses and avenues for improvement in the future. By using agree-ability scores as the performance measure, we compare the two models with regards to separation of drums from non-drums and categorization of drum types:
+\begin{itemize}
+\item \textbf{Decision 1:} The sounds generated were deemed percussive by both subjects in 70\% of the cases with the TPE system, and 50\% with the MEM. This discrepancy is highlighted  in the agreement scores as well; The agreement scores in Tables~\ref{kappa_table_TPE} and~\ref{kappa_table_MEM} show the scores before and after failures in~\decfirst~were removed according to various rules. Here we see sharper increase in the agree-ability scores for the MEM as more failures in drum vs non-drum separation are removed. This further highlights that~\decfirst~is a more pronounced weakness for the MEM.
+\item \textbf{Decision 2:} When all \enquote{bad} and \enquote{other} sounds are removed, the models can be fairly compered for their performance in~\decsecond. Here, the MEM matches the performance of FC, the best TPE. This suggests that classification using spectrogram embeddings can match or exceed the performance of models which learned from the entire spectrogram. This is interesting as the autoencoder model used for feature extraction was trained for encoding spectrograms into a small, 8-dimensional feature space and recreating the original using said features. Yet this feature space proves useful in an unrelated drum-classification task.  
+\end{itemize}
+
+Overall, the OSR problem is a major weakness in this project, particularly in the MEM approach. When removing all failures in~\decfirst, the agree-ability scores of the MEM and the best TPE are comparable and within the "moderate to strong agreement" kappa range for~\decsecond, leaving further room for improvement. However, despite these failures, the approach taken in this work has enabled the generation of virtually synthesized drum sounds in an unsupervised manner, achieving the original goal of the project outlined in the thesis statement in Section~\ref{sec:thesis_statement}. 
 
 
 
 \section{Making Drum Kits}
-[In Progress]
-% \section{Genetic Search}
-% %  introduce genetic search and how it works for our project
-% % 3 graphs for 3 stack sizes trying to find a certain type of drum
-%  \section{Speed}
-%  With our current models, a single iteration of this pipeline will take approximately 50 milliseconds for Synthesizers with stack sizes of 8 or less. This means around 20 iterations can be done per second using a single process. This pipeline scales up efficiently with multiprocessing. We have not measured the iteration latency for this pipeline when a GPU is leveraged. For reference, our CPU measurements are collected on a 2012 Macbook Air running Ubuntu 18.04.
+One possible method of using the system highlighted here is to create drum-tracks on the fly. We implemented a program (see Figure~\ref{fig:making_beats}) which perpetually listens for new outputs from the TPE system. Whenever a new drum is created, a drum track is generated using a drum-kit of the latest outputs. Using this program, we created and saved 1000 versions of the same drum-beat, which are available for download on Zenodo. Beyond improvements in the models themselves, these drum-beats highlights other important avenues for enhancement of the system. We believe that the expansion of the synthesizer parameters is needed to create larger variety of sounds. Another issue with usability is that stricter, more powerful drum vs non-drum classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible. This means that the introduction of an algorithm with intelligently modifies parameters in order to bypass the drum vs non-drum classifier will be a necessary step in the future. 
+
+
 \end{document}
