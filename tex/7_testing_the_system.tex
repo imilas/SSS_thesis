@@ -5,9 +5,9 @@
 \onlyinsubfile{\zexternaldocument*{\main/tex/introduction}}
 
 \begin{document}
-\chapter{On-line Drum Programming}
+\chapter{Drum-Kit Mutation}
 \section{Suitability for Live Performance}
-One use case for the drum generation approach pursued in this work is to create and evolve drum-tracks  on  the  fly. With our generative system of drums in place, we implemented a program which perpetually evolves a given drum-pattern (or rhythm) by continually replacing the drum sounds within the pattern by the outputs of the TPE system. This program is outlined in Figure~\ref{fig:live_dru}. This approach could be particularly interesting in a live setting where drum-patterns are repeated for long durations. In order to test this approach, we created a basic music notation where we consider a drum-pattern program to have the following attributes:
+We originally set out to generate new drum samples for the purpose of creating new drum-kits which musicians could use to create drum tracks for their compositions. One use case for the drum generation approach pursued in this work is to create and evolve drum-kits on the fly. With our generative system of drums in place, we implemented a \enquote{live performance} framework which continually evolves a given drum-pattern (or rhythm) by replacing the drum sounds within the kit by the outputs of the best TPE system. This framework, as outlined in Figure~\ref{fig:live_dru}, allows us to simultaneously gauge the suitability of the generative system for both drum-kit generation and live performances. This framework could be particularly useful in a setting where drum rhythms are repeated for long durations. In order to test this approach, we created a basic music notation program where each drum-pattern has the following attributes:
 
 \begin{itemize}
     \item Beats Per Minute (BPM): This defines the "speed" of the pattern. 
@@ -15,9 +15,9 @@ One use case for the drum generation approach pursued in this work is to create 
     \item Drum Pattern: An action must be taken at each beat, either a drum is played or no action is taken and nothing is played for that beat. A drum pattern dictates what action is taken at each beat.
 \end{itemize}
 
-We defined a basic 8 beat drum pattern\footnote{The actions taken at each beat are kick-snare-hat-kick-snare-hat-shaker sequentially} at 160 BPM, and  implemented  a  program  which  perpetually  listens for new outputs from the TPE system and creates drum tracks according to the pre-determined drum pattern.  Whenever a new drum is created, a drum track is generated using a drum-kit of the latest outputs. To test this approach, we let the program run for 100,000 iterations of the TPE generative system (i.e., 100,000 random sounds are synthesized and tested for similarity to drum sounds using our best models). 980 of the 100,000 attempts resulted in the generation of a drum sound, therefore this process gave us 980 drum tracks. If listened to sequentially, one of the drum types in the drum-kit is modified before rendering each drum track, but all drum-tracks are identically programmed. These drum tracks are available for download on Zenodo\footnote{https://zenodo.org/record/5004327}.
+In this experiment, given a drum program and a drum-kit\footnote{Here the drum-kit used has the types hat,kick,snare,shaker}, a process perpetually listens for new outputs from the TPE system, when a new drum sound is created, it replaces a sound in the drum-kit depending on the drum category; next, the drum track is regenerated using the new drum-kit. In short, if the outputs are listened to live or sequentially, the same rhythm is repeated, but the drums within the rhythm mutate over time. To analyse this approach, we defined two simple drum programs (shown in Table~\ref{tab:drum_prog}), and let the experiment run until 1000 drum tracks are generated, that is, 1000 new drum sounds are found and used for the creation of a drum track. The results for the rendition of both programs are available for download on Zenodo\footnote{https://zenodo.org/record/5004327  (will updated when settled on program 2)}. 
 
-\begin{figure}[htpb]
+\begin{figure}[tpb]
     \begin{center}
     \textbf{Drum Track Generation}
     \makebox[\textwidth]{
@@ -28,9 +28,49 @@ We defined a basic 8 beat drum pattern\footnote{The actions taken at each beat a
 \end{figure} 
 
 \section{Analyzing the Outputs}
+ Due to the subjective nature of this analysis, the readers are encouraged to download and analyze the results independently, however, we consider the majority of the drum tracks output by this system to be successful renditions of the desired drum programs. As discussed previously in Section~\ref{survey-conc}, as many as 30\% of the drum sounds output by the TPE system did not resemble drums. However, within a larger rhythmic pattern, the effect of these failures is diminished and can at times introduce an interesting dimension to the tracks. We also note that due the the source of drum sounds that are learned from and imitated in this work, generation of drum-tracks may be most suitable for experimental, electronic music performances.
+ 
+  We monitored the drum discovery rate while rendering these two programs, and found that the relative ratio of drum to non-drum generations was approximately 1/100. This means that 100 sounds need to be created before 1 modification is made to the drum-kit. Using 1 CPU thread~\footnote{AMD Ryzen 7 2700X Eight-Core Processor}, these 100 iterations take approximately 7 seconds. This discovery rate can be increased or decreased in a number of ways. For example, by increasing the number of discovery processes at the cost of heavier load to the CPU. We can also make trade-offs in precision and sensitivity, that is, accepting more sounds that may not fit their role well within the composition and decreasing discovery time, or rejecting more unsuitable sounds and increasing discovery time. 
+
+\begin{table}[tbp]
+ \resizebox{\linewidth}{!}{
+     \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    Program & BPM & Beats & Action at Each Beat & Notes \\ \hline
+    
+    Loop 1  & 180 & 8               & Kick-Snare-Hat-Kick-Snare-Hat-Kick-Shake &       \\ \hline
+    
+    Loop 2  & 300 & 7               &   in progress &       \\ \hline
+    \end{tabular}
+ }
+\caption{\label{tab:drum_prog} Parameters for each drum program.}
+\end{table}
 
 \section{Conclusion}
-Beyond improvements in the models themselves, these drum-tracks highlight other important avenues for enhancement of the system.  We believe that the expansion of the synthesizer parameters is needed to create larger variety of sounds. Another issue  with  usability  is  that  stricter,  more  powerful  drum  vs  non-drum  classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible.  In this case, 100,000 attempts were made at creating a drum,  985 of which were successful, leading to 985 different drum tracks. 
+ Beyond improvements in the models themselves, these drum-tracks highlight other issues with the approach taken in this work. The issues and possible solutions are as follows:
+~\begin{itemize}
+    \item  Discovery time: Stricter,  more  powerful  drum  versus  non-drum  classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible. This means that the introduction of an algorithm which intelligently  modifies  parameters  in  order  to  bypass  the  drum  versus  non-drum classifier will be a necessary step in the future in order to create desired sounds more efficiently.
+    
+    \item Limited variety: The virtual synthesizer used in this work has a limited set of parameters. This causes a lack of variety in the sounds output by the system. Expansion of the virtual synthesizer parameters or an interface which allows the use of VST synthesizers could help with this problem.
+    
+    \item Cohesiveness: Drum-kits are put together manually such that little to no modifications are needed before improvisation or composition. Here the sounds are generated independently, therefore there can be loudness and pitch discrepancies within the drum-kits. Normalization, filtering, and other DSP techniques can help with the creation of more cohesive kits. 
+\end{itemize}
+Overall, this experiment shows that the generative system of drum sounds discussed in this work can be suitable for live performances. While some of the weaknesses and failures of the classification models may be less pronounced in a live performance, the results of this experiment highlights other possible avenues of improvement and expansion. 
 
-This means that the introduction of an algorithm which intelligently  modifies  parameters  in  order  to  bypass  the  drum  vs  non-drum classifier will be a necessary step in the future to create desired sounds more efficiently.
 \end{document}
+
+
+% \begin{table}[]
+% \begin{center}
+
+% \begin{tabular}{|l|l|l|}
+% \hline
+%       & Number of Replacements & Percent \\ \hline
+% Kick   &                        &         \\ \hline
+% Snare  &                        &         \\ \hline
+% Hat    &                        &         \\ \hline
+% Shaker &                        &         \\ \hline
+% Total  &                        &         \\ \hline
+% \end{tabular}
+% \end{center}
+% \end{table}
