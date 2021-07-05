@@ -32,7 +32,7 @@ This experiment starts with a drum program and a drum-kit which contains 1 repre
     \hline
     Program & BPM & Beats & Action at Each Beat \\ \hline
     
-    Loop 1  & 180 & 8   & Kick-Snare-Hat-Kick-Snare-Hat-Kick-Shake     \\ \hlinp
+    Loop 1  & 180 & 8   & Kick-Snare-Hat-Kick-Snare-Hat-Kick-Shake     \\ \hline
     % Loop 2  & 300 & 7               &   in progress &       \\ \hline
     \end{tabular}
  }
@@ -42,18 +42,16 @@ This experiment starts with a drum program and a drum-kit which contains 1 repre
  We conduct a listening test in order to quantify the usefulness of this framework. For this test, both authors listened to 200 drum tracks, and recorded whether or not the output resembled a drum track. The result of this survey is shown in Table~\ref{tab:track_likes}. Due to the subjective nature of this analysis, readers are encouraged to download and analyze the results independently. We consider the majority of the drum tracks output by this system to be successful renditions of the desired drum programs. As discussed previously in Section~\ref{survey-conc}, as many as 30\% of the drum sounds output by the TPE system did not resemble drums when listened to in isolation. However, within a larger rhythmic pattern, the effect of these failures is diminished and can at times introduce an interesting dimension to the tracks. We also note that due the the source of drum sounds that are learned from and imitated in this work, generation of drum tracks may be most suitable for experimental music performances.
  
   We monitored the drum discovery rate while rendering the drum programs, and found that the relative ratio of drum to non-drum generations was approximately 1/100. This means that 100 sounds need to be created before 1 modification is made to the drum-kit. Using 1 CPU thread~\footnote{AMD Ryzen 7 2700X Eight-Core Processor}, these 100 iterations take approximately 7 seconds. This discovery rate can be increased or decreased in a number of ways. For example, by increasing the number of discovery threads at the cost of heavier load to the CPU. We can also make trade-offs in precision and sensitivity, that is, accepting more sounds that may not fit their role well within the composition and decreasing discovery time, or rejecting more unsuitable sounds and increasing discovery time. 
-% \begin{table}[tbp]
-%  \resizebox{\linewidth}{!}{
-%      \begin{tabular}{|l|l|l|l|}
-%     \hline
-%     Program & BPM & Beats & Action at Each Beat \\ \hline
-%     \hlinp
-%     Loop 1  & 180 & 8   & Kick-Snare-Hat-Kick-Snare-Hat-Kick-Shake     \\ \hlinp
-%     % Loop 2  & 300 & 7               &   in progress &       \\ \hline
-%     \end{tabular}
-%  }
-% \caption{\label{tab:likes} Parameters for each drum program.}
-% \end{table}
+\begin{table}[tbp]
+ \resizebox{\linewidth}{!}{
+\begin{tabular}{|l|l|l|l|}
+\hline
+Program & Listener 1 Like/Dislike & Listener 2 Like/Dislike & Average Percentage \\ \hline
+Loop 1  & 150/200                 & ?/200                   & 51\%               \\ \hline
+\end{tabular}       
+ }
+\caption{\label{tab:track_likes} Measuring the quality of generated drum tracks}
+\end{table}
 
 
 \subsection{Noticeable Limitations}
