@@ -388,6 +388,7 @@ LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
 Linear-1 & [$\mathcal{B}$, 2] &  \\ \hline 
 Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 \end{tabular}
+
 \caption{Sequential Layers for CNNLSTM-DVN }
 \label{table:cnndvn}
 \end{table}
@@ -398,7 +399,7 @@ Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 We defined and trained the following neural network models for the DVD task:
 \begin{enumerate}
 \item \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvd:EF}.
-\item \textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab}.
+\item \textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdcnn}.
 \item \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdfc}.
 \end{enumerate}
 
@@ -464,7 +465,7 @@ We defined and trained the following neural network models for the DVD task:
     \end{table}
 \end{center}
 
-While these models show promise in seperation of drums from non-drums and categorization of drums, we cannot know their effectiveness as part of a generative system of drum sounds until manual hearing tests are done. In Chapter~\ref{chapnov_gen}, we discuss how the TPE models were used in tandem with the virtual synthesizer as well as the results of our hearing tests. 
+While these models show promise in seperation of drums from non-drums and categorization of drums, we cannot know their effectiveness as part of a generative system of drum sounds until manual hearing tests are done. In Chapter~\ref{chap:nov_gen}, we discuss how the TPE models were used in tandem with the virtual synthesizer along with the results of our hearing tests. 
 \subsection{Mixed Ear Models}
 \label{chap3:mixed_ear_models}
 Unlike TPEs which make their decisions in two steps, mixed ear models (MEMs) simultaneously categorize a new sound's drum type or put it in the \enquote{synthetic noise} category. We call this task \textit{drum vs drum vs not-drum}, or \enquote{\textbf{DvDvN}}.
@@ -525,7 +526,7 @@ Using embeddings and envelope features to represent audio, five classification m
     \end{center}
 \end{figure}
 
-To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}. We used this extra-trees models as part of our drum generation system, the process for implementing this system and the results of our manual hearing tests are discussed in Chapter~\ref{chapnov_gen}.
+To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}. We used this extra-trees models as part of our drum generation system, the process for implementing this system and the results of our manual hearing tests are discussed in Chapter~\ref{chap:nov_gen}.
 
 \begin{figure}[tbp]   
     \begin{center}

@@ -43,14 +43,37 @@ This loop runs in a single CPU process, therefore generation can scale-up easily
  
  The main function of the manual hearing tests is to measure the precision of the virtual ear when the model is performing open-set recognition, i.e, separating drums sounds from none-drum sounds. If a small subset of synthetic noise can stand in for percussive sounds, then the ideal synthetic ear will be able to separate the desired sounds from noise with high recall and precision (see Figure~\ref{fig:ven_data}). Low recall will cause a slow-down of the pipeline, as a larger number of random sounds need to be generated and evaluated, and increase the loss of novel, percussive sounds. Low precision will make manual clean-up of generated samples necessary and arduous. 
 
-To assess the performance of each pipeline, we randomly create drum programs and generate and the corresponding audio signal. This sound is then fed through the ear model to determine if the sound is percussive. If so, a category is assigned to the sound. This sound and the corresponding synthesizer program are saved to hard-disk. Here we assess the success rate of two different pipelines by manual inspection and categorization of a randomly selected subset of its results. We cross reference the manual categorizations with the categories assigned by the virtual ear: Do we agree that the sounds are percussive? Do we agree with the drum category assigned to the percussive sounds?
- 
+To assess the performance of each pipeline, we randomly create drum programs and generate and the corresponding audio signal. This sound is then fed through the ear model to determine if the sound is percussive. If so, a category is assigned to the sound. This sound and the corresponding synthesizer program are saved to hard-disk. Here we assess the success rate of two different pipelines by manual inspection and categorization of a randomly selected subset of its results. We cross reference the manual categorizations with the categories assigned by the virtual ear: 
+\begin{itemize}
+\item Do we agree that the sounds are percussive? 
+\item Do we agree with the drum category assigned to the percussive sounds?
+\end{itemize}
  \section{Survey of Two-Phased Ear Performance}
    
-\begin{table}[htbp]
+
+%  We put a generative system together using a TPE ear. When using CPU, each loop could take up to 200 ms, however, each loop can be run on a simple process and multiprocessing can easily speed up generation time. Here, approximately 300 loops were necessary to create a drum sound, however, slight variations in recall and precision can change this number significantly. 
+ 
+ \subsection{Methodology and Dataset}
+  We put a generative system together using various TPEs discussed in Section~\ref{TPE_models}, and ran the system until a large number of samples in each category were found and saved to disk. Next, we randomly picked around 50 samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, 
+shakers and unusual percussive sounds). This gave us a total of 257 samples. These samples were determined to be percussive and then categorized by 3 different drum vs drum models (FC, CNNLSTM, E+F). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category).
+ \subsection{Survey Application and Results}
+Both reviewers categorized these samples without knowledge of other categorization results. It's important to note that each responder had an additional category of \enquote{Bad} for samples that they deemed not percussive. The \enquote{Bad} category indicates that the sample should have not been accepted as percussive.
+
+
+\begin{figure}[tbp]
+    \begin{center}
+    \textbf{Label Assignment Frequency For TPE Survey}
+    \makebox[\textwidth]{
+    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_2p_fixed.pdf}}
+    \end{center}
+    \caption{Frequency of assigned labels by persons versus the true number of labels (for TPEs)}
+\label{fig:freq-survey-2p}
+\end{figure}
+We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicates perfect agreement. Our kappa measurements shown in Table~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{Bad} by the authors, as samples that persons deem to be \enquote{Bad} should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{Bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed \enquote{Bad} by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
+\begin{table}[tbp]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c c c c||} 
  \hline
- Drop Rule & Size & HvH & H+FC & H+CNN & H+E/F & 3 models \\ [0.5ex] 
+ Drop Rule & Size & H+H & H+FC & H+CNN & H+E/F & 3 models \\ [0.5ex] 
  \hline
  No Drops & 257 &0.37 & 0.35 & 0.36 & 0.36 & 0.28\\ 
  \hline
@@ -63,26 +86,6 @@ To assess the performance of each pipeline, we randomly create drum programs and
 \end{tabular}}
 \caption{\label{kappa_table_TPE}Table of Fleiss' kappa coefficients to measure the degree of agreement between persons (HvH) and various TPEs: persons with FC model (H+FC), persons with CNNLSTM model, persons with all models (H+E/F), and between the 3 models. \enquote{Drop Rule} column indicates if any samples were dropped. We show the measurements after dropping samples if they are deemed bad by either or both responders. We also show measurements after dropping the \enquote{other} category along with samples deemed bad by either responder. }
 \end{table}
-
-%  We put a generative system together using a TPE ear. When using CPU, each loop could take up to 200 ms, however, each loop can be run on a simple process and multiprocessing can easily speed up generation time. Here, approximately 300 loops were necessary to create a drum sound, however, slight variations in recall and precision can change this number significantly. 
- 
- \subsection{Methodology and Dataset}
-  We put a generative system together using various TPEs discussed in Section~\ref{TPE_models}, and ran the system until a large number of samples in each category were found and saved to disk. Next, we randomly picked around 50 samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, 
-shakers and unusual percussive sounds). This gave us a total of 257 samples. These samples were determined to be percussive and then categorized by 3 different drum vs drum models (FC, CNNLSTM, E+F). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category).
- \subsection{Survey Application and Results}
-Both reviewers categorized these samples without knowledge of other categorization results (person or computation models). It's important to note that each responder had an additional category of \enquote{Bad} for samples that they deemed not percussive. The \enquote{Bad} category indicates that the sample should have not been accepted as percussive.
-
-\begin{figure}[h!]
-    \begin{center}
-    \textbf{Label Assignment Frequency For TPE Survey}
-    \makebox[\textwidth]{
-    \includegraphics[width=1.1\linewidth]{images/chapter_4/cat_2p_fixed.pdf}}
-    \end{center}
-    \caption{Frequency of assigned labels by persons versus the true number of labels (for TPEs)}
-\label{fig:freq-survey-2p}
-\end{figure}
-We assess the reliability of agreement between persons and categorization models via the Fleiss' kappa coefficient \cite{fleiss1971measuring}. The value of 0 or less for this coefficient indicates no agreement beyond random chance, and the value of 1 indicates perfect agreement. Our kappa measurements shown in Table~\ref{kappa_table_TPE} lie within the 0.35-0.45 range, indicating mild to moderate agreement between persons and machines. We again measure this coefficient after dropping samples that were categorized as \enquote{Bad} by the authors, as samples that persons deem to be \enquote{Bad} should not have been categorized by the models at all. Dropping of samples that both authors deemed \enquote{Bad} causes an 8\% reduction of our data (21 samples) and a small increase in kappa score. Dropping samples deemed \enquote{Bad} by either reviewer resulted in a 30\% reduction of samples and relatively large increase in kappa scores. 
-
 \subsection{Takeaways Of The TPE Pipeline Survey}
 Our main takeaways from the TPE survey are as follows:
 \label{survey1_takeaway}
@@ -98,7 +101,7 @@ Our main takeaways from the TPE survey are as follows:
   \subsection{Methodology and Dataset}
  Keeping the other components of the pipeline the same, the MEM is used as the virtual ear. With TPEs, the~\enquote{other} category is assigned when the sound is determined to be percussive in the first phase, but the second phase determines that the sound does not belong to any of the drum categories it is familiar with. MEMs either assign the sound to a drum category or determine that it is not a drum, therefore the MEM survey differs from the TPE survey in that the pipeline only creates the four drum categories, yet the \enquote{other} category can still be assigned by survey responders. This means that two out of six possible categories are only available to responders, which can cause an inherent bias towards worse agreement scores compared to the last survey. 
  \subsection{Survey Application and Results}
- \begin{table}[t]
+ \begin{table}[tbp]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
  \hline
  Drop Rule & Size & HvH & H+MEM \\
@@ -115,7 +118,7 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
 \caption{\label{kappa_table_MEM}Table of Fleiss' kappa coefficient to measure the degree of agreement between persons (HvH) and persons and MEM. We measure the agreeability scores after dropping bad samples if both or either persons assigned the sample as such. We also measure agree-ability when all samples deemed \enquote{Bad} or \enquote{other} by either person are removed.}
 \end{table}
 
-\begin{figure}[htpb]
+\begin{figure}[tpb]
     \begin{center}
     \textbf{Category Assignment Frequency For MEM Survey}
     \makebox[\textwidth]{

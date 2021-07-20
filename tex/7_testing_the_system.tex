@@ -13,7 +13,7 @@ We originally set out to generate new drum samples for the purpose of creating n
 \begin{itemize}
     \item Beats Per Minute (BPM): This defines the \enquote{speed} of the pattern. 
     \item Number of Beats: How many beats are in the pattern.
-    \item Drum Pattern: An action must be taken at each beat, either a drum is played or no action is taken and nothing is played for that beat. The drum pattern dictates what action is taken at each beat.
+    \item Drum Pattern: An action must be taken at each beat, either a drum is played or no action is taken and nothing is played for that beat. The drum pattern dictates what action is taken at each beat. This makes the drum patterns monophonic (at most one sound can be played at a time).
 \end{itemize}
 
 \begin{figure}[tpb]
@@ -47,10 +47,10 @@ This experiment starts with a drum program and a drum-kit which contains 1 repre
     % Loop 2  & 300 & 7               &   in progress &       \\ \hline
     \end{tabular}
  }
-\caption{\label{tab:drum_prog} Parameters for each drum program.\enquote{.} indicates no action}
+\caption{\label{tab:drum_prog} Parameters for each drum program. A period (\enquote{.}) indicates no action}
 \end{table}
 \section{Analyzing the Outputs}
- We conduct a listening test in order to quantify the usefulness of this framework. For this test, both authors listened to 100 drum tracks for each drum program and recorded the number of drum tracks they found appropriate for a live performance. The result of this survey is shown in Table~\ref{tab:track_likes}. Due to the subjective nature of this analysis, readers are encouraged to download and analyze the results as well. We consider the majority of the drum tracks output by this system to be successful renditions. As discussed previously in Section~\ref{survey-conc}, as many as 30\% of the drum sounds output by the TPE system did not resemble drums when played in isolation. However, within a larger rhythmic pattern, the effect of these failures is diminished and can at times introduce an interesting dimension to the tracks. We also note that due the the source of drum sounds that are learned from and imitated in this work, generation of drum tracks is more suitable for experimental music performances.
+ We conduct a listening test in order to quantify the usefulness of this framework. For this test, Amir and Dr. Hindle  listened to 100 drum tracks for each drum program and recorded the number of drum tracks they found appropriate for a live performance. The result of this survey is shown in Table~\ref{tab:track_likes}. Due to the subjective nature of this analysis, readers are encouraged to download and analyze the results as well. We consider the majority of the drum tracks output by this system to be successful renditions. As discussed previously in Section~\ref{survey-conc}, as many as 30\% of the drum sounds output by the TPE system did not resemble drums when played in isolation. However, within a larger rhythmic pattern, the effect of these failures is diminished and can at times introduce an interesting dimension to the tracks. We also note that due the the source of drum sounds that are learned from and imitated in this work, generation of drum tracks is more suitable for experimental music performances.
  
   We monitored the drum discovery rate while rendering the drum programs, and found that the relative ratio of drum to non-drum generations was approximately 1/100. This means that 100 sounds need to be created before 1 modification is made to the drum-kit. Using 1 CPU thread\footnote{AMD Ryzen 7 2700X Eight-Core Processor}, these 100 iterations take approximately 7 seconds. This discovery rate can be increased or decreased in a number of ways. For example, by increasing the number of discovery threads at the cost of heavier load to the CPU. It is also possible to make trade-offs in precision and sensitivity, that is, accepting more sounds that may not fit their role well within the composition and decreasing discovery time, or rejecting more unsuitable sounds and increasing discovery time. 
 \begin{table}[tbp]
@@ -69,14 +69,14 @@ Loop 1  & 55/100                 & 55/100                   & 55\%              
 \subsection{Noticeable Limitations}
  These drum tracks highlight other issues and limitations of this work. Other than improving the virtual ears, some of the issues and possible solutions are as follows:
 ~\begin{itemize}
-    \item  Discovery time: Stricter,  more  powerful  drum  versus  non-drum  classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible. This means that the introduction of an algorithm which intelligently  modifies  parameters  in  order  to  bypass  the  drum  versus  non-drum classifier will be a necessary step in the future in order to create desired sounds more efficiently.
+    \item  Discovery time: Stricter,  more  powerful  drum  versus  non-drum  classifiers may reject nearly all synthesized outputs, making the creation of new drum-kits time consuming if not impossible. This means that the introduction of an algorithm which intelligently  modifies  parameters in order to successfully make drums will be a necessary step in the future in order to create desired sounds more efficiently.
     
     \item Limited variety: The virtual synthesizer used in this work has a limited set of parameters. This causes a lack of variety in the sounds output by the system. Expansion of the virtual synthesizer parameters or an interface which allows the use of VST synthesizers could help with this problem.
     
-    \item Cohesiveness: Drum-kits are typically put together manually such that little to no modifications are needed before improvisation or composition. Here the sounds are generated independently, therefore there can be loudness and harmonic discrepancies within the drum-kits. Normalization, filtering, and other DSP techniques can help with the creation of more cohesive kits. 
+    % \item Cohesiveness: Drum-kits are typically put together manually such that little to no modifications are needed before improvisation or composition. Here the sounds are generated independently, therefore there can be loudness and harmonic discrepancies within the drum-kits. Normalization, filtering, and other DSP techniques can help with the creation of more cohesive kits. 
 \end{itemize}
 \section{Conclusion}
-The goal here was to create a tool which can create and mutate drum-tracks for live performances. In an offline setting, this tool should be able to quickly generate new drum-kits for musicians. To this end, we implemented a simple framework which creates drum tracks given a drum pattern. 
+The goal here was to create a tool which can create and mutate drums used within drum-tracks for live performances. In an offline setting, this tool should be able to quickly generate new drum-kits for musicians. To this end, we implemented a simple framework which creates drum tracks given a drum pattern. 
 
 This framework uses the generative system of drums described in the previous chapters to gradually replace the drum sounds within the drum pattern (i.e., the underlying drum-kit). We analyzed the outputs of this framework and believe that many of the outputs could be useful for musicians. 
 
