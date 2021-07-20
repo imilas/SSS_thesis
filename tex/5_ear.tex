@@ -21,7 +21,7 @@ To create a virtual ear, we use machine learning algorithms. In order for these 
 
 % The high-level approach to training is depicted in figure~\ref{fig:ear_plan}.
 \subsection{Learning Caveats}
-To train the models, percussive sounds are used as positive examples, while synthesizer sounds are used as negatives. Figure~\ref{fig:ven_data} highlights critical problems with the learning approach. The change in learning domains---particularly with the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test. 
+To train the models, percussive sounds are used as positive examples, while synthesizer sounds are used as negatives. Figure~\ref{fig:ven_data} highlights critical problems with the learning approach. The change in learning domains---particularly in the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test. 
 
 \begin{figure}[]
     \begin{center}
@@ -33,20 +33,20 @@ To train the models, percussive sounds are used as positive examples, while synt
 \label{fig:ven_data}
 \end{figure}
 
-Traditional classification tasks often make the assumption the data points used for training the model and future unlabeled data will emerge from the same system of processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}, where learning by examples can prove difficult when the category that is being learned is infinitely large. 
+Traditional classification tasks often assume that the data points used for training the model and future unlabeled data will emerge from the same system or processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}, where learning by examples can prove difficult when the category that is being learned is infinitely large. 
 
 We consider drum sounds to be a closed set, since it is reasonable that a sufficiently large sample pack can effectively describe common drum categories, while effective representation of all possible non-drum sounds is not attainable via examples alone. A hurdle towards the implementation of a \enquote{drum from non-drum} recognizer is that the set of sounds that are not drums do not share any characteristics beyond~\enquote{not being a drum}, making the learning process using negative examples difficult.  To ensure the quality of the results, particularly in the categorization of drums from non-drums, manual hearing tests need to be conducted to measure the quality of the results. The results of our blinded hearing tests are discussed in Chapter~\ref{surveys}.
 
 \section{Representing Sound}
 \label{chap:represent_sound}
-We are looking to implement machine learning models capable of analyzing sounds. Machine learning algorithms learn from observing data, which in the scope of this project is audio signals. Therefore, it is important to establish how digital sound will be transformed before an algorithm attempts to learn from it. 
-
-Raw digital sound can be difficult to analyze as a single second of digital sound at our desired sample rate exists as an array of 48000 numbers. The choice of feature extraction from digital sound is a foundational step towards the implementation of the virtual ear. While smaller representations can reduce computation costs significantly, important features may be lost in the transformation. Put differently, we wish to transform sounds into a small feature space without the loss of critical information. We take two approaches towards this goal: \begin{enumerate}
+We are looking to implement machine learning models capable of analyzing sounds. Here we establish how digital sounds will be transformed into smaller feature spaces before discussing the algorithms which learn from them. In this project two different approaches towards this goal are taken: 
+\begin{enumerate}
     \item By using features extracted from Fourier Transformations of sounds \item By using features extracted from autoencoders which condense the Fourier transformations. 
 \end{enumerate}
+These approaches will be discussed in detail within this section.
 \subsection{Fourier Transforms}
 \label{sec:fourier_transforms}
-In this work we rely on derivatives of the fast Fourier transform (FFT), and by extension, short-time Fourier transforms (STFT) for feature extraction. Various works have demonstrated effective reconstruction of signals given their short-time Fourier transforms~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,huzaifah2017comparison}. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when temporal changes in frequency bins are of interest; this can be done by the application of FFT\footnote{more accurately, discrete Fourier transforms} to a sliding time-window on the signal to create a vector for each time step. This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step). 
+In this work we rely on the application of the fast Fourier transform (FFT), and by extension, short-time Fourier transforms (STFT) for feature extraction. Various works have demonstrated effective reconstruction of signals given their short-time Fourier transforms~\cite{nawab1983signal,griffin1984signal}. If the STFT of a signal can be used for its reconstruction, perhaps it can be utilized as a source of fundamental features~\cite{lee2009unsupervised,huzaifah2017comparison}. Using FFT, a signal can be represented by a vector with each index corresponding to a frequency-bin (a range of frequencies too close to be distinguishable) and the value at each index corresponding to the combined-magnitude of the frequencies within the bin. STFT can be employed when temporal changes in frequency bins are of interest; this can be done by the application of FFT\footnote{more accurately, discrete Fourier transforms} to a sliding time-window on the signal to create a vector for each time step. This matrix can effectively represent the frequencies present in the signal at each time step, given the right window-length and hop-size (how much the window is shifted at each time-step). 
 
 To extract the FFT feature sets from a signal, we defined the following 3 transformation functions. These functions are applied at training time to transform raw digital signals into simpler formats, which may be easier to learn from: 
 \begin{figure}
@@ -87,7 +87,7 @@ We now have 3 types of which can be used for learning. Next, in Section~\ref{sec
 % 
 The advantage of the spectrum features discussed earlier is that it contains temporal information for the amplitude of each frequency bin. This means that it contains both envelope and frequency features, along with other possibly useful information. This comes at the cost of being exponentially larger than either frequency or envelope features. To speed up and simplify training, we want to further reduce the dimensionality of the spectrum features, ideally without the loss of vital information needed for classification. For this purpose, we utilized autoencoder networks, which are an approach to dimensionality reduction using deep neural networks~\cite{hinton1994autoencoders,hinton2006reducing}. 
 
-Autoencoders are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound onto a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vector. Here, the original data is the spectrum features, and the encoding at the bottle neck layer is the simplified feature sets which we would like to use for training. With some luck, this low dimensional vector will contain vital information which can be used for training models much faster than using the original data, with little loss in performance. The autoencoder training process is depicted in Figure~\ref{fig:autoencoder}.
+Autoencoders are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound onto a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vectors that can be reconstructed faithfully. Here, the original data is the spectrum features, and the encoding at the bottle neck layer is the simplified feature sets which we would like to use for training. With some luck, this low dimensional vector will contain vital information which can be used for training models much faster than using the original data, with little loss in performance. The autoencoder training process is depicted in Figure~\ref{fig:autoencoder}.
 \begin{table}[h!]
 
 \begin{tabular}{|p{28mm}|p{50mm}|p{21mm}|p{21mm}|}
@@ -110,18 +110,18 @@ Dropout Rate & Random zeroing of activations between layers to prevent over-fitt
 
 \subsection{Architecture and Hyper-Parameter Optimization}
 % could do multi-objective pareto front stuff
-We make the assumption that if an autoencoder can accurately encode and decode a spectrogram, then the values at the bottleneck layer form a viable alternative to the spectrogram features, while being much smaller in size. Based on this assumption, the optimization goal when training the autoencoder networks is to minimize the difference between the original and decoded spectrogram.  The autoencoder designs used in this project were kept relatively simple, all with approximately 150,000 parameters. Important to mention is that reported loss values of the models do not necessarily reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. 
+We make the assumption that if an autoencoder can accurately encode and decode a spectrogram, then the values at the bottleneck layer form a viable alternative to the spectrogram features, while being much smaller in size. Based on this assumption, the optimization goal when training the autoencoder networks is to minimize the difference between the original and decoded spectrogram.  The autoencoder designs used in this project were kept relatively simple, all with approximately 150,000 parameters (although a significant reduction occurs when the decoders are discarded during feature extraction). Important to mention is that reported loss values of the models do not necessarily reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. 
 
 These small networks train quickly without the need for much data. Here, we did not give any examples of synthetic noise to the encoders, and only train on organic drums. We hypothesize that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. In Section~\ref{table:mem_model_selection}, we use these latent expressions to train several machine learning models.
 
-Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g., number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's capacity, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist with the construction of the model, a number of possible choices for the architecture and the transformation function were defined (see Table~\ref{table:hyper_params}). These choices were then used in hyper-parameter optimization to extract promising sets of values. 
+Within the context of machine learning, a model's \emph{hyper-parameters} are fixed parameters which are set before the training begins (e.g., number of layers, size of layers, loss function) and are not learned during the minimization procedure~\cite{bengio2000gradient}. Also within this context, hyper-parameter optimization is the task of searching for a set of hyper-parameters which would maximize the model's performance, often done by a series of automatic test trials~\cite{bengio2000gradient,bergstra2011algorithms,bergstra2012random}. As a wide variety of viable autoencoder architectures have been proposed~\cite{aouameur2019neural,esling2018generative,gensler2016deep,zhang2016facing,pu2016variational}, we are faced with a number of choices for autoencoder design. To assist with the construction of the model, a number of possible choices for the architecture and the transformation function were defined (see Table~\ref{table:hyper_params}). These choices were then used in hyper-parameter optimization to extract promising sets of values. 
 
 The list of possible choices for the hyper-parameters can be found in Table~\ref{table:hyper_params}. The batchsize $\mathcal{B}$, was set to 64 for training and 4 for testing. We included not only model parameters but also spectrogram transformation parameters within this search space, as GPU accelerated FFT calculations allows ad hoc audio transformations to take place parallel to the training process. We implemented 3 base models which are affected by these hyper-parameters. The \enquote{Model Type} parameter dictates whether CNN or fully connected models are selected. If a \enquote{fully connected} model is selected, the \enquote{hidden layers} parameter selects between the two implementations. The specifications for these models can be found in Tables~\ref{table:FC1_AUTOENCODER},~\ref{table:FC2_AUTOENCODER} and~\ref{table:CNNAUTOENCODER}.
 
 \begin{table}[]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
-Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Layer-\# & Output Shape & Param Num & Details  \\ \hline
 Conv2d-1 & [$\mathcal{B}$, 8, 30, 20] &   208 & Encoder's input \newline
 Num. Channels:8\newline
 kernel:5x5\newline                  
@@ -143,7 +143,7 @@ Linear-8 & [$\mathcal{B}$, 600 ] &  154,200& Decoder's output\\ \hline
 \begin{table}[]
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
-Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Layer-\# & Output Shape & Param Num & Details  \\ \hline
 Linear-1 & [$\mathcal{B}$, 128]  & 76,928 & Encoder's input \\ \hline
 Dropout-2 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
 Linear-3 & [$\mathcal{B}$, 8] & 9,608 & Encoder's output \\ \hline
@@ -159,7 +159,7 @@ Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
 
 \begin{tabular}{|p{28mm}|p{25mm}|p{23mm}|p{50mm}|}
 \hline
-Layer-\# & Out Shape & Param Num & Details  \\ \hline
+Layer-\# & Output Shape & Param Num & Details  \\ \hline
 Linear-1 & [$\mathcal{B}$, 128]  & 76,928 & Encoder's input \\ \hline
 Dropout-2 & [$\mathcal{B}$, 128] & 0 &  \\ \hline
 Linear-3 & [$\mathcal{B}$, 32]  & 4,128 & \\ \hline
@@ -299,7 +299,7 @@ To test this, we implemented interactive graphs identical to those depicted in F
 \label{sec:howto_use_features}
 So far, we discussed two methods of feature extraction for audio. The FFT features can represent various aspects of sound which may be helpful to a virtual ear. Using autoencoders, FFT features can be further condensed into small embedded spaces. These embedded spaces are harder to understand and explain, but the 2-dimensional projections shown in Figure~\ref{fig:2d_tsne}  indicate that they contain vital information about the different drum and non-drum sound types in our databases. 
 
-The features discussed here can be used to train classifiers which can separate desirable from undesirable sounds. Section~\ref{TPE_models} covers the implementation of classifiers which directly use the FFT features and Section~\ref{chap3:mixed_ear_models} covers the use of embeddings to train virtual ear models. 
+The features discussed here can be used to train classifiers which can separate desirable sounds from undesirable sounds. Section~\ref{TPE_models} covers the implementation of classifiers which directly use the FFT features and Section~\ref{chap3:mixed_ear_models} covers the use of embeddings to train virtual ear models. 
 \section{Ear Decisions}
 \label{sec:decisions}
  Having considered the caveats and requirements, once a sound is generated and passed onto the ear, we expect the virtual ear to make decisions in response to two important questions: 
@@ -310,15 +310,14 @@ The features discussed here can be used to train classifiers which can separate 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}\label{Decision.2}
 \end{quote}
     }
-\decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with our training approach. If the sound is deemed percussive, the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. 
-% To maximize the transference of knowledge gained from training the classifiers to evaluation of programs, we need to extract concise feature sets that capture fundamental characteristics of the data points.
+\decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with our training approach.
+
+Assuming that the result of~\decfirst~ is positive, the sound is deemed percussive and the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. Since drum categories are not open sets, the OSR problem should not play a role in the decision making process. 
 
 The goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. The representation of sounds is critical in allowing the acceptance of novel sounds as part of the drum group despite their anomalies. In Section~\ref{chap:represent_sound}, we discussed 2 different approaches to feature extraction. This leads to two different implementation of a virtual ear: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of \decfirst~and \decsecond. The features utilized by these models are manually defined. MEMs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
-
-\subsection{Two Phased Ears}
 \label{TPE_models}
-\begin{figure}[t!]
+\begin{figure}[tbp]
     \begin{center}
     \textbf{TPE Design}
     \makebox[\textwidth]{
@@ -328,46 +327,57 @@ The goal is to create a pipeline of sound generation where the synthesizer is us
 \label{fig:TPE_design}
 \end{figure}
 
+\subsection{Two Phased Ears}
+
 Using the features and transformation described in the previous section as input, we trained several neural network models with the pytorch library. The tasks at hand with regards to \decfirst~is to separate drums from not-drums (DrumVsNotDrum, or DVN). In \decsecond~the aim is to categorize the type of drums and percussion (DrumVsDrum, or DVD). 
 
- Multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~are combined to make decisions sequentially. For \decfirst, all drums in RadarDB and FreeDB and 6000 examples of virtual synthesizer noise are used. For \decsecond, we combined the two databases and merge toms into kicks and rims/shakers into \enquote{other}. 80\% of this dataset were used for training, and the remaining 20\% of sounds for testing. 98\% accuracy in \decfirst~and 82\% accuracy in~\decsecond~were achieved with the best models. The loss function and optimizer are Categorical Cross-Entropy and Adam respectively. Training continued until no reduction in loss and accuracy is observed for 10 epochs. These accuracy numbers are weak as we did not account for category sizes or cross validate.  
+ Multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~are combined to make decisions sequentially. For \decfirst, all drums in RadarDB and FreeDB and 6000 examples of virtual synthesizer noise are used. For \decsecond, we combined the two databases and merge toms into kicks and rims/shakers into \enquote{other}. To train the models, 80\% of the sounds in the dataset were used, and the remaining 20\% of sounds were used for validation. The loss function and optimizer are Categorical Cross-Entropy and Adam respectively. Training continued until no reduction in loss and accuracy is observed for 10 epochs. These accuracy numbers are weak as we did not account for category sizes or cross validate. The architectures for the DVN models can be found in Section~\ref{sec:dvn_arch}. Likewise, the architectures for the DVD models can be found in Section~\ref{sec:dvd_arch}.
 
 
 
 \subsubsection{DVN Models}
-\textbf{FC-DVN}: Fully connected network trained on Envelope features, reaching 97\% accuracy on the test data for~\decfirst. \begin{center}
-\begin{table}[h!]
-\centering
-\begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+\label{sec:dvn_arch}
+We defined and trained the following neural network models for the DVN task:
+\begin{enumerate}
+\item \textbf{FC-DVN}: A fully connected network trained on envelope features and reached 97\% accuracy on the test data for~\decfirst. Architecture details are shown in Table~\ref{table:FCDVN}.
+\item \textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy for~\decfirst. Architecture details are shown in Table~\ref{table:cnndvn}.
+\end{enumerate}
 
-\hline
-Layer-\# & Out Shape &  Details  \\ 
-	\hline
-Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ 
-	\hline
-PReLU & [$\mathcal{B}$, 400] &  \\ 
-	\hline
-Linear-2 & [$\mathcal{B}$, 20] & \\ 
-	\hline
-PReLU & [$\mathcal{B}$, 20] &  \\ 
-	\hline 
-Linear-3 & [$\mathcal{B}$, 10] &  \\ 
-	\hline
-Linear-3 & [$\mathcal{B}$, 4] &  \\ 
-	\hline 
-Softmax & [$\mathcal{B}$, size(DvN)] &  DvN Probabilities\\ 
-	\hline
-\end{tabular}
-\caption{Sequential Layers for FC-DVN}
-\end{table}
+\begin{center}
+    \begin{table}[tbp]
+    \centering
+    \begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+    
+    \hline
+    Layer-\# & Output Shape &  Details  \\ 
+    	\hline
+    Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ 
+    	\hline
+    PReLU & [$\mathcal{B}$, 400] &  \\ 
+    	\hline
+    Linear-2 & [$\mathcal{B}$, 20] & \\ 
+    	\hline
+    PReLU & [$\mathcal{B}$, 20] &  \\ 
+    	\hline 
+    Linear-3 & [$\mathcal{B}$, 10] &  \\ 
+    	\hline
+    Linear-3 & [$\mathcal{B}$, 4] &  \\ 
+    	\hline 
+    Softmax & [$\mathcal{B}$, size(DvN)] &  DvN Probabilities\\ 
+    	\hline
+    \end{tabular}
+
+    \caption{Sequential Layers for FC-DVN}
+    \label{table:FCDVN}    
+    \end{table}
 \end{center}
-\textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy on the test set.
+
 \begin{center}
 \begin{table}[tbp]
 \centering
 \begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
 \hline
-Layer-\# & Out Shape & Details  \\ \hline
+Layer-\# & Output Shape & Details  \\ \hline
 Conv2d-1 & [$\mathcal{B}$, 8, 30, 20]  &
 kernel:7x3\newline                  
 stride:1\newline    
@@ -379,37 +389,47 @@ Linear-1 & [$\mathcal{B}$, 2] &  \\ \hline
 Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 \end{tabular}
 \caption{Sequential Layers for CNNLSTM-DVN }
-\label{table:CNNAUTOENCODER}
+\label{table:cnndvn}
 \end{table}
 \end{center}
 
 \subsubsection{DVD Models}
-\textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. 
+\label{sec:dvd_arch}
+We defined and trained the following neural network models for the DVD task:
+\begin{enumerate}
+\item \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvd:EF}.
+\item \textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab}.
+\item \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdfc}.
+\end{enumerate}
+
+
+
 \begin{center}
-\begin{table}[tbp]
-\centering
-\begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
-\hline
-Layer-\# & Out Shape &  Details  \\ \hline
-Linear-1 & [$\mathcal{B}$, 60] &   10 Envelope + 50 Encoded Features \\ \hline
-PReLU & [$\mathcal{B}$, 60] &  \\ \hline
-Linear-2 & [$\mathcal{B}$, 30] & \\ \hline
-PReLU & [$\mathcal{B}$, 30] &  \\ \hline 
-Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline %\newline \\ \hline
-Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline 
-Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
-\end{tabular}
-\caption{Sequential Layers for E+F-DVD}
+    \begin{table}[tbp]
+    \centering
+    \begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
+    \hline
+    Layer-\# & Output Shape &  Details  \\ \hline
+    Linear-1 & [$\mathcal{B}$, 60] &   10 Envelope + 50 Encoded Features \\ \hline
+    PReLU & [$\mathcal{B}$, 60] &  \\ \hline
+    Linear-2 & [$\mathcal{B}$, 30] & \\ \hline
+    PReLU & [$\mathcal{B}$, 30] &  \\ \hline 
+    Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline %\newline \\ \hline
+    Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline 
+    Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
+    \end{tabular}
+    \caption{Sequential Layers for E+F-DVD}
+    \label{tab:dvd:EF}
 \end{table}
 \end{center}
 
-\textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2.
+
 \begin{center}
     \begin{table}[tbp]
     \centering
     \begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
     \hline
-    Layer-\# & Out Shape & Details  \\ \hline
+    Layer-\# & Output Shape & Details  \\ \hline
     Conv2d-1 & [$\mathcal{B}$, 8, 30, 20]  &
     kernel:(7 , 3)\newline                  
     stride:(1 , 1)\newline    
@@ -421,16 +441,16 @@ Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
     Softmax & [$\mathcal{B}$, $\mathcal{C}$] &  DvD probabilities \\ \hline
     \end{tabular}
     \caption{Sequential Layers for CNNLSTM-DVD }
-    \label{table:CNNAUTOENCODER}
+    \label{tab:dvdcnn}
     \end{table} 
 \end{center}
-\textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. 
+
 \begin{center}
     \begin{table}[tbp]
     \centering
     \begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
     \hline
-    Layer-\# & Out Shape &  Details  \\ \hline
+    Layer-\# & Output Shape &  Details  \\ \hline
     Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ \hline
     PReLU & [$\mathcal{B}$, 400] &  \\ \hline
     Linear-2 & [$\mathcal{B}$, 20] & \\ \hline
@@ -440,14 +460,19 @@ Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
     Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
     \end{tabular}
     \caption{Sequential Layers for FC-DVD}
+    \label{tab:dvdfc}
     \end{table}
 \end{center}
 
-
-
-
+While these models show promise in seperation of drums from non-drums and categorization of drums, we cannot know their effectiveness as part of a generative system of drum sounds until manual hearing tests are done. In Chapter~\ref{chapnov_gen}, we discuss how the TPE models were used in tandem with the virtual synthesizer as well as the results of our hearing tests. 
 \subsection{Mixed Ear Models}
 \label{chap3:mixed_ear_models}
+Unlike TPEs which make their decisions in two steps, mixed ear models (MEMs) simultaneously categorize a new sound's drum type or put it in the \enquote{synthetic noise} category. We call this task \textit{drum vs drum vs not-drum}, or \enquote{\textbf{DvDvN}}.
+
+Manual t-SNE inspections discussed in Section~\ref{fig:embedding_FE} highlighted a disregard for envelope shapes as a major source of failure. Because of this, the feature set used to train MEMs contains envelope and embedded features. The performance of the models before and after the addition of envelope features (a vector of size 10) to the feature space is shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}.
+
+The autoencoder model trained on MixedDB is used as an embedding feature extractor. RadarDB, FreeDB and NoiseDB are combined for training/test data. To prevent class overlaps as much as possible, only claps, hats, kicks, snares and synthetic noise groups are used for measuring model effectiveness. Samples longer than 1 second are excluded in order to reduce potentially mislabeled data. This combined dataset was described in Section~\ref{db:memDB}
+
 \begin{figure}[tbp]
     \begin{center}
     \textbf{MEM Design}
@@ -457,13 +482,6 @@ Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
     \caption{MEMs use both FFT features and embedding features to make both decisions simultaneously. }
 \label{fig:TPE_design}
 \end{figure}
-
-Unlike TPEs which make their decisions in two steps, mixed ear models (MEMs) simultaneously categorize a new sound's drum type or put it in the \enquote{synthetic noise} category. We call this task drum vs drum vs not-drum, or \enquote{DvDvN}.
-
-Manual t-SNE inspections discussed in Section~\ref{fig:embedding_FE} highlighted a disregard for envelope shapes as a major source of failure. Because of this, the feature set used to train MEMs contains envelope and embedded features. The performance of the models before and after the addition of envelope features (a vector of size 10) to the feature space is shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}.
-
-The autoencoder model trained on MixedDB is used as an embedding feature extractor. RadarDB, FreeDB and NoiseDB are combined for training/test data. To prevent class overlaps as much as possible, only claps, hats, kicks, snares and synthetic noise groups are used for measuring model effectiveness. Samples longer than 1 second are excluded in order to reduce potentially mislabeled data. This combined dataset was described in Section~\ref{db:memDB}
-
 
 \subsubsection{Model Selection}
 Using embeddings and envelope features to represent audio, five classification models were trained for the task of categorizing the five different sound groups. We did not use neural networks for classification as traditional classification models have been shown to match, if not exceed deep-learning models with less training time, given that the feature set is a simplified representation extracted using neural networks~\cite{notley2018examining}.
@@ -498,7 +516,7 @@ Using embeddings and envelope features to represent audio, five classification m
     \end{threeparttable}
 \end{table}
 
-\begin{figure}[htbp!]
+\begin{figure}[tbp]
     \begin{center}
     \textbf{Cross Validation F-Scores For All Sound Groups}\par\medskip
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_mme.pdf}}
@@ -507,9 +525,9 @@ Using embeddings and envelope features to represent audio, five classification m
     \end{center}
 \end{figure}
 
-To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}.
+To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}. We used this extra-trees models as part of our drum generation system, the process for implementing this system and the results of our manual hearing tests are discussed in Chapter~\ref{chapnov_gen}.
 
-\begin{figure}[htbp]   
+\begin{figure}[tbp]   
     \begin{center}
         \textbf{Cross Validation F-Scores For Drum Vs Not-Drum}
     \makebox[\textwidth]{\includegraphics[width=0.8\paperwidth]{images/chapter_3/mme_comparisons_dvn.pdf}}
@@ -519,11 +537,11 @@ To see how these models perform on the binary DvN task (i.e \decfirst), the perf
 \end{figure}
 
 
-\begin{figure}[htbp]
+\begin{figure}[tbp]
 \begin{center}
     \textbf{ Classification Report for DvDvN and DvN  }\par\medskip
     \makebox[\textwidth]{
-    \subfloat[Precision, recall, F1-Score, and number of supporting examples]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_mme.pdf}
+    \subfloat[Precision, recall, F1-Score, and number of supporting examples. The \enquote{synth noise} category is identical to the \enquote{not drum} category]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_mme.pdf}
     \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_dvn.pdf}
     }
     
