@@ -337,10 +337,13 @@ Using the features and transformation described in the previous section as input
 
 \subsubsection{DVN Models}
 \label{sec:dvn_arch}
-We defined and trained the following neural network models for the DVN task:
+In the TPE approach, DVN models are tasked with the separation of drums from non-drums, or~\decfirst. Here, we use 2 neural network architectures to train for this task. These architectures are trained on the spectrogram representations of each sound as described in Section~\ref{sec:fourier_transforms}, and aim to predict whether a sound is percussive or not. For convenience, we also prefer models which train quickly (under an hour) without parallelization\footnote{Using NVIDIA GeForce GTX 1070}.
+
+Since training is done only on small spectrogram features sets, there are benefits and downsides in the utilization of different neural network layers. CNN layers are capable of identifying patterns regardless of their location and orientation within a 2D space~\cite{albawi2017understanding}. However, here were working with spectrogram data, where the 2D position of each feature is critical to its meaning. CNN layers also have the benefit of being less computationally expensive than fully-connected layers~\cite{albawi2017understanding}; but models which only utilize fully-connected layers are a viable option here due to the small feature space. Considering these possible benefits and costs as well as our preference for simplicity and quick training, we train two different models for~\decfirst:
+
 \begin{enumerate}
-\item \textbf{FC-DVN}: A fully connected network trained on envelope features and reached 97\% accuracy on the test data for~\decfirst. Architecture details are shown in Table~\ref{table:FCDVN}.
-\item \textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. This model is trained on spectrum data and reaches 98\% accuracy for~\decfirst. Architecture details are shown in Table~\ref{table:cnndvn}.
+\item \textbf{FC-DVN}: A fully connected network trained on spectrogram features which reached 97\% accuracy on the test data for~\decfirst. Architecture details are shown in Table~\ref{table:FCDVN}.
+\item \textbf{CNNLSTM-DVN}: A combination of CNN and LSTM models, where the CNN model extracts higher level features that are fed temporally to an LSTM cell. Here, LSTM layers are utilized in order to extract temporal features from the CNN layers. This model is trained on spectrum data and reaches 98\% accuracy for~\decfirst. Architecture details are shown in Table~\ref{table:cnndvn}.
 \end{enumerate}
 
 \begin{center}
@@ -351,9 +354,9 @@ We defined and trained the following neural network models for the DVN task:
     \hline
     Layer-\# & Output Shape &  Details  \\ 
     	\hline
-    Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ 
+    Linear-1 & [$\mathcal{B}$, 600] &   Input Layer  \\ 
     	\hline
-    PReLU & [$\mathcal{B}$, 400] &  \\ 
+    PReLU & [$\mathcal{B}$, 600] &  \\ 
     	\hline
     Linear-2 & [$\mathcal{B}$, 20] & \\ 
     	\hline
@@ -378,12 +381,12 @@ We defined and trained the following neural network models for the DVN task:
 \begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
 \hline
 Layer-\# & Output Shape & Details  \\ \hline
-Conv2d-1 & [$\mathcal{B}$, 8, 30, 20]  &
+Conv2d-1 & [$\mathcal{B}$, 1, 30, 20]  &
 kernel:7x3\newline                  
 stride:1\newline    
 padding:3x1 \\ \hline
-ReLU-2 & [$\mathcal{B}$, 8, 30, 20] & \\  \hline
-Dropout-4 & [$\mathcal{B}$, 8, 15, 10] &  \\ \hline
+ReLU-2 & [$\mathcal{B}$, 1, 30, 20] & \\  \hline
+Dropout-4 & [$\mathcal{B}$, 1, 15, 10] &  \\ \hline
 LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
 Linear-1 & [$\mathcal{B}$, 2] &  \\ \hline 
 Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
@@ -396,13 +399,55 @@ Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 
 \subsubsection{DVD Models}
 \label{sec:dvd_arch}
-We defined and trained the following neural network models for the DVD task:
+As \textit{FC-DVN} and \textit{CNNLSTM-DVN} appeared effective for~\decfirst, we trained identical models for the categorization of drum sounds, or~\decsecond. The only modification being the change in the final output layers depending on the number of drums being categorized. In addition, as we hypothesize that~\decsecond~ may be relatively an easier task, we trained another fully connected model trained only on the envelope and frequency features of each sound (i.e, a vector of size 60). 
+
 \begin{enumerate}
-\item \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvd:EF}.
-\item \textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdcnn}.
 \item \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdfc}.
+\item \textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdcnn}.
+\item \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvd:EF}.
 \end{enumerate}
 
+
+
+\begin{center}
+    \begin{table}[tbp]
+    \centering
+    \begin{tabular}{|p{33mm}|p{33mm}|p{40mm}|}
+    \hline
+    Layer-\# & Output Shape &  Details  \\ \hline
+    Linear-1 & [$\mathcal{B}$, 600] &   Input Layer  \\ \hline
+    PReLU & [$\mathcal{B}$, 600] &  \\ \hline
+    Linear-2 & [$\mathcal{B}$, 20] & \\ \hline
+    PReLU & [$\mathcal{B}$, 20] &  \\ \hline 
+    Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline %\newline \\ \hline
+    Linear-3 & [$\mathcal{B}$, Drum Types] &  \\ \hline 
+    Softmax & [$\mathcal{B}$, Drum Types] &  DvD Probabilities\\ \hline
+    \end{tabular}
+    \caption{Sequential Layers for FC-DVD}
+    \label{tab:dvdfc}
+    \end{table}
+\end{center}
+
+\begin{center}
+    \begin{table}[tbp]
+    \centering
+    \begin{tabular}{|p{28mm}|p{32mm}|p{40mm}|}
+    \hline
+    Layer-\# & Output Shape & Details  \\ \hline
+    Conv2d-1 & [$\mathcal{B}$, 1, 30, 20]  &
+    kernel:(7 , 3)\newline                  
+    stride:(1 , 1)\newline    
+    padding:(3 , 1) \\ \hline
+    ReLU-2 & [$\mathcal{B}$, 1, 30, 20] & \\  \hline
+    Dropout-4 & [$\mathcal{B}$, 1, 15, 10] &  \\ \hline
+    LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
+    Linear-1 & [$\mathcal{B}$, Drum Types] &  \\ \hline 
+    Softmax & [$\mathcal{B}$, Drum Types)] &  DvD probabilities \\ \hline
+    \end{tabular}
+    \caption{Sequential Layers for CNNLSTM-DVD }
+    \label{tab:dvdcnn}
+    \end{table} 
+\end{center}
 
 
 \begin{center}
@@ -417,52 +462,11 @@ We defined and trained the following neural network models for the DVD task:
     PReLU & [$\mathcal{B}$, 30] &  \\ \hline 
     Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline %\newline \\ \hline
     Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline 
-    Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
+    Softmax & [$\mathcal{B}$, Drum Types] &  DvD Probabilities\\ \hline
     \end{tabular}
     \caption{Sequential Layers for E+F-DVD}
     \label{tab:dvd:EF}
 \end{table}
-\end{center}
-
-
-\begin{center}
-    \begin{table}[tbp]
-    \centering
-    \begin{tabular}{|p{28mm}|p{25mm}|p{50mm}|}
-    \hline
-    Layer-\# & Output Shape & Details  \\ \hline
-    Conv2d-1 & [$\mathcal{B}$, 8, 30, 20]  &
-    kernel:(7 , 3)\newline                  
-    stride:(1 , 1)\newline    
-    padding:(3 , 1) \\ \hline
-    ReLU-2 & [$\mathcal{B}$, 8, 30, 20] & \\  \hline
-    Dropout-4 & [$\mathcal{B}$, 8, 15, 10] &  \\ \hline
-    LSTMCell  & [$\mathcal{B}$, 30] & hidden size:800 \\ \hline
-    Linear-1 & [$\mathcal{B}$, $\mathcal{C}$] &  \\ \hline 
-    Softmax & [$\mathcal{B}$, $\mathcal{C}$] &  DvD probabilities \\ \hline
-    \end{tabular}
-    \caption{Sequential Layers for CNNLSTM-DVD }
-    \label{tab:dvdcnn}
-    \end{table} 
-\end{center}
-
-\begin{center}
-    \begin{table}[tbp]
-    \centering
-    \begin{tabular}{|p{33mm}|p{33mm}|p{50mm}|}
-    \hline
-    Layer-\# & Output Shape &  Details  \\ \hline
-    Linear-1 & [$\mathcal{B}$, 400] &   Input Layer  \\ \hline
-    PReLU & [$\mathcal{B}$, 400] &  \\ \hline
-    Linear-2 & [$\mathcal{B}$, 20] & \\ \hline
-    PReLU & [$\mathcal{B}$, 20] &  \\ \hline 
-    Linear-3 & [$\mathcal{B}$, 10] &  \\ \hline %\newline \\ \hline
-    Linear-3 & [$\mathcal{B}$, 4] &  \\ \hline 
-    Softmax & [$\mathcal{B}$, size(DvD)] &  DvD Probabilities\\ \hline
-    \end{tabular}
-    \caption{Sequential Layers for FC-DVD}
-    \label{tab:dvdfc}
-    \end{table}
 \end{center}
 
 While these models show promise in seperation of drums from non-drums and categorization of drums, we cannot know their effectiveness as part of a generative system of drum sounds until manual hearing tests are done. In Chapter~\ref{chap:nov_gen}, we discuss how the TPE models were used in tandem with the virtual synthesizer along with the results of our hearing tests. 

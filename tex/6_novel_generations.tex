@@ -43,10 +43,10 @@ This loop runs in a single CPU process, therefore generation can scale-up easily
  
  The main function of the manual hearing tests is to measure the precision of the virtual ear when the model is performing open-set recognition, i.e, separating drums sounds from none-drum sounds. If a small subset of synthetic noise can stand in for percussive sounds, then the ideal synthetic ear will be able to separate the desired sounds from noise with high recall and precision (see Figure~\ref{fig:ven_data}). Low recall will cause a slow-down of the pipeline, as a larger number of random sounds need to be generated and evaluated, and increase the loss of novel, percussive sounds. Low precision will make manual clean-up of generated samples necessary and arduous. 
 
-To assess the performance of each pipeline, we randomly create drum programs and generate and the corresponding audio signal. This sound is then fed through the ear model to determine if the sound is percussive. If so, a category is assigned to the sound. This sound and the corresponding synthesizer program are saved to hard-disk. Here we assess the success rate of two different pipelines by manual inspection and categorization of a randomly selected subset of its results. We cross reference the manual categorizations with the categories assigned by the virtual ear: 
+To assess the performance of each pipeline, we randomly create drum programs and generate and the corresponding audio signal. This sound is then fed through the ear model to determine if the sound is percussive. If so, a category is assigned to the sound. This sound and the corresponding synthesizer program are saved to hard-disk. Here we assess the success rate of two different pipelines by manual inspection and categorization of a randomly selected subset of its results. We cross reference the manual categorizations with the categories assigned by the virtual ear and seek to answer the following two research questions for each system: 
 \begin{itemize}
-\item Do we agree that the sounds are percussive? 
-\item Do we agree with the drum category assigned to the percussive sounds?
+\item \textbf{RQ.1}: Do we agree that the sounds are percussive? 
+\item \textbf{RQ.2}: Do we agree with the drum category assigned to the percussive sounds?
 \end{itemize}
  \section{Survey of Two-Phased Ear Performance}
    
@@ -54,7 +54,7 @@ To assess the performance of each pipeline, we randomly create drum programs and
 %  We put a generative system together using a TPE ear. When using CPU, each loop could take up to 200 ms, however, each loop can be run on a simple process and multiprocessing can easily speed up generation time. Here, approximately 300 loops were necessary to create a drum sound, however, slight variations in recall and precision can change this number significantly. 
  
  \subsection{Methodology and Dataset}
-  We put a generative system together using various TPEs discussed in Section~\ref{TPE_models}, and ran the system until a large number of samples in each category were found and saved to disk. Next, we randomly picked around 50 samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, 
+  To answer \textbf{RQ.1} and \textbf{RQ.2} for the TPE approach, we put a generative system together using the TPEs discussed in Section~\ref{TPE_models}, and ran the system until a large number of samples in each category were found and saved to disk. Next, we randomly picked around 50 samples in the following categories: \enquote{snare}, \enquote{kick}, \enquote{hat}, \enquote{clap} and \enquote{other} (combination of rims, 
 shakers and unusual percussive sounds). This gave us a total of 257 samples. These samples were determined to be percussive and then categorized by 3 different drum vs drum models (FC, CNNLSTM, E+F). We ensured a balanced division between samples of stack size 1, 2 and 4 (each stack is responsible for a third of the samples under each category).
  \subsection{Survey Application and Results}
 Both reviewers categorized these samples without knowledge of other categorization results. It's important to note that each responder had an additional category of \enquote{Bad} for samples that they deemed not percussive. The \enquote{Bad} category indicates that the sample should have not been accepted as percussive.
@@ -90,16 +90,14 @@ We assess the reliability of agreement between persons and categorization models
 Our main takeaways from the TPE survey are as follows:
 \label{survey1_takeaway}
 \begin{itemize}
-    % \item With 6 categorization groups, responders had the same categorization in 47\% of cases.
-    % \item Of 257 samples, the responders agreed with FC, CNNLSTM, and E+F respectively in 78, 76, and 46 of cases. 
-    \item The survey brings into question the reliability of our DVN models, as 30\% of the generated samples were deemed not percussive by at least 1 reviewer and 8\% by both reviewers
-    \item The task of categorizing synthetic drums is difficult. Survey shows that the scale of agreement within persons as well as between persons and models is moderate at best, even after removal of \enquote{Bad} samples.  While the same models can achieve over 98 percent accuracy when tested on recorded drum samples. This may be a manifestation of the \enquote{open set recognition} problem. 
+    \item For \textbf{RQ.1}, the survey brings into question the reliability of our DVN models, as 30\% of the generated samples were deemed not percussive by at least 1 reviewer and 8\% by both reviewers. 
+    \item For \textbf{RQ.2}, the task of categorizing synthetic drums appears difficult. Survey shows that even after removal of \enquote{Bad} samples, the scale of agreement between just 2 persons (H+H) as well as between 2 persons and any of the models (H+FC, H+CNN, H+E/F) is moderate at best.  While the same models can achieve over 98 percent accuracy when tested on recorded drum samples. This may be a manifestation of the \enquote{open set recognition} problem. 
     \item While there is much room for improvement, our pipeline can generate and categorize drums and percussive sounds with a promising degree of success. 
 \end{itemize}
 
  \section{Survey of Mixed Ear Model Performance}
   \subsection{Methodology and Dataset}
- Keeping the other components of the pipeline the same, the MEM is used as the virtual ear. With TPEs, the~\enquote{other} category is assigned when the sound is determined to be percussive in the first phase, but the second phase determines that the sound does not belong to any of the drum categories it is familiar with. MEMs either assign the sound to a drum category or determine that it is not a drum, therefore the MEM survey differs from the TPE survey in that the pipeline only creates the four drum categories, yet the \enquote{other} category can still be assigned by survey responders. This means that two out of six possible categories are only available to responders, which can cause an inherent bias towards worse agreement scores compared to the last survey. 
+  To answer \textbf{RQ.1} and \textbf{RQ.2} for the MEM approach, we kept the other components of the pipeline the same, while using the MEM as the virtual ear. With TPEs, the~\enquote{other} category is assigned when the sound is determined to be percussive in the first phase, but the second phase determines that the sound does not belong to any of the drum categories it is familiar with. MEMs either assign the sound to a drum category or determine that it is not a drum, therefore the MEM survey differs from the TPE survey in that the pipeline only creates the four drum categories, yet the \enquote{other} category can still be assigned by survey responders. This means that two out of six possible categories are only available to responders, which can cause an inherent bias towards worse agreement scores compared to the last survey. 
  \subsection{Survey Application and Results}
  \begin{table}[tbp]
  \resizebox{\linewidth}{!}{\begin{tabular}{||c c c c||} 
@@ -136,9 +134,9 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
 \label{survey2_takeaway}
 Our main takeaways from the MEM survey are as follows:
 \begin{itemize}
-\item 50\% of sounds were deemed~\enquote{bad} by at least one survey taker, and 17\% by both.
-\item The improvement in kappa scores after reduction of~\enquote{bad} outputs show that similar to TPEs, mistakes in separation of drums in non-drums is a major point of failure. 
-\item Overall, these results show success in usage of spectrogram autoencoders as feature extractors for sounds, however open set recognition is a major weakness. 
+\item For \textbf{RQ.1}: 50\% of sounds were deemed~\enquote{bad} by at least one survey taker, and 17\% by both.
+\item For \textbf{RQ.2}: The improvement in kappa scores after reduction of~\enquote{bad} outputs show that similar to TPEs, mistakes in separation of drums in non-drums is a major point of failure. 
+\item Overall, these results show success in usage of spectrogram autoencoders as feature extractors for sounds, however we suspect that open set recognition is a major weakness. 
 \end{itemize}
 
 \section{Survey Conclusion}
