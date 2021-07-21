@@ -312,7 +312,7 @@ The features discussed here can be used to train classifiers which can separate 
     }
 \decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with our training approach.
 
-Assuming that the result of~\decfirst~ is positive, the sound is deemed percussive and the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. Since drum categories are not open sets, the OSR problem should not play a role in the decision making process. 
+Assuming that the result of~\decfirst~is positive, the sound is deemed percussive and the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. Since drum categories are not open sets, the OSR problem should not play a role in the decision making process. 
 
 The goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. The representation of sounds is critical in allowing the acceptance of novel sounds as part of the drum group despite their anomalies. In Section~\ref{chap:represent_sound}, we discussed 2 different approaches to feature extraction. This leads to two different implementation of a virtual ear: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of \decfirst~and \decsecond. The features utilized by these models are manually defined. MEMs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
@@ -331,7 +331,7 @@ The goal is to create a pipeline of sound generation where the synthesizer is us
 
 Using the features and transformation described in the previous section as input, we trained several neural network models with the pytorch library. The tasks at hand with regards to \decfirst~is to separate drums from not-drums (DrumVsNotDrum, or DVN). In \decsecond~the aim is to categorize the type of drums and percussion (DrumVsDrum, or DVD). 
 
- Multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~are combined to make decisions sequentially. For \decfirst, all drums in RadarDB and FreeDB and 6000 examples of virtual synthesizer noise are used. For \decsecond, we combined the two databases and merge toms into kicks and rims/shakers into \enquote{other}. To train the models, 80\% of the sounds in the dataset were used, and the remaining 20\% of sounds were used for validation. The loss function and optimizer are Categorical Cross-Entropy and Adam respectively. Training continued until no reduction in loss and accuracy is observed for 10 epochs. These accuracy numbers are weak as we did not account for category sizes or cross validate. The architectures for the DVN models can be found in Section~\ref{sec:dvn_arch}. Likewise, the architectures for the DVD models can be found in Section~\ref{sec:dvd_arch}.
+ Multiple neural network architectures using different subsets of the FFT features to specialize in \decfirst~or \decsecond~are combined to make decisions sequentially. For \decfirst, all drums in RadarDB and FreeDB and 6000 examples of virtual synthesizer noise are used. For \decsecond, we combined the two databases and merge toms into kicks and rims/shakers into \enquote{other}. To train the models, 80\% of the sounds in the dataset were used, and the remaining 20\% of sounds were used for validation. The loss function and optimizer are Categorical Cross-Entropy and Adam respectively. Training continued until no reduction in loss and accuracy is observed for 10 epochs. These accuracy numbers are weak as we did not account for category sizes or cross validate. Further details about the design decisions, performance, and the architectures for the DVN models can be found in Section~\ref{sec:dvn_arch}. Likewise, the architectures for the DVD models can be found in Section~\ref{sec:dvd_arch}.
 
 
 
@@ -399,16 +399,16 @@ Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 
 \subsubsection{DVD Models}
 \label{sec:dvd_arch}
-As \textit{FC-DVN} and \textit{CNNLSTM-DVN} appeared effective for~\decfirst, we trained identical models for the categorization of drum sounds, or~\decsecond. The only modification being the change in the final output layers depending on the number of drums being categorized. In addition, as we hypothesize that~\decsecond~ may be relatively an easier task, we trained another fully connected model trained only on the envelope and frequency features of each sound (i.e, a vector of size 60). 
+As FC-DVN and CNNLSTM-DVN appeared effective for~\decfirst, we trained identical models for the categorization of drum sounds, or~\decsecond. The only modification being the change in the final output layers depending on the number of drums being categorized. In addition, as we hypothesize that~\decsecond~may be a relatively easier task (a large number of sounds are pruned after~\decfirst), we trained another fully connected model using only on the envelope and frequency features of each sound (i.e, a vector of size 60). These models and their performances are as follows:
 
 \begin{enumerate}
 \item \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdfc}.
 \item \textbf{CNNLSTM-DVD}: A CNN model trained on Spectrum features. Reaching 82\% accuracy in a 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdcnn}.
 \item \textbf{E+F-DVD}: A fully connected model trained on a concatenation of envelope and frequency features. Reaching 80\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvd:EF}.
 \end{enumerate}
+Based on the results on the testing data, these models show promise in separation of drums from non-drums and categorization of drums, however, we cannot know their effectiveness as part of a generative system of drum sounds until manual hearing tests are done. That is, while the ears may be effective at rejecting non-percussive sounds, we cannot know what percentage of the sounds accepted by these virtual ears resemble drums without manual hearing tests. In Chapter~\ref{chap:nov_gen}, we discuss how the TPE models were used in tandem with the virtual synthesizer along with the results of our hearing tests.
 
-
-
+In the next section, we discuss the implementation of MEMs, a separate class of virtual ears which make~\decfirst~and~\decsecond~simultaneously without the need for two different models.
 \begin{center}
     \begin{table}[tbp]
     \centering
@@ -469,7 +469,7 @@ As \textit{FC-DVN} and \textit{CNNLSTM-DVN} appeared effective for~\decfirst, we
 \end{table}
 \end{center}
 
-While these models show promise in seperation of drums from non-drums and categorization of drums, we cannot know their effectiveness as part of a generative system of drum sounds until manual hearing tests are done. In Chapter~\ref{chap:nov_gen}, we discuss how the TPE models were used in tandem with the virtual synthesizer along with the results of our hearing tests. 
+
 \subsection{Mixed Ear Models}
 \label{chap3:mixed_ear_models}
 Unlike TPEs which make their decisions in two steps, mixed ear models (MEMs) simultaneously categorize a new sound's drum type or put it in the \enquote{synthetic noise} category. We call this task \textit{drum vs drum vs not-drum}, or \enquote{\textbf{DvDvN}}.
@@ -530,7 +530,7 @@ Using embeddings and envelope features to represent audio, five classification m
     \end{center}
 \end{figure}
 
-To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising model for the virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}. We used this extra-trees models as part of our drum generation system, the process for implementing this system and the results of our manual hearing tests are discussed in Chapter~\ref{chap:nov_gen}.
+To see how these models perform on the binary DvN task (i.e \decfirst), the performance of the models is measured in the same manner after all drums are grouped together. The results of these tests are shown in Figures~\ref{fig:f1_allg_box} and~\ref{fig:f1_dvn_box}. Considering the performance of these models, we selected the extra-trees model as the most promising for the MEM virtual ear. Extra-trees is an ensemble-model which uses the results of multiple random forests trained on different feature subsets~\cite{geurts2006extremely,pedregosa2011scikit}. We used this extra-trees model as part of our drum generation system, the implementation process for this system and the results of our manual hearing tests are discussed in Chapter~\ref{chap:nov_gen}.
 
 \begin{figure}[tbp]   
     \begin{center}

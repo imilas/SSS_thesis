@@ -13,7 +13,7 @@ The proposed system for virtual drum generation proposed in Section~\ref{sec:the
 \newcommand{\decfirst}{\textit{Decision.1}}
 \newcommand{\decsecond}{\textit{Decision.2}}
 \section{Putting The System Together}
- The virtual synthesizer generates a second of audio based on randomly generated programs, and the virtual ear can analyze the generated sounds and categorizes them as percussive or non-percussive. These two components work together to execute the plan laid out for the final, generative system of drum sounds, shown in Figure~\ref{fig:pipeline_outline}. A code example of how the system is put together is shown in the Listing~\ref{lst:system_code}.
+ The virtual synthesizer generates a second of audio based on randomly generated programs, and the virtual ear can analyze the generated sounds and categorizes them as percussive or non-percussive. These two components work together to execute the plan laid out for the final, generative system of drum sounds, shown in Figure~\ref{fig:pipeline_outline}. A code example of how the system is put together is shown in Listing~\ref{lst:system_code}.
 
 \begin{lstlisting}[float,floatplacement=H,caption={Example Program For The Generative System}\label{lst:system_code},captionpos=t]
 
@@ -91,7 +91,7 @@ Our main takeaways from the TPE survey are as follows:
 \label{survey1_takeaway}
 \begin{itemize}
     \item For \textbf{RQ.1}, the survey brings into question the reliability of our DVN models, as 30\% of the generated samples were deemed not percussive by at least 1 reviewer and 8\% by both reviewers. 
-    \item For \textbf{RQ.2}, the task of categorizing synthetic drums appears difficult. Survey shows that even after removal of \enquote{Bad} samples, the scale of agreement between just 2 persons (H+H) as well as between 2 persons and any of the models (H+FC, H+CNN, H+E/F) is moderate at best.  While the same models can achieve over 98 percent accuracy when tested on recorded drum samples. This may be a manifestation of the \enquote{open set recognition} problem. 
+    \item For \textbf{RQ.2}, the task of categorizing synthetic drums appears difficult. Survey shows that even after removal of \enquote{Bad} samples, the scale of agreement between just 2 persons (H+H) as well as between 2 persons and any of the models (H+FC, H+CNN, H+E/F) is moderate at best; while the same models can achieve over 98 percent accuracy when tested on recorded drum samples. This may be a manifestation of the \enquote{open set recognition} problem. 
     \item While there is much room for improvement, our pipeline can generate and categorize drums and percussive sounds with a promising degree of success. 
 \end{itemize}
 
@@ -134,8 +134,8 @@ Assigned \enquote{Bad} or \enquote{Other} By Either  & 120 & 0.620   &  0.587 \\
 \label{survey2_takeaway}
 Our main takeaways from the MEM survey are as follows:
 \begin{itemize}
-\item For \textbf{RQ.1}: 50\% of sounds were deemed~\enquote{bad} by at least one survey taker, and 17\% by both.
-\item For \textbf{RQ.2}: The improvement in kappa scores after reduction of~\enquote{bad} outputs show that similar to TPEs, mistakes in separation of drums in non-drums is a major point of failure. 
+\item For \textbf{RQ.1}, 50\% of sounds were deemed~\enquote{bad} by at least one survey taker, and 17\% by both.
+\item For \textbf{RQ.2}, the improvement in kappa scores after reduction of~\enquote{bad} outputs show that similar to TPEs, mistakes in separation of drums in non-drums is a major point of failure. 
 \item Overall, these results show success in usage of spectrogram autoencoders as feature extractors for sounds, however we suspect that open set recognition is a major weakness. 
 \end{itemize}
 
