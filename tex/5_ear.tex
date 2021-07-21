@@ -399,7 +399,7 @@ Softmax & [$\mathcal{B}$, 2] &  DVN probabilities \\ \hline
 
 \subsubsection{DVD Models}
 \label{sec:dvd_arch}
-As FC-DVN and CNNLSTM-DVN appeared effective for~\decfirst, we trained identical models for the categorization of drum sounds, or~\decsecond. The only modification being the change in the final output layers depending on the number of drums being categorized. In addition, as we hypothesize that~\decsecond~may be a relatively easier task (a large number of sounds are pruned after~\decfirst), we trained another fully connected model using only on the envelope and frequency features of each sound (i.e, a vector of size 60). These models and their performances are as follows:
+As FC-DVN and CNNLSTM-DVN appeared effective for~\decfirst, we trained identical models for the categorization of drum sounds, or~\decsecond. The only modification being the change in the final output layers depending on the number of drums being categorized. In addition, as we hypothesize that~\decsecond~may be a relatively easier task (a large number of sounds are pruned after~\decfirst), we trained another fully connected model using only the envelope and frequency features of each sound (i.e, a vector of size 60). These models and their performances are as follows:
 
 \begin{enumerate}
 \item \textbf{FC-DVD}: Fully connected 3 layer neural net with 78\% accuracy for 6-way drum categorization in Phase 2. Architecture details are shown in Table~\ref{tab:dvdfc}.
