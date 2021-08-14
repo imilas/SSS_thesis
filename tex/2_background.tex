@@ -85,21 +85,21 @@ Spectrograms are graphs used to depict the duration and amplitude of frequencies
 
 \section{Digital Audio Synthesis}
 \label{sec_digital_synthesis}
-The phenomena of sound at intensities we commonly encounter can be described as a product of a \textit{linear system} of functions~\cite{cook1999chap4}. A linear system is a system where the transformation of overlapping inputs is equal to the sum of the separately transformed inputs~\cite{lyons2004understandingChap1,cook1999chap4}. In a linear system $\mathcal{S}$ with valid inputs and outputs $x(i)$ and $y(i)$, if we have:
+The phenomena of sound at intensities we commonly encounter can be described as the output of a \textit{linear system} of functions~\cite{cook1999chap4}. A linear system is a system where the transformation of combined inputs is equal to the sum of the separately transformed inputs~\cite{lyons2004understandingChap1,cook1999chap4}. In a linear system $\mathcal{S}$ with valid inputs and outputs $x$ and $y$, if we have:
 
 \begin{equation}
- \mathcal{S}(x(i_1)) \xrightarrow{generates} y(i_1)
+ \mathcal{S}(x_1) \xrightarrow{generates} y_1
 \end{equation}
 \begin{center}
     and
 \end{center}
 \begin{equation}
-\mathcal{S}(x(i_2)) \xrightarrow{generates}y(i_2)
+\mathcal{S}(x_2) \xrightarrow{generates}y_2
 \end{equation}
 
 The output of the system given both inputs is the sum of the individual outputs, or:
 \begin{equation}
- \mathcal{S}(x(i_1)+x(i_2)) \xrightarrow{generates} y(i_1)+y(i_2) 
+ \mathcal{S}(x_1+x_2) \xrightarrow{generates} y_1+y_2 
 \end{equation}
 \\
 This concept has important implications digital audio creation and analysis. Simple tones can be combined to create complex sounds, and complex sounds can be broken down for easier analysis~\cite{lyons2004understandingChap1}. It also allows experiments with simple sine waves to remain relevant in complex sound domains~\cite{cook1999chap4}.
@@ -109,7 +109,7 @@ This concept has important implications digital audio creation and analysis. Sim
 
 Various sound synthesis techniques have been developed by treating sound as a sequence of values. Linear systems are commonly used in creation of musical tones, while non-linear systems are used for introduction of distortion and noise where needed. In their taxonomy of digital synthesis techniques, Smith defines four families of algorithms: algorithms that process and modulate existing sounds (e.g., granular synthesis, wavelets), spectral models that aim to create a particular spectrum of sound (e.g., additive, subtractive), physical models which emulate the physics of real instruments, and abstract models (e.g., wave shaping, Karplus-Strong), often used for adding harmonics or distortion to simple sound signals~\cite{smith1991viewpoints}. 
 
-Synthesizers are engines of synthesis that make use of one or more of these techniques for sound generation. Selection of the appropriate synthesis method depends not only on the expectations for the end product, but also the features of the synthesizer itself. Whether in goal oriented tasks such as text-to-speech or in creative endeavors such as ambient-noise generation, it is often desirable to work with systems that are quick, adaptable and tractable. For example, one might desire a text-to-speech system where slight changes to input parameters can introduces slight changes to the speech patterns, utterances, voices, etc. This ability to quickly modify and audition sounds becomes a necessity when the synthesizer is being used as a creative instrument in of itself, rather than an emulator for existing instruments and sounds. 
+Synthesizers are engines of synthesis that make use of one or more of these techniques for sound generation. Selection of the appropriate synthesis method depends not only on the expectations for the sound, but also the features of the synthesizer itself. Whether in goal oriented tasks such as text-to-speech or in creative endeavors such as ambient-noise generation, it is often desirable to work with systems that are quick, adaptable and tractable. For example, one might desire a text-to-speech system where slight changes to input parameters can introduce slight changes to the speech patterns, utterances, voices, etc. This ability to quickly modify and audition sounds becomes a necessity when the synthesizer is being used as a creative instrument in of itself, rather than an emulator for existing instruments and sounds. 
 
 Often used methods of digital sound generation are \enquote{additive} and \enquote{subtractive} synthesis, umbrella terms for some of the most simple and common methods of digital synthesis~\cite{mitchell2009basicsynthChap1}. 
 In additive synthesis, sounds are built as a sum of signals, where signals are outputs of oscillators (periodic wave generators).  In subtractive synthesis, segments of a complex signal are removed until a desired sound is reached. A chain of one or more \textit{digital filters}, which can subtract or reduce frequency ranges, are often used in subtractive synthesis. Digital \textit{low-pass filters} lower the amplitude of signals with frequencies higher than a given \textit{cutoff}, while \textit{high-pass} filters remove lower than threshold frequencies. It is not uncommon for percussive sounds to have noisy, chaotic high frequency content during their short attack period, followed by harmonic low/medium frequencies~\cite{lakatos2000common}.
@@ -118,7 +118,7 @@ In additive synthesis, sounds are built as a sum of signals, where signals are o
 % \subsection{Analog Synthesizer}
 % Talk about analog synthesis briefly, so the word synthesizer feels less abstract...
 \subsection{Virtual Synthesizers}
-Nearly 5 decades ago, Mathews claimed that any sound can be recreated via a computer by high frequency sampling of pressure waves~\cite{mathews1963digital}. He noted that since \enquote{a very high sampling rate is required...if this process is to be useful musically, programs for generating samples from the parameters of notes must be written}~\cite{mathews1963digital}. The methods of synthesis discussed here are a major component of such programs. With the exception of physical synthesis, modern computers are more than capable of simultaneously running many instances of these algorithms. To further assist with their musical utility, the majority of digital synthesis systems work in tandem with notation protocols such as Musical Instrument Digital Interface (MIDI), which can modulate the parameters of these synthesis methods by modulating information pertaining to ADSR and other note characteristics, often in real time~\cite{moog1986midi}.  
+Nearly 5 decades ago, Mathews claimed that any sound can be recreated via a computer by high frequency sampling of pressure waves~\cite{mathews1963digital}. He noted that since \enquote{a very high sampling rate is required...if this process is to be useful musically, programs for generating samples from the parameters of notes must be written}~\cite{mathews1963digital}. The methods of synthesis discussed in this chapter are a major component of such programs, and modern computers are more than capable of simultaneously running many instances of these algorithms. To further assist with their musical utility, the majority of digital synthesis systems work in tandem with notation protocols such as Musical Instrument Digital Interface (MIDI), which can modulate the parameters of these synthesis methods by modulating information pertaining to ADSR and other note characteristics, often in real time~\cite{moog1986midi}.  
 
  The rise Digital Audio Workstations (DAWs)~\cite{leider2004digital} and Virtual Studio Technology (VST) plug-ins~\cite{tanev2013virtual} which provide cheaper and virtual alternatives to recording studios and musical equipment have rapidly transformed the sonic and material landscape of music production in the recent years. DAWs such as FL-Studio\footnote{https://www.image-line.com/} and Ableton\footnote{https://www.ableton.com/} provide virtual alternatives to expensive hardware typically found in recording studios. These DAWs typically come with a large set of VSTs which can accurately imitate nearly all experimental and traditional physical instruments (e.g., moog synthesizers, pianos, choir voices) and audio effects (e.g., reverb, chorus, delay). Furthermore, communities such as KVRAudio\footnote{https://www.kvraudio.com/} provide an ever-growing list of free and commercial VST instrument and effects which can be added to DAWs or run stand-alone.
  
@@ -126,7 +126,7 @@ Nearly 5 decades ago, Mathews claimed that any sound can be recreated via a comp
  
 \section{Neural Networks And Sound}
 \label{bg:NN}
-In Section~\ref{sec:digital_audio}, we defined digital synthesis as the \enquote{process of generating discrete values which approximate sound waves}. We also established that manual generation of these values at high sampling rates is not practical; a problem which has motivated a wide variety of synthesis techniques which aim to create signals within a linear (or mostly linear) system. The recent exponential increase in computing power has been coupled with a wide range of research in probabilistic sound generation, mainly via generative neural networks. 
+In Section~\ref{sec:digital_audio}, we defined digital synthesis as the \enquote{process of generating discrete values which approximate sound waves}. Virtual generation of sounds has motivated a wide variety of synthesis techniques which aim to create signals within a linear (or mostly linear) system. The recent exponential increase in computing power has been coupled with a wide range of research in probabilistic sound generation, mainly via generative neural networks. 
 % deterministically, if the input parameters to the system do not change, the output of the system will remain the same \footnote{talk about noise generation methods and seeding}.
 
 Artificial Neural networks (ANNs) map inputs to outputs via a large network of parameters and activation functions. Given the right network shape and parameter weights, they can approximate a large set of functions~\cite{cybenko1989approximation,cardaliaguet1992approximation}. ANNs are often deployed when we do not have access to the system of functions which guide a process, but a mapped set of inputs and the corresponding outputs are available. Given this set, the parameters of a neural network can be tuned for approximating the effect of the system on any valid input. The architecture of the neural network (e.g., number of layers, connections, activation functions) is often selected via trial and error ~\cite{bergstra2012random,bergstra2011algorithms,ba2013adaptive}. By definition, these approximations will never be more accurate than the system that is being approximated. 
@@ -151,7 +151,7 @@ audio sample conditioned on all previous ones}~\cite{oord2016wavenet}. Once this
 
 \begin{center}
 \begin{table}[]
-% \resizebox{\linewidth}{!}{
+\resizebox{\linewidth}{!}{
 \begin{tabular}{||c c c c||} 
 \hline
 work & feature extraction & synthesis & specilization  \\
@@ -160,14 +160,14 @@ Oord et al.~\cite{oord2016wavenet} & CNN & CNN &Speech \\
 	\hline
 Yamamoto et a.l~\cite{yamamoto2020parallel} & GAN & GAN&Speech  \\ 
 	\hline
-Aouameur et al.~\cite{aouameur2019neural} & Latent layer& Decoding of Latent Layers & Percussion  \\ 
+Aouameur et al.~\cite{aouameur2019neural} & Autoencoder & Decoding of Latent Layers & Percussion  \\ 
 	\hline
-Ramires et al.~\cite{ramires2020neural} & Latent layer & FeedForward Network & Percussion  \\ 
+Ramires et al.~\cite{ramires2020neural} & CNN & FeedForward Network & Percussion  \\ 
 	\hline
-Yee-King et al.~\cite{yee2018automatic} & LSTM on Paremters & DSP & Synth Pads  \\ 
+Yee-King et al.~\cite{yee2018automatic} & LSTM & DSP & Synth Pads  \\ 
 	\hline
 \end{tabular}
-%}
+}
 \caption{Quick reference for related works}
 \end{table}
 \end{center}
@@ -177,10 +177,10 @@ ANN or DSP approaches can be taken towards the implementation of a virtual ear a
 Many deep neural network models have been proposed and utilized for the purpose of signal generation in recent years. WaveGans and WaveNet have been subject to significant improvements and experiments since their proposal~\cite{nsynth2017,yamamoto2020parallel,oord2017parallel}. Specifically for the generation of percussive sounds, a recent work by Aaouameur et al.~\cite{aouameur2019neural} utilizes variational AutoEncoders (VAE's) for generation of drum sound spectrograms, which are then converted to sound using a Multi-head CNN model~\cite{aouameur2019neural}. Another recent work by Ramires et al.~\cite{ramires2020neural} also uses neural networks for this purpose, where a feedforward neural network capable of creating sounds is guided by a small number of parameters which represent the producer's desired characteristics for a drum sound. 
 
 Automatic programming of virtual synthesizers has also been a topic of interest. Genetic Algorithms have long been utilized for the generation of new sounds with various sound-engines~\cite{johnson1999exploring,dahlstedt2001creating,hornermachinetongues,macret2012automatic}. More recent work by Yee-King et al.~\cite{yee2018automatic} used Long Short-Term Memory (LSTM) models and genetic algorithms to find the exact parameters used to create a group of sounds. The sounds approximated were made by the same virtual synthesizer, not an external source; making the eventual replication certain even with random search. In addition, the work by Yee-King et al.~\cite{yee2018automatic} is generally more focused on pads and textures rather than drums, and feature matching appears to not be concerned with the envelope of the sounds but rather the frequency content within arbitrary time windows. Yet another recent work by Esling et al. used a large dataset of over 10,000 presets for a commercial VST synthesizer to learn a latent parameter space which can be sampled for creation of new programs for audio synthesizers~\cite{esling2019universal}. This bespoke latent space requires large amounts of synthesizer programs for the initial training, and cannot be used for other virtual synthesizers.\\
-In the work presented here, we take a different approach to automatic programming of synthesizers by aiming for rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer and exploring the actual parameter space rather than its latent representation. Unlike previous related works, no prior examples of audio made by the synthesizer nor examples of manually generated programs are needed for our approach. Any synthesizer can be integrated into our system so long as \begin {enumerate*} [label=\itshape\alph*\upshape)]
+In the work presented here, we take a different approach to automatic programming of synthesizers by aiming for rapid approximation of percussion sounds with no previous knowledge about the sonic capabilities of our virtual synthesizer and directly exploring the synthesizer's parameter space rather than its latent representation through a neural network. Unlike previous related works, no prior examples of audio made by the synthesizer nor examples of manually generated programs are needed for our approach. Any synthesizer can be integrated into our system so long as \begin {enumerate*} [label=\itshape\alph*\upshape)]
   \item its parameters are known,
   \item the system can randomly modify its parameters, and
   \item The system can render and extract the sound output for virtual listening tests.
 \end{enumerate*}  
-These requirements are not strict as VST synthesizers meet these expectations by design, giving our project a large scope of applicability. 
+These requirements are not strict as VST synthesizers meet these expectations by design, giving our project a large scope of applicability for future work.
 \end{document}

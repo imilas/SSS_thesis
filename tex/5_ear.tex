@@ -21,6 +21,7 @@ To create a virtual ear, we use machine learning algorithms. In order for these 
 
 % The high-level approach to training is depicted in figure~\ref{fig:ear_plan}.
 \subsection{Learning Caveats}
+\label{sec:ear_caveats}
 To train the models, percussive sounds are used as positive examples, while synthesizer sounds are used as negatives. Figure~\ref{fig:ven_data} highlights critical problems with the learning approach. The change in learning domains---particularly in the case of positive examples of percussive instruments---should not interfere with transformation of knowledge from the training of the ear to the hearing test. 
 
 \begin{figure}[]
@@ -29,13 +30,13 @@ To train the models, percussive sounds are used as positive examples, while synt
     \makebox[\textwidth]{
     \includegraphics[width=1\linewidth]{images/chapter_4/venn_data.pdf}}
     \end{center}
-    \caption{ An illustration of the discrepancy between the sounds used to train the classifiers and the type of sounds the classifier is expected to classify. $\mathcal{N}$ is the set of percussive sounds a synthesizer is capable of making. The inclusion of sounds in this group may vary from person to person. The positive samples, $\mathcal{T^{+}}$, is a small fraction of a wide variety of percussive sounds that are conceivable. For $\mathcal{T^{-}}$, Any number of random samples can be generated. $\mathcal{H}$ is a series of sounds sent to the ear for classification.}
+    \caption{ An illustration of the discrepancy between the sounds used to train the classifiers and the type of sounds the classifier is expected to classify. $\mathcal{N}$ is the hypothetical set of sounds our synthesizer is capable of making that could be used as percussion. The inclusion of sounds in $\mathcal{N}$ may vary from person to person. The positive samples, $\mathcal{T^{+}}$, represents the percussive sounds we have in our datasets, a small portion of which may be mislabeled. $\mathcal{T^{-}}$ is a set of sounds produced by our synthesizer that are used as negative examples; however, a small portion may be similar to percussive sounds and can be thought of as mislabled negatives. $\mathcal{H}$ is a series of sounds sent to the ear for classification for manual surveys.}
 \label{fig:ven_data}
 \end{figure}
 
-Traditional classification tasks often assume that the data points used for training the model and future unlabeled data will emerge from the same system or processes~\cite{geng2020recent,mundt2019open}. This assumptions requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}, where learning by examples can prove difficult when the category that is being learned is infinitely large. 
+Traditional classification tasks often assume that the data points used for training the model and future unlabeled data will emerge from the same system or processes~\cite{geng2020recent,mundt2019open}. This assumption requires that sufficient positive examples of all possible classes exist and are trained on. Works which involve the implementation of GANs have documented scenarios in which networks will assign high categorization probabilities to nonsensical, out of context data which should be rejected rather than categorized~\cite{geng2020recent,mundt2019open,hassen2020learning}. This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}, where learning by examples can prove difficult when the category that is being learned is infinitely large. 
 
-We consider drum sounds to be a closed set, since it is reasonable that a sufficiently large sample pack can effectively describe common drum categories, while effective representation of all possible non-drum sounds is not attainable via examples alone. A hurdle towards the implementation of a \enquote{drum from non-drum} recognizer is that the set of sounds that are not drums do not share any characteristics beyond~\enquote{not being a drum}, making the learning process using negative examples difficult.  To ensure the quality of the results, particularly in the categorization of drums from non-drums, manual hearing tests need to be conducted to measure the quality of the results. The results of our blinded hearing tests are discussed in Chapter~\ref{surveys}.
+We consider drum sounds to be a closed set, since it is reasonable that a sufficiently large sample pack can effectively describe conventional drum categories, while effective representation of all possible non-drum sounds is not attainable via examples alone. A hurdle towards the implementation of a \enquote{drum from non-drum} recognizer is that the set of sounds that are not drums do not share any characteristics beyond~\enquote{not being a drum}, making the learning process using negative examples difficult.  To ensure the quality of the results, particularly in the categorization of drums from non-drums, manual hearing tests need to be conducted to measure the quality of the results. The results of our blinded hearing tests are discussed in Chapter~\ref{surveys}.
 
 \section{Representing Sound}
 \label{chap:represent_sound}
@@ -61,14 +62,14 @@ To extract the FFT feature sets from a signal, we defined the following 3 transf
 \label{fig:stackspectrums}
 \end{figure}
 \begin{enumerate}
-\item Envelope Transformation: The goal of this feature is to capture the changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively, and with values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector $v_i$. This vector is then normalized to the range of 0 to 1. The information contained in this vector is similar to that of an RMS measurement.
+\item Envelope Transformation: The goal of this feature is to capture the changes in loudness for the duration of the signal. Using STFT we generate a matrix $M_{i \times j}$ with rows $i$ and columns $j$ corresponding to time steps and frequency bins respectively, and with values $v_{i \times j}$ indicating the magnitude of the frequency bin $j$ at each time-step $i$. Information about the envelope of the signal can be extracted by summing the values of $M$ for each time-step (or row $i$), giving us a feature vector $v_i$. For each sound, this vector is normalized to the range of 0 to 1. The information contained in this vector is similar to that of an RMS measurement.
 \item Frequency Transformation: A static, normalized snap-shot of the  frequencies present within the audio. The calculation of this feature vector is similar to the envelope, but the summation is done along the frequency axis.
-\item Spectrum Transformation: STFT with its values normalized from 0-1. Since this feature is a 2D matrix rather than a vector, it captures more information about our signal. This spectrogram is \enquote{mel-scaled}\cite{stevens1940relation} to better represent human perception of audio frequencies.
+\item Spectrum Transformation: STFT with its values normalized from 0-1 per sample. Since this feature is a 2D matrix rather than a vector, it captures more information about our signal. This spectrogram is \enquote{mel-scaled}\cite{stevens1940relation} to better represent human perception of audio frequencies.
 \end{enumerate}
 
 Once the transformation functions are applied to a signal, we have 3 feature sets which can be learned from. The Frequency bin and envelope features are 1 dimensional arrays of values in the 0-1 range, and are given directly to the learning models. The spectrum features are a 2 dimensional array of values in the 0-1 range, which can be thought of as a greyscale image. Depending on the the learning algorithm, the spectrum features may be flattened into a single dimension (e.g fully connected neural net) or left unchanged (e.g convolutional neural net). 
 
-We now have 3 types of which can be used for learning. Next, in Section~\ref{section:embedded_feats}, we discuss how the spectrum features can be further encoded, or condensed, using autoencoder neural networks. The procedure of learning from these feature sets is covered in Section~\ref{sec:decisions}. Section~\ref{TPE_models} discusses the training procedure for models which directly use the FFT features described above, and models which use encoded spectrum features are discussed in Section~\ref{chap3:mixed_ear_models}.
+In Section~\ref{section:embedded_feats}, we discuss how the spectrum features can be further encoded, or condensed, using autoencoder neural networks. The procedure of learning from these feature sets is covered in Section~\ref{sec:decisions}. Section~\ref{TPE_models} discusses the training procedure for models which directly use the FFT features described above, and models which use encoded spectrum features are discussed in Section~\ref{chap3:mixed_ear_models}.
 
 \subsection{Embedded FFT Features}
 \label{section:embedded_feats}
@@ -76,7 +77,7 @@ We now have 3 types of which can be used for learning. Next, in Section~\ref{sec
     \begin{center}
     \textbf{AutoEncoding Spectrograms}
     \makebox[\textwidth]{
-    \fbox{\includegraphics[width=1.1\linewidth]{images/autoencoder.pdf}}}
+    \fbox{\includegraphics[width=1.1\linewidth]{images/autoencoder2.pdf}}}
     \end{center}
     \caption{Overview of autoencoder training. Once an autoencoder is trained, the decoder and loss function are not needed, and the bottleneck layer values will be used as features. }
 \label{fig:autoencoder}
@@ -85,7 +86,7 @@ We now have 3 types of which can be used for learning. Next, in Section~\ref{sec
 % http://www.justinsalamon.com/uploads/4/3/9/4/4394963/cramer_looklistenlearnmore_icassp_2019.pdf says they need almost 40 million samples 
 % http://www.cs.toronto.edu/~zemel/documents/prototypical_networks_nips_2017.pdf
 % 
-The advantage of the spectrum features discussed earlier is that it contains temporal information for the amplitude of each frequency bin. This means that it contains both envelope and frequency features, along with other possibly useful information. This comes at the cost of being exponentially larger than either frequency or envelope features. To speed up and simplify training, we want to further reduce the dimensionality of the spectrum features, ideally without the loss of vital information needed for classification. For this purpose, we utilized autoencoder networks, which are an approach to dimensionality reduction using deep neural networks~\cite{hinton1994autoencoders,hinton2006reducing}. 
+The advantage of the spectrum features discussed earlier is that they contain temporal information for the amplitude of each frequency bin. This means that it contains both envelope and frequency features, along with other possibly useful information. This comes at the cost of requiring a much larger representation space than either frequency or envelope features. To speed up and simplify training, we want to further reduce the dimensionality of the spectrum features, ideally without the loss of vital information needed for classification. For this purpose, we utilized autoencoder networks, which are an approach to dimensionality reduction using deep neural networks~\cite{hinton1994autoencoders,hinton2006reducing}. 
 
 Autoencoders are comprised of an encoder and a decoder. The encoder has the task of meaningfully projecting the spectrum data of each sound onto a small bottleneck layer, while the decoder aims to use this projection to replicate the input data as closely as possible. Successful training will lead to an encoder network capable of projecting audio data into a low dimensional vectors that can be reconstructed faithfully. Here, the original data is the spectrum features, and the encoding at the bottle neck layer is the simplified feature sets which we would like to use for training. With some luck, this low dimensional vector will contain vital information which can be used for training models much faster than using the original data, with little loss in performance. The autoencoder training process is depicted in Figure~\ref{fig:autoencoder}.
 \begin{table}[h!]
@@ -110,7 +111,7 @@ Dropout Rate & Random zeroing of activations between layers to prevent over-fitt
 
 \subsection{Architecture and Hyper-Parameter Optimization}
 % could do multi-objective pareto front stuff
-We make the assumption that if an autoencoder can accurately encode and decode a spectrogram, then the values at the bottleneck layer form a viable alternative to the spectrogram features, while being much smaller in size. Based on this assumption, the optimization goal when training the autoencoder networks is to minimize the difference between the original and decoded spectrogram.  The autoencoder designs used in this project were kept relatively simple, all with approximately 150,000 parameters (although a significant reduction occurs when the decoders are discarded during feature extraction). Important to mention is that reported loss values of the models do not necessarily reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder. 
+We make the assumption that if an autoencoder can accurately encode and decode a spectrogram, then the values at the bottleneck layer form a viable alternative to the spectrogram features, while being much smaller in size. Based on this assumption, the optimization goal when training the autoencoder networks is to minimize the difference between the original and decoded spectrogram.  The autoencoder designs used in this project were kept relatively simple, all with approximately 150,000 parameters (although a significant reduction occurs when the decoders are discarded during feature extraction). Important to mention is that reported loss values of the models do not necessarily reflect whether the encoder will capture data that is useful for any purpose other than being utilized by the decoder (such as classification of drums from non-drums). 
 
 These small networks train quickly without the need for much data. Here, we did not give any examples of synthetic noise to the encoders, and only train on organic drums. We hypothesize that if a synthetic noise has drum-like characteristics, its compressed, latent representation given by the encoder will be similar to those of drum sounds and vice versa. In Section~\ref{table:mem_model_selection}, we use these latent expressions to train several machine learning models.
 
@@ -176,12 +177,12 @@ Linear-6  & [$\mathcal{B}$, 600 ] &  77,400 &Decoder's output\\ \hline
 \end{table}
 
 
-Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials. The trial's success is measured in their final loss value, calculated by applying the model to test data-set. Here, the test data-set is all sounds from MixedDB. Each trial consisted of 20 epochs of training using a selected set of hyper-parameters. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epochs where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space \cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
+Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 search trials, where each trial consisted of up to 20 epochs of training using a fixed set of hyper-parameters, and each epoch consists of 1 training round using the entire dataset. The trials' success is measured in their final loss value, calculated by applying the model to test data-set. Here, the test data-set is all sounds from MixedDB. An additional 100 trials with 40 epochs of training were conducted following the initial 500 to test the effect of longer epochs. Each trial's intermediate results (loss at every n epochs where $0<n<20$) were reported to a multi-armed bandit based pruner for early stoppage of unpromising trials\cite{li2017hyperband}. We employed a tree-structured parzen estimator for better navigation of the search space \cite{bergstra2011algorithms,akiba2019optuna} but found short reversions to a random sampling coupled with a decrease in the frequency of pruning helpful in exiting local minima. \\
 \begin{figure}[htbp]
 \centering
 \textbf{Tracing the Best Loss Values}
 \includegraphics[width=12cm,height=7cm]{images/chapter_3/Optimization_History.pdf}
-\caption{Best loss values found during hyper-parameter optimization. The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
+\caption{Smaller objective values imply better hyper-paramter sets. As more trials are executed, how quickly does the best found objective value decrease? The goal here is to run trials that return the smallest objective values possible.  The effect of a switch to random sampling and an increase of the pruning threshold can be observed during trials 270 and 310.}
 \label{chap3:bestvalues}
 \end{figure}
 
@@ -189,7 +190,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \centering
 \textbf{Loss Value per Epoch for Top 10 Trials}
 \includegraphics[width=12cm,height=6.5cm]{images/chapter_3/loss_per_training.pdf}
-\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epoch steps. The learning curves tend to flatten quickly. Therefore, 20 epoch steps may be a reasonable number for measuring hyper-parameter viability. }
+\caption{Loss value per epoch for top 10 trials. Some of the initial 500 trials appear in this list, despite having half the number of epochs. The learning curves tend to flatten quickly. Therefore, 20 epochs may be a reasonable number for measuring hyper-parameter viability. }
 \label{chap3:top10}
 \end{figure}
 
@@ -198,7 +199,7 @@ Using the optuna optimization tools \cite{akiba2019optuna}, we conducted 500 sea
 \begin{center}
     \textbf{Hyper-Parameters' Loss Correlation}
     \makebox[\textwidth]{\includegraphics[width=0.95\paperwidth]{images/chapter_3/slice_plot.pdf}}
-      \caption{Sliced plot depicting the correlation between hyper-parameters and loss values. The color-scale shows the number of times each parameter has been used in a trial. Our sampling algorithm aims to utilize spaces with higher potential more often. }
+      \caption{Sliced plot depicting the correlation between hyper-parameters and loss values. The color-scale shows the number of times each parameter has been used in a trial. Our sampling algorithm aims to utilize spaces with higher potential more often. The effect of higher resolution in the frequency and time dimensions of the spectrogram are notable.}
     \label{fig:slicegraph}
     \end{center}
 
@@ -273,7 +274,7 @@ Dropout Rate & 0.5 \\ \hline
 \centering
 \textbf{2 Dimensional Projection of Latent Variables}\par\medskip
  \includegraphics[width=0.90\linewidth]{images/chapter_3/t-SNE_2d.pdf}
-\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. We implemented interactions for these graphs for manual inspection of samples.}
+\caption{Projection of an embedding model's low dimensional encoding on to a 2D plane. D1 and D2 are the two dimensions output by T-SNE. We implemented interactions for these graphs for manual inspection of samples.}
 \label{fig:2d_tsne}
 \end{figure}
 
@@ -292,9 +293,9 @@ Dropout Rate & 0.5 \\ \hline
 
 To better understand the delineation potential of the encoded features,  we trained an autoencoder with our top performing hyper-parameter set, shown in Table~\ref{table:best_params}. We used 80\% of MixedDB to train the model for 200 epochs. Using this model, we encoded the remaining 20\% and approximately 1000 randomly selected sounds from NoiseDB into 64 dimensions. These 64-dimensions were then projected onto a 2 or 3-dimensional plane using t-SNE. 
 
-In the upcoming Section~\ref{sec:decisions}, we will thoroughly discuss the expectations of an effective virtual ear. In summary, if the embeddings are useful in helping the virtual ear with separation of drums from not-drums as well as categorization of drum types, we expect the projection of drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
+In Section~\ref{sec:decisions}, we will thoroughly discuss the expectations of an effective virtual ear. In summary, if the embeddings are useful in helping the virtual ear with separation of drums from not-drums as well as categorization of drum types, we expect the projection of drum sounds to be clustered together, with the majority of the synthetic noise sounds appearing away from these clusters. Our projections confirm that this is the case. We are most interested in synthetic noise sounds which appear within or near these clusters. Do these synthetic noise sounds have drum like characteristics?\\ 
 
-To test this, we implemented interactive graphs identical to those depicted in Figure~\ref{fig:2d_tsne} and~\ref{fig:3d_tsne}. These graphs allow for interactions such as playing the samples (by hovering the cursor on-top) and movement of the scene camera for a closer look at clusters.  Manual inspection reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembling a \emph{reverse} kick drum within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
+To test this, we implemented interactive graphs identical to those depicted in Figure~\ref{fig:2d_tsne} and~\ref{fig:3d_tsne}. These graphs allow for interactions such as playing the samples (by hovering the cursor on-top) and movement of the scene camera for a closer look at clusters.  Manual inspections detailed in Chapter~\ref{chap:nov_gen} reveals a noticeable, positive correlation between distance and similarity of a synthetic sound to a drum cluster. Divergences from the envelope features expected from drums are a common point of failure. A noticeable case was a synthetic noise resembling a kick drum played in reverse within the kick cluster. While encouraging, we hypothesize that more specialized forms of encoding or addition of other features are needed for reducing the frequency of errors and strengthening this correlation.
 \subsection{What To Do With Extracted Features}
 \label{sec:howto_use_features}
 So far, we discussed two methods of feature extraction for audio. The FFT features can represent various aspects of sound which may be helpful to a virtual ear. Using autoencoders, FFT features can be further condensed into small embedded spaces. These embedded spaces are harder to understand and explain, but the 2-dimensional projections shown in Figure~\ref{fig:2d_tsne}  indicate that they contain vital information about the different drum and non-drum sound types in our databases. 
@@ -310,11 +311,11 @@ The features discussed here can be used to train classifiers which can separate 
 \text{Decision.2 If it does sound like a drum, what type of drum should it be?}\label{Decision.2}
 \end{quote}
     }
-\decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (noise from a synthesizer). This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with our training approach.
+\decfirst~requires knowledge of what drums \textbf{do not} sound like, or knowledge of an infinitely large set, which cannot be fully represented via examples. An important consideration is that the source of sounds used for training the model (organic drum sounds) will be fundamentally different from the source of unlabeled sounds we wish to categorize (i.e., noise from a synthesizer.) This issue is reflective of the open set recognition (OSR) problem~\cite{geng2020recent,mundt2019open}. Figure~\ref{fig:ven_data} highlights a number of caveats with our training approach.
 
-Assuming that the result of~\decfirst~is positive, the sound is deemed percussive and the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. Since drum categories are not open sets, the OSR problem should not play a role in the decision making process. 
+Assuming that the result of~\decfirst~is positive, the sound is deemed percussive and the virtual ear makes \decsecond~by finding the best drum category for the sound. The number of categories available is dependent on the database of drums used for training. Since drum categories are not open sets (i.e., they can be described via examples), the OSR problem should not play a role in the decision making process. 
 
-The goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. The representation of sounds is critical in allowing the acceptance of novel sounds as part of the drum group despite their anomalies. In Section~\ref{chap:represent_sound}, we discussed 2 different approaches to feature extraction. This leads to two different implementation of a virtual ear: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of \decfirst~and \decsecond. The features utilized by these models are manually defined. MEMs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
+The goal is to create a pipeline of sound generation where the synthesizer is used for the rapid generation of sounds and the virtual ear is used for the acceptance of inputs which satisfy some fundamental characteristics of percussive instruments. The representation of sounds is critical in allowing the acceptance of novel sounds as part of the drum group despite their anomalies. In Section~\ref{chap:represent_sound}, we discussed 2 different approaches to feature extraction. This leads to two different implementations of a virtual ear: \emph{two phased ears} (TPEs) and \emph{mixed ear models} (MEMs). TPEs are a combination different models for each of \decfirst~and \decsecond. The features utilized by these models are manually defined. MEMs use a highly compressed, automatically encoded representation of sound to give simultaneous answers to both questions.
 
 \label{TPE_models}
 \begin{figure}[tbp]
@@ -546,7 +547,7 @@ To see how these models perform on the binary DvN task (i.e \decfirst), the perf
 \begin{center}
     \textbf{ Classification Report for DvDvN and DvN  }\par\medskip
     \makebox[\textwidth]{
-    \subfloat[Precision, recall, F1-Score, and number of supporting examples. The \enquote{synth noise} category is identical to the \enquote{not drum} category]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_mme.pdf}
+    \subfloat[Precision, recall, F1-Score, and number of supporting examples. The sounds in the \enquote{synth noise} category are identical to the sounds in the \enquote{not drum} category.]{ \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_mme.pdf}
     \includegraphics[width=9cm,height=9cm]{images/chapter_3/f1_dvn.pdf}
     }
     
@@ -571,6 +572,7 @@ To create the confusion matrices and the F-Scores shown in Figure~\ref{fig:conf_
 % the addition of envelope features had a positive effect on performance for all models, yet the RandomForest and ExtraTrees models clearly outperform the other classifiers in both tasks.
 
 \section{How Will TPEs and MEMs Be Used?}
+
 With the virtual synthesizer in place, we required a virtual ear: a tool capable of automatic separation of drums from non-drums and categorization of drum sounds.  We took two different approaches to implementing such a tool, which gave us two types of virtual ears: TPE Ears, which make the two decisions sequentially, and MEM ears which makes these decisions simultaneously. The distinguishing characteristic of TPEs and MEMs is the type of feature set that they use for learning. TPEs use envelope and spectrogram features derived using Fourier transformations, while MEMs use encoded spectrogram features, which is a much smaller set of features, yet achieve similar classification performance.  
 
  Based on results shown in this chapter, TPEs and MEMs appear to have high categorization accuracy in our testing data. But without manual hearing tests, we cannot know whether the synthesizer sounds that are deemed percussive by the virtual ears resemble organic drum sounds or simply have characteristics that the virtual ears were not familiar with, leading to mistakes. This is due to the infinite variety of sounds that are not percussive (i.e, the OSR problem), which makes such training tasks difficult. 

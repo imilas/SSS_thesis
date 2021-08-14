@@ -25,7 +25,7 @@ Earlier in Section~\ref{sec:sol_propose}, the solution we proposed towards the v
 \label{fig:pipeline_outline}
 \end{figure}
 \section{Why DSP over ANN Synthesizers?}
- As discussed in Section~\ref{related}, the majority of state of the art works tackling the problem of unsupervised audio generation utilize neural networks for synthesis of audio. Here, rather than using neural networks for sound synthesis, we generate programs for a virtual synthesizer which mainly utilizes additive and subtractive techniques. Our decision is based on the following factors:
+ As discussed in Section~\ref{related}, many of the state of the art works tackling the problem of supervised audio generation utilize neural networks for synthesis of audio. Here, rather than using neural networks for sound synthesis, we generate programs for a virtual synthesizer which mainly utilizes additive and subtractive techniques. Our decision is based on the following factors:
 \begin{enumerate}[label=(\roman*)]
     \item \textit{Novelty and Creativity}: The goal here is to work within the limitations of any tractable sound source to create its approximations of a given sound category. We seek to create novel sounds via artificial, exploratory creativity. Boden defines this concept as an emergent property of generative work within confined rule sets~\cite{boden2009computer}. An example is the perpetual popularity of 8-bit aesthetics in genres such as~\enquote{chiptunes}~\cite{collins2007loop}. 
     \item \textit{Interpretability}: Neural networks are often described as black boxes with uninterpretable weights~\cite{basheer2000artificial}. Their highly recursive structure makes modern explanation methods such as saliency maps unreliable~\cite{rudin2019stop}.  
@@ -43,7 +43,7 @@ Earlier in Section~\ref{sec:sol_propose}, the solution we proposed towards the v
     \makebox[\textwidth]{
     \fbox{\includegraphics[width=1\linewidth]{images/chapter_3/synthesizer_block.pdf}}}
     \end{center}
-    \caption{High level representation of a submodule. Each Synthesizer contains 1 or more submodules. Synthesizer programs set the number of these submodules and their parameters.
+    \caption{High level representation of a submodule. Each Synthesizer contains 1 or more submodules. Synthesizer programs set the number of these submodules and their parameters. A list of notes (Pitch) are sent to the oscillator (OSC), the resulting waveform may or may not be passed through a clouding effect. Next, a high-pass (HP) and a low-pass (LP) filter are applied. Finally, the attack, delay, sustain, and release periods of the sound are defined by the ADSR envelope. The full list of synthesizer block parameters are shown in Table~\ref{table:submodule_params}.
     }
 \label{fig:submodule}
 \end{figure}
@@ -82,7 +82,7 @@ LP filter Cutoff & 20000-HP & never lower than HP cutoff\\
 Filter Order & 4,8,16 & butterworth filter order \\
 \hline
 \end{tabular}}
-\caption{Synthesizer submodule parameters. Despite the simplicity of the parameters and efforts at constraining the ranges, the number of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
+\caption{Synthesizer submodule parameters. Despite the simplicity of the parameters and efforts at constraining the ranges, the combinations of parameters that can be randomly chosen for each submodule is in the order of $10^{15}$ }
 \label{table:submodule_params}
 \end{table}
 
